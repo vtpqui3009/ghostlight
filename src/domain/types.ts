@@ -7,13 +7,17 @@ export interface InitialState { status: 'available' | 'unknown' | 'absent'; zone
 
 export interface Prop { id: string; name: string; kind: string; initial: InitialState }
 
+export interface Zone { id: string; name: string }
+
+export interface Holder { id: string; name: string }
+
 export interface Action { id: string; propId: string; kind: ActionKind; requiredSource: Position | null; destination?: Position; note?: string }
 
 export interface Cue { id: string; title: string; actions: Action[] }
 
 export interface NamedEntity { id: string; name: string }
 
-export interface Scenario { version: 1; title: string; description?: string; zones: NamedEntity[]; holders: NamedEntity[]; props: Prop[]; cues: Cue[] }
+export interface Scenario { version: 1; title: string; description?: string; zones: Zone[]; holders: Holder[]; props: Prop[]; cues: Cue[] }
 
 export interface TraceRef { cueId: string; actionId: string; cueIndex: number; actionIndex: number }
 
