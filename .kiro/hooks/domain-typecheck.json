@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "domain-typecheck",
+      "trigger": "PostFileSave",
+      "matcher": "(^|/)src/domain/.*\\.tsx?$",
+      "action": {
+        "type": "command",
+        "command": "bash .kiro/hooks/typecheck-domain.sh"
+      },
+      "timeout": 30
+    }
+  ]
+}
