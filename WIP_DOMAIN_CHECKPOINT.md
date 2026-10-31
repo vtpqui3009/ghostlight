@@ -47,7 +47,7 @@ Independent isolated probes did confirm partial progress: sparse arrays/inherite
 
 ## Resume scope
 
-Kiro remains primary code/spec/test author; Codex owns orchestration, independent QA and checkpoints. Resume only with freshly verified free quota or verified awarded promotional credits. No new purchase/upgrade/paid allowance. Use a bounded capable native model for a narrow repair; avoid repeating unchanged compiler loops. Current private runtime holds a detailed original review brief and exact diagnostics.
+Kiro remains primary code/spec/test author; Codex owns orchestration, independent QA and checkpoints. Resume only with freshly verified free quota or verified awarded promotional credits. No new purchase/upgrade/paid allowance. Use a bounded capable native model for a narrow repair; avoid repeating unchanged compiler loops. The original [domain repair brief](docs/handoff/DOMAIN_REPAIR_BRIEF.md), [UI direction](docs/handoff/UI_DIRECTION.md), and [browser QA plan](docs/handoff/BROWSER_QA_PLAN.md) are preserved on this private branch. They are Codex preparation, not implementation or passing test evidence. Exact transient command logs remain in the private runtime; this checkpoint records their observed results.
 
 After domain repairs pass independent review, build the real editable Halloween interface, ghost-required versus modeled-before comparison, ordered timeline/causal navigation, synthetic demos, practical reports, validated import/export and recoverable persistence. Then run actual browser, keyboard, reduced-motion, responsive/reflow and print QA. No live-tracking or real-user-validation claim.
 
