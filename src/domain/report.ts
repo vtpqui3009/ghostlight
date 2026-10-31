@@ -1,4 +1,4 @@
-import type { Scenario, Action, Cause, Frame, TraceRef, PropState } from './types';
+import type { Scenario, Action, Cause, Frame, PropState } from './types';
 import { copyCause, copyAction } from './ids';
 
 export interface PresetReport {
@@ -106,7 +106,7 @@ export function resetReport(scenario: Scenario, runResult: { initial: Record<str
           description: `Return ${prop.name} (${prop.id}) to initial location: zone ${initialPos.zoneId}${initialPos.holderId ? ` / ${initialPos.holderId}` : ' (resting)'}.`,
         });
       }
-    } else if (initial.status === 'available' && finalState.status !== 'consumed') {
+    } else if (initial.status === 'available' && finalState.status !== 'available') {
       result.push({
         propId: prop.id,
         propName: prop.name,

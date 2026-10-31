@@ -74,7 +74,8 @@ function findHolderReferences(holderId: string, scenario: Scenario): ReferenceEn
   return refs;
 }
 
-function findCueReferences(cueId: string, scenario: Scenario): ReferenceEntry[] {
+function findCueReferences(): ReferenceEntry[] {
+  // Cues have no internal references to check; the caller validates existence.
   return [];
 }
 
@@ -112,7 +113,7 @@ export function checkBlockDeletion(entityType: 'prop' | 'zone' | 'holder' | 'cue
   } else if (entityType === 'holder') {
     refs.push(...findHolderReferences(entityId, scenario));
   } else if (entityType === 'cue') {
-    refs.push(...findCueReferences(entityId, scenario));
+    refs.push(...findCueReferences());
   }
   if (refs.length > 0) {
     const name = entityType === 'prop' ? scenario.props.find(p => p.id === entityId)?.name || entityId :
@@ -180,7 +181,7 @@ export function retargetReferences(scenario: Scenario, entityType: 'prop' | 'zon
       }
     }
   }
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function addProp(scenario: Scenario, id: string, name: string, kind: string, initialStatus: 'available' | 'unknown' | 'absent'): EditResult<Scenario> {
@@ -200,7 +201,7 @@ export function addProp(scenario: Scenario, id: string, name: string, kind: stri
     initial: initialStatus === 'available' ? { status: 'available', zoneId: scenario.zones[0].id, holderId: null } : { status: initialStatus },
   };
   const cloned = { ...scenario, props: [...scenario.props, newProp] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function addZone(scenario: Scenario, id: string, name: string): EditResult<Scenario> {
@@ -218,7 +219,7 @@ export function addZone(scenario: Scenario, id: string, name: string): EditResul
   }
   const newZone = { id, name };
   const cloned = { ...scenario, zones: [...scenario.zones, newZone] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function addHolder(scenario: Scenario, id: string, name: string): EditResult<Scenario> {
@@ -236,7 +237,7 @@ export function addHolder(scenario: Scenario, id: string, name: string): EditRes
   }
   const newHolder = { id, name };
   const cloned = { ...scenario, holders: [...scenario.holders, newHolder] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function addCue(scenario: Scenario, id: string, title: string): EditResult<Scenario> {
@@ -254,7 +255,7 @@ export function addCue(scenario: Scenario, id: string, title: string): EditResul
   }
   const newCue: Cue = { id, title, actions: [] };
   const cloned = { ...scenario, cues: [...scenario.cues, newCue] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function updateProp(scenario: Scenario, id: string, updates: Partial<Prop>): EditResult<Scenario> {
@@ -273,7 +274,7 @@ export function updateProp(scenario: Scenario, id: string, updates: Partial<Prop
     initial: updates.initial ?? prop.initial,
   };
   const cloned = { ...scenario, props: [...scenario.props.slice(0, idx), newProp, ...scenario.props.slice(idx + 1)] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function updateZone(scenario: Scenario, id: string, updates: Partial<Zone>): EditResult<Scenario> {
@@ -287,7 +288,7 @@ export function updateZone(scenario: Scenario, id: string, updates: Partial<Zone
   const zone = scenario.zones[idx];
   const newZone = { id: zone.id, name: updates.name ?? zone.name };
   const cloned = { ...scenario, zones: [...scenario.zones.slice(0, idx), newZone, ...scenario.zones.slice(idx + 1)] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function updateHolder(scenario: Scenario, id: string, updates: Partial<Holder>): EditResult<Scenario> {
@@ -301,7 +302,7 @@ export function updateHolder(scenario: Scenario, id: string, updates: Partial<Ho
   const holder = scenario.holders[idx];
   const newHolder = { id: holder.id, name: updates.name ?? holder.name };
   const cloned = { ...scenario, holders: [...scenario.holders.slice(0, idx), newHolder, ...scenario.holders.slice(idx + 1)] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function updateCue(scenario: Scenario, id: string, updates: Partial<Cue>): EditResult<Scenario> {
@@ -319,7 +320,7 @@ export function updateCue(scenario: Scenario, id: string, updates: Partial<Cue>)
     actions: updates.actions ?? cue.actions,
   };
   const cloned = { ...scenario, cues: [...scenario.cues.slice(0, idx), newCue, ...scenario.cues.slice(idx + 1)] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function deleteProp(scenario: Scenario, propId: string): EditResult<Scenario> {
@@ -333,7 +334,7 @@ export function deleteProp(scenario: Scenario, propId: string): EditResult<Scena
   }
   const newProps = scenario.props.filter(p => p.id !== propId);
   const cloned = { ...scenario, props: newProps };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function deleteZone(scenario: Scenario, zoneId: string): EditResult<Scenario> {
@@ -350,7 +351,7 @@ export function deleteZone(scenario: Scenario, zoneId: string): EditResult<Scena
   }
   const newZones = scenario.zones.filter(z => z.id !== zoneId);
   const cloned = { ...scenario, zones: newZones };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function deleteHolder(scenario: Scenario, holderId: string): EditResult<Scenario> {
@@ -364,7 +365,7 @@ export function deleteHolder(scenario: Scenario, holderId: string): EditResult<S
   }
   const newHolders = scenario.holders.filter(h => h.id !== holderId);
   const cloned = { ...scenario, holders: newHolders };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function deleteCue(scenario: Scenario, cueId: string): EditResult<Scenario> {
@@ -374,7 +375,7 @@ export function deleteCue(scenario: Scenario, cueId: string): EditResult<Scenari
   }
   const newCues = scenario.cues.filter(c => c.id !== cueId);
   const cloned = { ...scenario, cues: newCues };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function addAction(scenario: Scenario, cueId: string, action: Action): EditResult<Scenario> {
@@ -398,7 +399,7 @@ export function addAction(scenario: Scenario, cueId: string, action: Action): Ed
   const clonedAction = copyAction(action);
   const cue = { ...scenario.cues[cueIdx], actions: [...scenario.cues[cueIdx].actions, clonedAction] };
   const cloned = { ...scenario, cues: [...scenario.cues.slice(0, cueIdx), cue, ...scenario.cues.slice(cueIdx + 1)] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function updateAction(scenario: Scenario, cueId: string, actionId: string, updates: Partial<Action>): EditResult<Scenario> {
@@ -424,7 +425,7 @@ export function updateAction(scenario: Scenario, cueId: string, actionId: string
   };
   const cue = { ...scenario.cues[cueIdx], actions: [...scenario.cues[cueIdx].actions.slice(0, actionIdx), newAction, ...scenario.cues[cueIdx].actions.slice(actionIdx + 1)] };
   const cloned = { ...scenario, cues: [...scenario.cues.slice(0, cueIdx), cue, ...scenario.cues.slice(cueIdx + 1)] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function deleteAction(scenario: Scenario, cueId: string, actionId: string): EditResult<Scenario> {
@@ -438,7 +439,7 @@ export function deleteAction(scenario: Scenario, cueId: string, actionId: string
   }
   const cue = { ...scenario.cues[cueIdx], actions: [...scenario.cues[cueIdx].actions.slice(0, actionIdx), ...scenario.cues[cueIdx].actions.slice(actionIdx + 1)] };
   const cloned = { ...scenario, cues: [...scenario.cues.slice(0, cueIdx), cue, ...scenario.cues.slice(cueIdx + 1)] };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function moveCue(scenario: Scenario, cueId: string, newIndex: number): EditResult<Scenario> {
@@ -446,18 +447,23 @@ export function moveCue(scenario: Scenario, cueId: string, newIndex: number): Ed
   if (idx === -1) {
     return errorResult(`Cue '${cueId}' not found.`);
   }
-  if (newIndex < 0 || newIndex >= scenario.cues.length) {
-    return errorResult(`Invalid index ${newIndex}; must be between 0 and ${scenario.cues.length - 1}.`);
+  // Defect 1: Validate integer index within bounds
+  if (!Number.isInteger(newIndex) || newIndex < 0 || newIndex >= scenario.cues.length) {
+    return errorResult(`Invalid index ${newIndex}; must be an integer between 0 and ${scenario.cues.length - 1}.`);
   }
   if (idx === newIndex) {
-    const cloned = cloneAndNormalize(scenario);
-    return { blocked: false, result: cloned };
+    // Defect 3: No-op must normalize like other edits
+    const parsed = parseScenario(scenario);
+    if (!parsed.success) {
+      return errorResult(`No-op reorder produced invalid scene: ${parsed.errors.join('; ')}`);
+    }
+    return { blocked: false, result: parsed.data };
   }
   const cues = [...scenario.cues];
   const [cue] = cues.splice(idx, 1);
   cues.splice(newIndex, 0, cue);
   const cloned = { ...scenario, cues };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 export function moveAction(scenario: Scenario, cueId: string, actionId: string, newIndex: number): EditResult<Scenario> {
@@ -482,7 +488,7 @@ export function moveAction(scenario: Scenario, cueId: string, actionId: string, 
   const cues = [...scenario.cues];
   cues[cueIdx] = cue;
   const cloned = { ...scenario, cues };
-  return parseResultToEditResult(parseScenario(cloned), scenario);
+  return parseResultToEditResult(parseScenario(cloned));
 }
 
 function copyPosition(pos: { zoneId: string; holderId: string | null }): { zoneId: string; holderId: string | null } {
