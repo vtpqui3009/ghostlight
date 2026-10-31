@@ -2,6 +2,10 @@
 
 Prepared by Codex, 2026-10-31 14:26 UTC. This document reports actual native Kiro work and independent QA. It is not application implementation or a claim of completed MVP.
 
+Post-stop update at 14:30 UTC: a fresh native read-only `/usage` reports **KIRO FREE 48.55/50**, estimated **1.45 remaining**, reset date 2026-11-01. No model inference occurred after the pause. All native sessions were closed. The earlier 48.29 reading below records the decision point, not the latest balance.
+
+The primary worktree `/workspace/ghostlight` was restored to accepted `d8a1a61` after the six draft files were hash-verified in this separate worktree and backed up remotely at source snapshot `ce7912933604771b866e57544a0e040ab0d73344`. A fresh independent `npm run check` at **14:29 UTC passed lint, typecheck, all 31 engine tests and the stub production build**, exit 0. Both worktrees are preserved; resume unfinished work in `/workspace/ghostlight-domain-draft`, not by overwriting the clean primary checkpoint. Main and PR #1 head remain unchanged.
+
 ## Safe and draft checkpoints
 
 The accepted WIP remains `d8a1a611cb9a704bc2052917dca8ad0fe1c5e25a` on `codex/ghostlight-kiro-cloud-wip-20261031`, draft PR #1. It passed lint, typecheck, 31 engine tests and the compilation-stub build at 13:28 UTC. The application interface is still a stub. Main remains `1a2f9521111f0ba67a085474a441f26a61d709b9`.
