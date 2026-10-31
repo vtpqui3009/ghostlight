@@ -2,7 +2,7 @@
 
 Prepared by **Codex** on 2026-10-31. This is orchestration guidance and a task ledger, not a Kiro transcript, application implementation, or QA result. Baseline: `1a2f9521111f0ba67a085474a441f26a61d709b9`.
 
-The user's later implementation authorization supersedes the validation-only execution gates in the research documents. Their caveats about demand, differentiation, real-user validation, and contest eligibility remain intact. This work is local build and verification only: no push, merge, deploy, submission, visibility change, outreach, purchase, or unrelated project access.
+The user's later implementation authorization supersedes the validation-only execution gates in the research documents. Their caveats about demand, differentiation, real-user validation, and contest eligibility remain intact. The parent subsequently relayed explicit user authorization for private coding branches, commits, pushes, and draft pull requests. Preserve `main`; use a separate WIP branch after reviewing the diff and scanning for secrets/proprietary content. No merge, force push, deployment, submission, visibility/security change, outreach, purchase, or unrelated project access is authorized.
 
 ## Ownership and sequence
 
@@ -15,18 +15,18 @@ The user's later implementation authorization supersedes the validation-only exe
 
 ## Task ledger
 
-Native Builder ID login and whoami verification succeeded in this environment. T1 specifications have passed independent domain review. Native T1 session ended normally; application implementation and QA remain **NOT RUN**. Optional native hook-trigger and final spec-format checks are deferred so T2 can begin.
+Native Builder ID login and whoami verification succeeded in this environment. T1 specifications passed independent domain review and were checkpointed locally at `29c9d75489c10c97ce097eadb7ab0d070613961b`. T2 is in progress in native Kiro PTY 66744 after PTY 44795 exited normally. Initial checks failed; the repair pass has since run lint, typecheck, 30 tests and the stub production build successfully, and is strengthening test oracles. No complete T2 or product acceptance is claimed. Optional native hook-trigger and final spec-format checks remain deferred.
 
 | ID | Owner | Paths | Base SHA | Dependencies | Acceptance and evidence | Status |
 |---|---|---|---|---|---|---|
 | T0 | Codex preflight | Repository checkout; `WORKFLOW.md` | `1a2f9521111f0ba67a085474a441f26a61d709b9` | None | Verify exact fetched SHA, read all 17 baseline files, identify missing runtime pieces | DONE: baseline restored; no app checks run |
 | T1 | Kiro primary writer | `.kiro/specs/ghostlight/**`, `.kiro/steering/**`, meaningful `.kiro` hook/config paths | Baseline, then record checkpoint | Verified native authentication | Resolve six-action transition table, state invariants, unknown handling, causal semantics, report semantics, and acceptance plan; preserve prior authorship | DONE for domain handoff: independent GO; hook syntax/skip checked, native trigger deferred |
-| T2 | Kiro primary writer | `package.json`, lockfile, project tool configs, `src/domain/**`, owned fixture paths, `tests/**`, minimal `src/App.tsx`/`src/styles.css` stubs and Playwright config | Record T1 checkpoint | T1 | A01–A15 and A18 model/parser coverage; `npm run lint`, `npm run typecheck`, `npm test`, scoped independent review | NOT RUN |
+| T2 | Kiro primary writer, current PTY 66744 | `package.json`, lockfile, project tool configs, `src/domain/**`, owned fixture paths, `tests/**`, minimal `src/App.tsx`/`src/styles.css`/`src/main.tsx` stubs and Playwright config | `29c9d75489c10c97ce097eadb7ab0d070613961b` | T1 | A01–A15 and A18 model/parser coverage; `npm run lint`, `npm run typecheck`, `npm test`, scoped independent review | IN PROGRESS: engine slice checks green; stronger oracles, parser, reports and edit helpers pending |
 | T3 | Kiro primary writer | `src/**`, `index.html`, UI/browser test/config paths; any T2 fixes explicitly recorded | Record T2 checkpoint | T2 model review | Editable scene/timeline, ghost/solid comparison, causal links, reports, validated import/export, recovery and empty/error states; A16–A18 | NOT RUN |
 | T4 | Codex reviewer/QA; fixes by Kiro | Read all implementation; write only QA evidence outside active writer scope | Record T3 checkpoint | T3 | `npm run check`, `npm run test:e2e`; browser workflow, keyboard, responsive, reduced motion, storage error and print checks; record exact failures and fixes | NOT RUN |
-| T5 | Codex checkpoint owner | Progress/QA documents; local checkpoint only after review | Record reviewed SHA | T4 | `git diff --check`, reviewed diff and secret scan, documented checks/limitations and next action; no remote mutation | NOT RUN |
+| T5 | Codex checkpoint owner | Progress/QA documents; private WIP branch/commit/draft PR after review | Record reviewed SHA | Reviewed milestone; T4 for final acceptance | `git diff --check`, reviewed diff and secret/proprietary scan, documented checks/limitations and next action; preserve main, no merge/deploy | WIP checkpoint preparation authorized; final acceptance NOT RUN |
 
-Scripts in the baseline are intentions: there are no declared dependencies or lockfile, and application imports refer to missing files. Do not mark checks passed because the scripts exist.
+Scripts in the baseline were intentions. Kiro has now installed dependencies, created a lockfile, and added minimal compilation stubs. The stubs are not the product UI. Do not mark checks passed because the scripts exist.
 
 ## Acceptance map
 
