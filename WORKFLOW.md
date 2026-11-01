@@ -1,5 +1,7 @@
 # Ghostlight cloud work protocol
 
+> Historical orchestration record. Read [START_HERE.md](START_HERE.md) for the latest documented checkpoint and continuation order. Session IDs, balances, test counts and in-progress status below describe their recorded dates; do not resume an old writer or infer current acceptance from them.
+
 Prepared by **Codex** on 2026-10-31. This is orchestration guidance and a task ledger, not a Kiro transcript, application implementation, or QA result. Baseline: `1a2f9521111f0ba67a085474a441f26a61d709b9`.
 
 The user's later implementation authorization supersedes the validation-only execution gates in the research documents. Their caveats about demand, differentiation, real-user validation, and contest eligibility remain intact. The parent subsequently relayed explicit user authorization for private coding branches, commits, pushes, and draft pull requests. Preserve `main`; use a separate WIP branch after reviewing the diff and scanning for secrets/proprietary content. No merge, force push, deployment, submission, visibility/security change, outreach, purchase, or unrelated project access is authorized.
