@@ -263,7 +263,7 @@ export function updateProp(scenario: Scenario, id: string, updates: Partial<Prop
   if (idx === -1) {
     return errorResult(`Prop '${id}' not found.`);
   }
-  if (updates.id && updates.id !== id) {
+  if (Object.prototype.hasOwnProperty.call(updates, 'id') && updates.id !== id) {
     return errorResult(`Cannot change prop ID from '${id}' to '${updates.id}'.`);
   }
   const prop = scenario.props[idx];
@@ -282,7 +282,7 @@ export function updateZone(scenario: Scenario, id: string, updates: Partial<Zone
   if (idx === -1) {
     return errorResult(`Zone '${id}' not found.`);
   }
-  if (updates.id && updates.id !== id) {
+  if (Object.prototype.hasOwnProperty.call(updates, 'id') && updates.id !== id) {
     return errorResult(`Cannot change zone ID from '${id}' to '${updates.id}'.`);
   }
   const zone = scenario.zones[idx];
@@ -296,7 +296,7 @@ export function updateHolder(scenario: Scenario, id: string, updates: Partial<Ho
   if (idx === -1) {
     return errorResult(`Holder '${id}' not found.`);
   }
-  if (updates.id && updates.id !== id) {
+  if (Object.prototype.hasOwnProperty.call(updates, 'id') && updates.id !== id) {
     return errorResult(`Cannot change holder ID from '${id}' to '${updates.id}'.`);
   }
   const holder = scenario.holders[idx];
@@ -310,7 +310,7 @@ export function updateCue(scenario: Scenario, id: string, updates: Partial<Cue>)
   if (idx === -1) {
     return errorResult(`Cue '${id}' not found.`);
   }
-  if (updates.id && updates.id !== id) {
+  if (Object.prototype.hasOwnProperty.call(updates, 'id') && updates.id !== id) {
     return errorResult(`Cannot change cue ID from '${id}' to '${updates.id}'.`);
   }
   const cue = scenario.cues[idx];
@@ -412,16 +412,20 @@ export function updateAction(scenario: Scenario, cueId: string, actionId: string
     return errorResult(`Action '${actionId}' not found in cue '${cueId}'.`);
   }
   const action = scenario.cues[cueIdx].actions[actionIdx];
-  if (updates.id && updates.id !== actionId) {
+  if (Object.prototype.hasOwnProperty.call(updates, 'id') && updates.id !== actionId) {
     return errorResult(`Cannot change action ID from '${actionId}' to '${updates.id}'.`);
   }
+
+  const hasOwnDest = Object.prototype.hasOwnProperty.call(updates, 'destination');
+  const hasOwnNote = Object.prototype.hasOwnProperty.call(updates, 'note');
+
   const newAction: Action = {
     id: action.id,
     propId: updates.propId ?? action.propId,
     kind: updates.kind ?? action.kind,
     requiredSource: updates.requiredSource !== undefined ? (updates.requiredSource ? copyPosition(updates.requiredSource) : null) : action.requiredSource,
-    destination: updates.destination !== undefined ? (updates.destination ? copyPosition(updates.destination) : undefined) : action.destination,
-    note: updates.note ?? action.note,
+    ...(hasOwnDest ? (updates.destination ? { destination: copyPosition(updates.destination) } : {}) : (action.destination ? { destination: action.destination } : {})),
+    ...(hasOwnNote ? (updates.note !== undefined ? { note: updates.note } : {}) : (action.note !== undefined ? { note: action.note } : {})),
   };
   const cue = { ...scenario.cues[cueIdx], actions: [...scenario.cues[cueIdx].actions.slice(0, actionIdx), newAction, ...scenario.cues[cueIdx].actions.slice(actionIdx + 1)] };
   const cloned = { ...scenario, cues: [...scenario.cues.slice(0, cueIdx), cue, ...scenario.cues.slice(cueIdx + 1)] };
@@ -475,12 +479,15 @@ export function moveAction(scenario: Scenario, cueId: string, actionId: string, 
   if (actionIdx === -1) {
     return errorResult(`Action '${actionId}' not found in cue '${cueId}'.`);
   }
-  if (newIndex < 0 || newIndex >= scenario.cues[cueIdx].actions.length) {
-    return errorResult(`Invalid index ${newIndex}; must be between 0 and ${scenario.cues[cueIdx].actions.length - 1}.`);
+  if (!Number.isInteger(newIndex) || newIndex < 0 || newIndex >= scenario.cues[cueIdx].actions.length) {
+    return errorResult(`Invalid index ${newIndex}; must be an integer between 0 and ${scenario.cues[cueIdx].actions.length - 1}.`);
   }
   if (actionIdx === newIndex) {
-    const cloned = cloneAndNormalize(scenario);
-    return { blocked: false, result: cloned };
+    const parsed = parseScenario(scenario);
+    if (!parsed.success) {
+      return errorResult(`No-op reorder produced invalid scene: ${parsed.errors.join('; ')}`);
+    }
+    return { blocked: false, result: parsed.data };
   }
   const cue = { ...scenario.cues[cueIdx], actions: [...scenario.cues[cueIdx].actions] };
   const [action] = cue.actions.splice(actionIdx, 1);

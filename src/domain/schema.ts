@@ -27,10 +27,6 @@ export function parseScenario(value: unknown): ParseResult {
     if (typeof v !== 'string' || !ID.test(v) || FORBIDDEN_IDS.has(v)) { err(path, 'use a unique identifier with letters, numbers, hyphens or underscores (max 64)'); return false; }
     return true;
   };
-  const array = (v: unknown, path: string, max: number, min = 0): unknown[] => {
-    if (!Array.isArray(v) || v.length < min || v.length > max) { err(path, `expected ${min}–${max} entries`); return []; }
-    return v;
-  };
   if (!isRecord(value)) return { success: false, errors: ['Scene: expected a JSON object'] };
   if (value.version !== 1) err('version', 'only Ghostlight version 1 is supported');
   text(value.title, 'title');
@@ -45,17 +41,6 @@ export function parseScenario(value: unknown): ParseResult {
   if (!hasOwn(value, 'props')) err('props', 'missing required field');
   if (!hasOwn(value, 'cues')) err('cues', 'missing required field');
 
-  // Check for sparse/holey arrays - must have own numeric indices
-  const checkArrayOwn = (arr: unknown[], path: string, max: number, min = 0): boolean => {
-    if (!Array.isArray(arr)) return false;
-    if (arr.length < min || arr.length > max) { err(path, `expected ${min}–${max} entries`); return false; }
-    // Check for holes and inherited indices
-    for (let i = 0; i < arr.length; i++) {
-      if (!hasOwn(arr, i)) { err(`${path}[${i + 1}]`, 'missing own entry at index'); return false; }
-    }
-    return true;
-  };
-
   const entityIds = (entries: unknown[], path: string) => {
     const ids = new Set<string>();
     entries.forEach((entry, index) => {
@@ -69,27 +54,30 @@ export function parseScenario(value: unknown): ParseResult {
     });
     return ids;
   };
-  const zoneValues = ownProp<unknown[]>(value, 'zones');
-  const holderValues = ownProp<unknown[]>(value, 'holders');
-  const propValues = ownProp<unknown[]>(value, 'props');
-  const cueValues = ownProp<unknown[]>(value, 'cues');
+  // Validate required collections - must be own dense arrays within limits
+  const validateCollection = (key: string, min: number, max: number): unknown[] | null => {
+    const val = ownProp<unknown>(value, key);
+    if (val === undefined) { err(key, 'missing required field'); return null; }
+    if (!Array.isArray(val)) { err(key, 'expected an array'); return null; }
+    if (val.length < min || val.length > max) { err(key, `expected ${min}–${max} entries`); return null; }
+    for (let i = 0; i < val.length; i++) {
+      if (!hasOwn(val, i)) { err(`${key}[${i + 1}]`, 'missing own entry at index'); return null; }
+    }
+    return val;
+  };
 
-  // Validate collections - must exist as own arrays
-  const zonesArr = zoneValues ?? [];
-  const holdersArr = holderValues ?? [];
-  const propsArr = propValues ?? [];
-  const cuesArr = cueValues ?? [];
+  const zonesArr = validateCollection('zones', 1, LIMITS.zones);
+  const holdersArr = validateCollection('holders', 0, LIMITS.holders);
+  const propsArr = validateCollection('props', 0, LIMITS.props);
+  const cuesArr = validateCollection('cues', 0, LIMITS.cues);
 
-  if (!checkArrayOwn(zonesArr, 'zones', LIMITS.zones, 1)) {
-    return { success: false, errors: errors.length ? errors : ['zones: missing or invalid required field'] };
+  if (!zonesArr || !holdersArr || !propsArr || !cuesArr) {
+    return { success: false, errors };
   }
-  const holdersOk = checkArrayOwn(holdersArr, 'holders', LIMITS.holders);
-  const propsOk = checkArrayOwn(propsArr, 'props', LIMITS.props);
-  const cuesOk = checkArrayOwn(cuesArr, 'cues', LIMITS.cues);
 
   const zones = entityIds(zonesArr, 'zones');
-  const holders = holdersOk ? entityIds(holdersArr, 'holders') : new Set<string>();
-  const props = propsOk ? entityIds(propsArr, 'props') : new Set<string>();
+  const holders = entityIds(holdersArr, 'holders');
+  const props = entityIds(propsArr, 'props');
 
   const position = (v: unknown, path: string) => {
     if (!isRecord(v)) { err(path, 'choose a zone and an explicit holder (or no holder)'); return; }
@@ -100,7 +88,7 @@ export function parseScenario(value: unknown): ParseResult {
     else if (v.holderId !== null && (typeof v.holderId !== 'string' || !holders.has(v.holderId))) err(`${path}.holderId`, 'choose an existing holder or null for no holder');
   };
 
-  if (propsOk) {
+  if (propsArr.length > 0) {
     propsArr.forEach((prop, index) => {
       if (!isRecord(prop)) return;
       const p = `props[${index + 1}]`;
@@ -126,7 +114,7 @@ export function parseScenario(value: unknown): ParseResult {
 
   const cueIds = new Set<string>();
   const actionIds = new Set<string>();
-  if (cuesOk) {
+  if (cuesArr.length > 0) {
     cuesArr.forEach((cue, index) => {
       const p = `cues[${index + 1}]`;
       if (!isRecord(cue)) { err(p, 'expected a cue object'); return; }
@@ -135,10 +123,14 @@ export function parseScenario(value: unknown): ParseResult {
       else if (id(cue.id, `${p}.id`)) { if (cueIds.has(cue.id)) err(`${p}.id`, 'duplicate cue identifier'); cueIds.add(cue.id); }
       if (!hasOwn(cue, 'title')) err(`${p}.title`, 'missing required field');
       else text(cue.title, `${p}.title`);
-      const actionsArr = ownProp<unknown[]>(cue, 'actions');
-      const acts = actionsArr ?? [];
-      if (!checkArrayOwn(acts, `${p}.actions`, LIMITS.actionsPerCue)) return;
-      acts.forEach((action, ai) => {
+      const actionsVal = ownProp<unknown>(cue, 'actions');
+      if (actionsVal === undefined) { err(`${p}.actions`, 'missing required field'); return; }
+      if (!Array.isArray(actionsVal)) { err(`${p}.actions`, 'expected an array'); return; }
+      if (actionsVal.length > LIMITS.actionsPerCue) { err(`${p}.actions`, `expected 0–${LIMITS.actionsPerCue} entries`); return; }
+      for (let i = 0; i < actionsVal.length; i++) {
+        if (!hasOwn(actionsVal, i)) { err(`${p}.actions[${i + 1}]`, 'missing own entry at index'); return; }
+      }
+      actionsVal.forEach((action, ai) => {
         const a = `${p}.actions[${ai + 1}]`;
         if (!isRecord(action)) { err(a, 'expected an action object'); return; }
         // Required fields on actions must be own
@@ -152,9 +144,11 @@ export function parseScenario(value: unknown): ParseResult {
         if (!hasOwn(action, 'requiredSource')) err(`${a}.requiredSource`, 'missing required field');
         else if (action.requiredSource !== null) position(action.requiredSource, `${a}.requiredSource`);
         // Optional fields - only validate own (inherited ignored)
-        if (hasOwn(action, 'destination')) position(action.destination, `${a}.destination`);
-        if (hasOwn(action, 'note')) {
-          if (typeof action.note !== 'string' || action.note.length > 500) err(`${a}.note`, 'use at most 500 characters');
+        const ownDest = hasOwn(action, 'destination') ? action.destination : undefined;
+        if (ownDest !== undefined) position(ownDest, `${a}.destination`);
+        const ownNote = hasOwn(action, 'note') ? action.note : undefined;
+        if (ownNote !== undefined) {
+          if (typeof ownNote !== 'string' || ownNote.length > 500) err(`${a}.note`, 'use at most 500 characters');
         }
       });
     });
@@ -176,14 +170,16 @@ export function parseScenario(value: unknown): ParseResult {
     holders: raw.holders.map(({ id: key, name }) => ({ id: key, name })),
     props: raw.props.map(({ id: key, name, kind, initial }) => ({ id: key, name, kind,
       initial: initial.status === 'available' ? { status: initial.status, zoneId: initial.zoneId!, holderId: initial.holderId! } : { status: initial.status } })),
-    cues: raw.cues.map(({ id: key, title, actions }) => ({ id: key, title, actions: actions.map(action => ({
-      id: action.id, propId: action.propId, kind: action.kind,
-      requiredSource: action.requiredSource ? copyPosition(action.requiredSource) : null,
-      // Only copy own destination (not inherited) - explicit undefined deletes it
-      ...(hasOwn(action, 'destination') ? { destination: copyPosition(action.destination) } : {}),
-      // Only copy own note if present
-      ...(hasOwn(action, 'note') ? { note: action.note } : {}),
-    })) })),
+    cues: raw.cues.map(({ id: key, title, actions }) => ({ id: key, title, actions: actions.map(action => {
+      const ownDest = hasOwn(action, 'destination') ? action.destination : undefined;
+      const ownNote = hasOwn(action, 'note') ? action.note : undefined;
+      return {
+        id: action.id, propId: action.propId, kind: action.kind,
+        requiredSource: action.requiredSource ? copyPosition(action.requiredSource) : null,
+        ...(ownDest !== undefined ? { destination: copyPosition(ownDest) } : {}),
+        ...(ownNote !== undefined ? { note: ownNote } : {}),
+      };
+    }) })),
   };
   return { success: true, data: result };
 }

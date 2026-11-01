@@ -1,17 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { parseScenario, parseScenarioJson, LIMITS } from '../../src/domain/schema';
+import { parseScenario, parseScenarioJson } from '../../src/domain/schema';
 import { presetReport, runnerReport, resetReport } from '../../src/domain/report';
 import {
-  addProp, addZone, addHolder, addCue, deleteProp, deleteZone, deleteHolder, deleteCue,
-  updateProp, updateZone, updateHolder, updateCue, addAction, deleteAction, moveAction,
+  addZone, deleteZone, deleteCue,
+  updateProp, updateZone, updateHolder, updateCue, updateAction, addAction, moveAction, moveCue,
   retargetReferences, wouldLeaveNoZones, checkBlockDeletion,
 } from '../../src/domain/edit';
-import type { Scenario, PropState, Action } from '../../src/domain/types';
+import type { Scenario, Action, Cue } from '../../src/domain/types';
 import { runScenario } from '../../src/domain/engine';
-
-function deepClone<T>(v: T): T {
-  return JSON.parse(JSON.stringify(v));
-}
 
 // Valid minimal scene S (deep-clone per case)
 function makeS(): Scenario {
@@ -47,36 +43,40 @@ describe('parser: sparse entries reject validation (A18)', () => {
     const s = makeS();
     (s as { props: unknown }).props = Array(1);
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
-    expect(result.errors.join(' ')).toContain('expected');
+    if (result.success) throw new Error('Expected rejection for sparse props');
+    expect(result.errors.some(e => e.includes('props[1]') && e.includes('missing own entry'))).toBe(true);
   });
 
   it('sparse zones array fails', () => {
     const s = makeS();
     (s as { zones: unknown }).zones = Array(1);
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for sparse zones');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('sparse holders array fails', () => {
     const s = makeS();
     (s as { holders: unknown }).holders = Array(1);
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for sparse holders');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('sparse cues array fails', () => {
     const s = makeS();
     (s as { cues: unknown }).cues = Array(1);
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for sparse cues');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('sparse actions in a cue fails', () => {
     const s = makeS();
     s.cues.push({ id: 'c1', title: 'Cue 1', actions: Array(1) as unknown as Action[] });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for sparse actions');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 });
 
@@ -85,34 +85,35 @@ describe('parser: own fields vs inherited fields (A18)', () => {
     const s = makeS();
     const proto = Object.create(s);
     const result = parseScenario(proto);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for inherited required fields');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('inherited optional description is stripped', () => {
     const s = makeS();
-    s.description = 'Test';
-    const proto = Object.create(s);
-    // Make description own on proto
-    Object.defineProperty(proto, 'description', { value: 'Inherited desc', enumerable: true, writable: true, configurable: true });
-    const result = parseScenario(proto);
-    // Either reject (inherited not allowed) or strip it
-    if (result.success) {
-      expect(result.data.description).toBeUndefined();
-    } else {
-      expect(result.success).toBe(false);
-    }
+    const proto = { description: 'Inherited' };
+    Object.setPrototypeOf(s, proto);
+    const result = parseScenario(s);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.description).toBeUndefined();
   });
 
-  it('valid available prop with inherited optional holderId fails', () => {
+  it('available prop with inherited REQUIRED holderId fails', () => {
     const s = makeS();
-    s.props.push({
+    const initialProto = { holderId: null };
+    const initial: Record<string, unknown> = Object.create(initialProto);
+    initial.status = 'available';
+    initial.zoneId = 'L';
+    const propData: Record<string, unknown> = {
       id: 'p1',
       name: 'Prop1',
       kind: 'test',
-      initial: { status: 'available', zoneId: 'L' } as { status: 'available'; zoneId: string; holderId: string | null },
-    });
+      initial,
+    };
+    s.props.push(propData as unknown as { id: string; name: string; kind: string; initial: { status: 'available'; zoneId: string; holderId: string | null } });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for inherited required holderId');
+    expect(result.errors.some(e => e.includes('props[1].initial.holderId'))).toBe(true);
   });
 });
 
@@ -131,28 +132,32 @@ describe('parser: identity/reference/shape adversaries (A09/A13)', () => {
       actions: [{ id: 'a1', propId: 'toString', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }],
     });
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.props.some(p => p.id === 'toString')).toBe(true);
   });
 
   it('__proto__ as ID fails', () => {
     const s = makeS();
-    (s as { id: string }).id = '__proto__';
+    s.props.push({ id: '__proto__', name: 'P', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for __proto__ ID');
+    expect(result.errors.some(e => e.includes('props[1].id'))).toBe(true);
   });
 
   it('constructor as ID fails', () => {
     const s = makeS();
-    (s as { id: string }).id = 'constructor';
+    s.props.push({ id: 'constructor', name: 'P', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for constructor ID');
+    expect(result.errors.some(e => e.includes('props[1].id'))).toBe(true);
   });
 
   it('prototype as ID fails', () => {
     const s = makeS();
-    (s as { id: string }).id = 'prototype';
+    s.props.push({ id: 'prototype', name: 'P', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for prototype ID');
+    expect(result.errors.some(e => e.includes('props[1].id'))).toBe(true);
   });
 
   it('duplicate action IDs across cues fail', () => {
@@ -163,22 +168,24 @@ describe('parser: identity/reference/shape adversaries (A09/A13)', () => {
       { id: 'c2', title: 'Cue 2', actions: [{ id: 'a1', propId: 'p1', kind: 'place', requiredSource: { zoneId: 'L', holderId: 'A' }, destination: { zoneId: 'R', holderId: null } }] }
     );
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for duplicate action IDs');
     expect(result.errors.join(' ')).toContain('unique');
   });
 
   it('missing referenced prop fails', () => {
-    const s = makeS();
+    const s = makeSWithAll();
     s.cues.push({ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'missing', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for missing prop reference');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('explicit holderId null is accepted', () => {
     const s = makeS();
     s.props.push({ id: 'p1', name: 'Prop1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } });
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.props[0].initial.holderId).toBeNull();
   });
 });
 
@@ -192,7 +199,8 @@ describe('parser: exact UTF-8 byte boundary (A14)', () => {
     const large = json + ' '.repeat(padding);
     expect(new TextEncoder().encode(large).length).toBe(200000);
     const result = parseScenarioJson(large);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.title).toBe('Review');
   });
 
   it('200001 bytes fails', () => {
@@ -204,65 +212,91 @@ describe('parser: exact UTF-8 byte boundary (A14)', () => {
     const over = json + ' '.repeat(padding);
     expect(new TextEncoder().encode(over).length).toBe(200001);
     const result = parseScenarioJson(over);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for oversized JSON');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 });
 
 describe('parser: collection and ID boundaries (A14)', () => {
   it('max zones (6) succeeds', () => {
     const s = makeS();
-    for (let i = 0; i < 6; i++) s.zones.push({ id: `z${i}`, name: `Zone ${i}` });
+    s.zones = [
+      { id: 'z0', name: 'Zone 0' },
+      { id: 'z1', name: 'Zone 1' },
+      { id: 'z2', name: 'Zone 2' },
+      { id: 'z3', name: 'Zone 3' },
+      { id: 'z4', name: 'Zone 4' },
+      { id: 'z5', name: 'Zone 5' },
+    ];
+    expect(s.zones.length).toBe(6);
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.zones.length).toBe(6);
   });
 
   it('max zones + 1 (7) fails', () => {
     const s = makeS();
-    for (let i = 0; i < 7; i++) s.zones.push({ id: `z${i}`, name: `Zone ${i}` });
+    s.zones = [
+      { id: 'z0', name: 'Zone 0' },
+      { id: 'z1', name: 'Zone 1' },
+      { id: 'z2', name: 'Zone 2' },
+      { id: 'z3', name: 'Zone 3' },
+      { id: 'z4', name: 'Zone 4' },
+      { id: 'z5', name: 'Zone 5' },
+      { id: 'z6', name: 'Zone 6' },
+    ];
+    expect(s.zones.length).toBe(7);
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for 7 zones');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('max holders (12) succeeds', () => {
     const s = makeS();
     for (let i = 0; i < 12; i++) s.holders.push({ id: `h${i}`, name: `Holder ${i}` });
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.holders.length).toBe(12);
   });
 
   it('max holders + 1 (13) fails', () => {
     const s = makeS();
     for (let i = 0; i < 13; i++) s.holders.push({ id: `h${i}`, name: `Holder ${i}` });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for 13 holders');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('max props (12) succeeds', () => {
     const s = makeSWithAll();
     for (let i = 0; i < 12; i++) s.props.push({ id: `p${i}`, name: `Prop ${i}`, kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } });
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.props.length).toBe(12);
   });
 
   it('max props + 1 (13) fails', () => {
     const s = makeSWithAll();
     for (let i = 0; i < 13; i++) s.props.push({ id: `p${i}`, name: `Prop ${i}`, kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for 13 props');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('max cues (40) succeeds', () => {
     const s = makeS();
     for (let i = 0; i < 40; i++) s.cues.push({ id: `c${i}`, title: `Cue ${i}`, actions: [] });
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.cues.length).toBe(40);
   });
 
   it('max cues + 1 (41) fails', () => {
     const s = makeS();
     for (let i = 0; i < 41; i++) s.cues.push({ id: `c${i}`, title: `Cue ${i}`, actions: [] });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for 41 cues');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('64-char ID succeeds', () => {
@@ -270,7 +304,8 @@ describe('parser: collection and ID boundaries (A14)', () => {
     const longId = 'a'.repeat(64);
     s.zones.push({ id: longId, name: 'Long' });
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.zones.some(z => z.id === longId)).toBe(true);
   });
 
   it('65-char ID fails', () => {
@@ -278,66 +313,83 @@ describe('parser: collection and ID boundaries (A14)', () => {
     const longId = 'a'.repeat(65);
     s.zones.push({ id: longId, name: 'Long' });
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for 65-char ID');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('empty scene is valid', () => {
     const s = makeS();
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.zones.length).toBe(1);
   });
 
   it('zero zones is invalid', () => {
     const s = makeS();
     s.zones = [];
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error('Expected rejection for zero zones');
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   it('error cap at 30', () => {
     const s = makeS();
-    // Add many errors
-    for (let i = 0; i < 35; i++) s.zones.push({ id: `z${i}`, name: '' });
+    // Add 12 malformed props to generate field errors without collection overflow
+    const malformedProps: unknown[] = [];
+    for (let i = 0; i < 12; i++) {
+      malformedProps.push({
+        id: '',
+        name: '',
+        kind: '',
+        initial: { status: 'invalid' },
+      });
+    }
+    s.props = malformedProps as typeof s.props;
     const result = parseScenario(s);
-    expect(result.success).toBe(false);
-    expect(result.errors.length).toBeLessThanOrEqual(30);
+    if (result.success) throw new Error('Expected rejection for malformed props');
+    expect(result.errors.length).toBe(30);
   });
 });
 
 describe('parser: owned normalization and round trip (A13/A15)', () => {
   it('extra keys stripped, empty note preserved', () => {
     const s = makeSWithAll();
-    s.props.push({ id: 'p1', name: 'Prop1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null }, extraKey: 'bad' });
+    const rawProp = { id: 'p1', name: 'Prop1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null }, extraKey: 'bad' } as unknown;
+    s.props.push(rawProp as { id: string; name: string; kind: string; initial: { status: 'available'; zoneId: string; holderId: string | null } });
     s.cues.push({
       id: 'c1',
       title: 'Cue 1',
       actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' }, note: '' }],
     });
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
-    expect((result.data.props[0] as { extraKey?: string }).extraKey).toBeUndefined();
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect((result.data.props[0] as unknown as { extraKey?: string }).extraKey).toBeUndefined();
     expect(result.data.cues[0].actions[0].note).toBe('');
   });
 
   it('original unchanged after parse', () => {
-    const s = makeS();
+    const s = makeSWithAll();
     s.props.push({ id: 'p1', name: 'Prop1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } });
-    parseScenario(s);
+    const snapshot = JSON.parse(JSON.stringify(s));
+    const result = parseScenario(s);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(JSON.stringify(s)).toBe(JSON.stringify(snapshot));
     // Mutate original
-    s.props[0].initial.zoneId = 'MUTATED';
-    const parsed = parseScenario(s);
-    expect(parsed.success).toBe(true);
-    expect(parsed.data.props[0].initial.zoneId).toBe('MUTATED');
+    s.props[0].initial.zoneId = 'R';
+    expect(result.data.props[0].initial.zoneId).toBe('L');
+    // Mutate normalized
+    result.data.props[0].name = 'Changed';
+    expect(s.props[0].name).toBe('Prop1');
   });
 
   it('parse->serialize->parse preserves IDs and order', () => {
     const s = makeSWithAll();
     s.props.push({ id: 'p1', name: 'Prop1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } });
     const result = parseScenario(s);
-    expect(result.success).toBe(true);
+    if (!result.success) throw new Error(result.errors.join('; '));
     const json = JSON.stringify(result.data);
     const reparsed = parseScenarioJson(json);
-    expect(reparsed.success).toBe(true);
+    if (!reparsed.success) throw new Error(reparsed.errors.join('; '));
     expect(reparsed.data.props[0].id).toBe('p1');
   });
 });
@@ -487,8 +539,8 @@ describe('edit: deletion checks every reference site (A18)', () => {
     };
 
     const block = checkBlockDeletion('prop', 'p', s);
-    expect(block).not.toBeNull();
-    expect(block?.reason).toContain('referenced');
+    if (!block) throw new Error('Expected block for deleting referenced prop');
+    expect(block.reason).toContain('referenced');
   });
 
   it('deleting zone with initial reference is blocked', () => {
@@ -502,8 +554,8 @@ describe('edit: deletion checks every reference site (A18)', () => {
     };
 
     const block = checkBlockDeletion('zone', 'L', s);
-    expect(block).not.toBeNull();
-    expect(block?.reason).toContain('referenced');
+    if (!block) throw new Error('Expected block for deleting referenced zone');
+    expect(block.reason).toContain('referenced');
   });
 
   it('deleting zone with destination reference is blocked', () => {
@@ -517,8 +569,8 @@ describe('edit: deletion checks every reference site (A18)', () => {
     };
 
     const block = checkBlockDeletion('zone', 'R', s);
-    expect(block).not.toBeNull();
-    expect(block?.reason).toContain('referenced');
+    if (!block) throw new Error('Expected block for deleting referenced zone');
+    expect(block.reason).toContain('referenced');
   });
 
   it('deleting holder with initial reference is blocked', () => {
@@ -532,15 +584,15 @@ describe('edit: deletion checks every reference site (A18)', () => {
     };
 
     const block = checkBlockDeletion('holder', 'B', s);
-    expect(block).not.toBeNull();
-    expect(block?.reason).toContain('referenced');
+    if (!block) throw new Error('Expected block for deleting referenced holder');
+    expect(block.reason).toContain('referenced');
   });
 
   it('cannot delete last zone', () => {
     const s = makeS();
     expect(wouldLeaveNoZones('L', s)).toBe(true);
     const result = deleteZone(s, 'L');
-    expect(result.blocked).toBe(true);
+    if (!result.blocked) throw new Error('Expected block for deleting last zone');
     expect(result.reason).toContain('last zone');
   });
 
@@ -555,7 +607,7 @@ describe('edit: deletion checks every reference site (A18)', () => {
     };
 
     const result = retargetReferences(s, 'zone', 'L', 'R');
-    expect(result.blocked).toBe(false);
+    if (result.blocked) throw new Error(result.reason);
     // After retargeting, both initial and actions should reference R
     expect(result.result.props[0].initial.zoneId).toBe('R');
     expect(result.result.cues[0].actions[0].requiredSource?.zoneId).toBe('R');
@@ -566,23 +618,31 @@ describe('edit: deletion checks every reference site (A18)', () => {
 describe('edit: preserve structural validity and identity (A18)', () => {
   it('add duplicate ID fails', () => {
     const s = makeS();
-    s.zones.push({ id: 'L', name: 'Left' });
     const result = addZone(s, 'L', 'Duplicate');
-    expect(result.blocked).toBe(true);
+    if (!result.blocked) throw new Error('Expected block for duplicate zone ID');
+    expect(result.reason).toContain('already exists');
   });
 
   it('add beyond limit fails', () => {
     const s = makeS();
-    for (let i = 0; i < 6; i++) s.zones.push({ id: `z${i}`, name: `Zone ${i}` });
+    s.zones = [
+      { id: 'z0', name: 'Zone 0' },
+      { id: 'z1', name: 'Zone 1' },
+      { id: 'z2', name: 'Zone 2' },
+      { id: 'z3', name: 'Zone 3' },
+      { id: 'z4', name: 'Zone 4' },
+      { id: 'z5', name: 'Zone 5' },
+    ];
     const result = addZone(s, 'new', 'New');
-    expect(result.blocked).toBe(true);
+    if (!result.blocked) throw new Error('Expected block for exceeding zone limit');
+    expect(result.reason).toContain('limit');
   });
 
   it('update preserves IDs', () => {
     const s = makeS();
     s.props.push({ id: 'p1', name: 'Old', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } });
     const result = updateProp(s, 'p1', { name: 'New' });
-    expect(result.blocked).toBe(false);
+    if (result.blocked) throw new Error(result.reason);
     expect(result.result.props[0].id).toBe('p1');
     expect(result.result.props[0].name).toBe('New');
   });
@@ -592,17 +652,18 @@ describe('edit: preserve structural validity and identity (A18)', () => {
       version: 1,
       title: 'Test',
       zones: [{ id: 'L', name: 'Left' }],
-      holders: [],
-      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }, { id: 'p2', name: 'P2', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [
+        { id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } },
+        { id: 'p2', name: 'P2', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } },
+      ],
       cues: [
         { id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] },
         { id: 'c2', title: 'Cue 2', actions: [{ id: 'a2', propId: 'p2', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] },
       ],
     };
-    // Add holder A
-    s.holders.push({ id: 'A', name: 'Alice' });
     const result = deleteCue(s, 'c1');
-    expect(result.blocked).toBe(false);
+    if (result.blocked) throw new Error(result.reason);
     expect(result.result.cues).toHaveLength(1);
     expect(result.result.cues[0].id).toBe('c2');
     // p1 and p2 should still exist
@@ -622,12 +683,12 @@ describe('edit: preserve structural validity and identity (A18)', () => {
       ],
     };
 
-    const { moveCue } = require('../../src/domain/edit');
     const result = moveCue(s, 'c1', 0);
-    expect(result.blocked).toBe(false);
+    if (result.blocked) throw new Error(result.reason);
     // Result should be a new object
     expect(result.result).not.toBe(s);
     expect(result.result.cues[0].id).toBe('c1');
+    expect(result.result.cues[1].id).toBe('c2');
   });
 
   it('moving action without assigning reordered array fails', () => {
@@ -650,7 +711,7 @@ describe('edit: preserve structural validity and identity (A18)', () => {
     };
 
     const result = moveAction(s, 'c1', 'a1', 1);
-    expect(result.blocked).toBe(false);
+    if (result.blocked) throw new Error(result.reason);
     expect(result.result.cues[0].actions[0].id).toBe('a2');
     expect(result.result.cues[0].actions[1].id).toBe('a1');
   });
@@ -666,7 +727,641 @@ describe('edit: preserve structural validity and identity (A18)', () => {
     };
 
     const result = addAction(s, 'c1', { id: 'existing', propId: 'p1', kind: 'place', requiredSource: { zoneId: 'L', holderId: 'A' }, destination: { zoneId: 'L', holderId: null } });
-    expect(result.blocked).toBe(true);
+    if (!result.blocked) throw new Error('Expected block for duplicate action ID');
     expect(result.reason).toContain('already exists');
+  });
+});
+
+describe('parser: table-driven collection defect regressions', () => {
+  const S = (): Record<string, unknown> => ({ version: 1, title: 'Review', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [], cues: [] });
+
+  it('missing zones fails', () => {
+    const s = S();
+    delete s.zones;
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for missing zones');
+    expect(result.errors.some(e => e.includes('zones') && e.includes('missing required field'))).toBe(true);
+  });
+
+  it.each([
+    ['zones'],
+    ['holders'],
+    ['props'],
+    ['cues'],
+  ])('null %s fails', (key) => {
+    const s = S();
+    s[key] = null;
+    const result = parseScenario(s);
+    if (result.success) throw new Error(`Expected rejection for null ${key}`);
+    expect(result.errors.some(e => e.includes(key) && e.includes('expected an array'))).toBe(true);
+  });
+
+  it.each([
+    ['zones'],
+    ['holders'],
+    ['props'],
+    ['cues'],
+  ])('undefined %s fails', (key) => {
+    const s = S();
+    s[key] = undefined;
+    const result = parseScenario(s);
+    if (result.success) throw new Error(`Expected rejection for undefined ${key}`);
+    expect(result.errors.some(e => e.includes(key) && e.includes('missing required field'))).toBe(true);
+  });
+
+  it.each([
+    ['zones'],
+    ['holders'],
+    ['props'],
+    ['cues'],
+  ])('object %s fails', (key) => {
+    const s = S();
+    s[key] = {};
+    const result = parseScenario(s);
+    if (result.success) throw new Error(`Expected rejection for object ${key}`);
+    expect(result.errors.some(e => e.includes(key) && e.includes('expected an array'))).toBe(true);
+  });
+
+  it('missing holders fails', () => {
+    const s = S();
+    delete s.holders;
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for missing holders');
+    expect(result.errors.some(e => e.includes('holders') && e.includes('missing required field'))).toBe(true);
+  });
+
+  it('missing props fails', () => {
+    const s = S();
+    delete s.props;
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for missing props');
+    expect(result.errors.some(e => e.includes('props') && e.includes('missing required field'))).toBe(true);
+  });
+
+  it('missing cues fails', () => {
+    const s = S();
+    delete s.cues;
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for missing cues');
+    expect(result.errors.some(e => e.includes('cues') && e.includes('missing required field'))).toBe(true);
+  });
+
+  it('cue with missing actions fails', () => {
+    const s = S();
+    s.cues = [{ id: 'c1', title: 'Cue 1' }];
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for missing actions');
+    expect(result.errors.some(e => e.includes('cues[1].actions') && e.includes('missing required field'))).toBe(true);
+  });
+
+  it('cue with null actions fails', () => {
+    const s = S();
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: null }];
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for null actions');
+    expect(result.errors.some(e => e.includes('cues[1].actions') && e.includes('expected an array'))).toBe(true);
+  });
+
+  it('cue with object actions fails', () => {
+    const s = S();
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: {} }];
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for object actions');
+    expect(result.errors.some(e => e.includes('cues[1].actions') && e.includes('expected an array'))).toBe(true);
+  });
+
+  it('cue with inherited actions containing invalid action fails', () => {
+    const s = S();
+    s.props = [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }];
+    const actionsProto = [{ id: 'a1', propId: 'missing', kind: 'bogus', requiredSource: { zoneId: 'L', holderId: null } }];
+    const cue: Record<string, unknown> = { id: 'c1', title: 'Cue 1' };
+    Object.setPrototypeOf(cue, { actions: actionsProto });
+    s.cues = [cue];
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for inherited actions with invalid content');
+    expect(result.errors.some(e => e.includes('actions') && e.includes('missing required field'))).toBe(true);
+  });
+
+  it('empty own cue actions succeed', () => {
+    const s = S();
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: [] }];
+    const snapshot = JSON.stringify(s);
+    const result = parseScenario(s);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.cues[0].actions).toEqual([]);
+    expect(JSON.stringify(s)).toBe(snapshot);
+  });
+
+  it.each([
+    ['zones', 'zones'],
+    ['holders', 'holders'],
+    ['props', 'props'],
+    ['cues', 'cues'],
+  ])('sparse %s array fails', (key, path) => {
+    const s = S();
+    s[key] = Array(1);
+    const result = parseScenario(s);
+    if (result.success) throw new Error(`Expected rejection for sparse ${key}`);
+    expect(result.errors.some(e => e.includes(`${path}[1]`) && e.includes('missing own entry'))).toBe(true);
+  });
+
+  it('sparse actions array fails', () => {
+    const s = S();
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: Array(1) }];
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for sparse actions');
+    expect(result.errors.some(e => e.includes('actions[1]') && e.includes('missing own entry'))).toBe(true);
+  });
+
+  it.each([
+    ['zones', [{ id: 'Z', name: 'Proto' }], 'zones[1]'],
+    ['holders', [{ id: 'H', name: 'Proto' }], 'holders[1]'],
+    ['props', [{ id: 'P', name: 'Proto', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }], 'props[1]'],
+    ['cues', [{ id: 'C', title: 'Proto', actions: [] }], 'cues[1]'],
+  ])('inherited %s numeric index fails', (key, protoElement, errorPath) => {
+    const s = S();
+    const proto = protoElement;
+    const arr: unknown[] = [undefined];
+    Object.setPrototypeOf(arr, proto);
+    delete arr[0];
+    s[key] = arr;
+    const result = parseScenario(s);
+    if (result.success) throw new Error(`Expected rejection for inherited ${key} index`);
+    expect(result.errors.some(e => e.includes(errorPath) && e.includes('missing own entry'))).toBe(true);
+  });
+
+  it('inherited actions numeric index fails', () => {
+    const s = S();
+    s.props = [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }];
+    const actionsProto = [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null } }];
+    const actionsArr: unknown[] = [undefined];
+    Object.setPrototypeOf(actionsArr, actionsProto);
+    delete actionsArr[0];
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: actionsArr }];
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for inherited actions index');
+    expect(result.errors.some(e => e.includes('actions[1]') && e.includes('missing own entry'))).toBe(true);
+  });
+
+  it('own note/destination undefined omitted from normalized output', () => {
+    const s = S();
+    s.props = [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }];
+    const action: Record<string, unknown> = { id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, note: undefined, destination: undefined };
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: [action] }];
+    const result = parseScenario(s);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(Object.hasOwn(result.data.cues[0].actions[0], 'note')).toBe(false);
+    expect(Object.hasOwn(result.data.cues[0].actions[0], 'destination')).toBe(false);
+  });
+
+  it('inherited note/destination ignored on valid action', () => {
+    const s = S();
+    s.props = [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }];
+    const actionProto = { note: 99, destination: 'invalid' };
+    const action: Record<string, unknown> = { id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null } };
+    Object.setPrototypeOf(action, actionProto);
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: [action] }];
+    const result = parseScenario(s);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(Object.hasOwn(result.data.cues[0].actions[0], 'note')).toBe(false);
+    expect(Object.hasOwn(result.data.cues[0].actions[0], 'destination')).toBe(false);
+  });
+
+  it('own empty note retained', () => {
+    const s = S();
+    s.props = [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }];
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, note: '' }] }];
+    const result = parseScenario(s);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(result.data.cues[0].actions[0].note).toBe('');
+  });
+
+  it('own invalid note fails', () => {
+    const s = S();
+    s.props = [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }];
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, note: 'x'.repeat(501) }] }];
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for oversized note');
+    expect(result.errors.some(e => e.includes('note') && e.includes('500 characters'))).toBe(true);
+  });
+
+  it('own invalid destination fails', () => {
+    const s = S();
+    s.props = [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }];
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: 'invalid' }] }];
+    const result = parseScenario(s);
+    if (result.success) throw new Error('Expected rejection for invalid destination');
+    expect(result.errors.some(e => e.includes('destination'))).toBe(true);
+  });
+
+  it('valid input produces owned normalized output', () => {
+    const s = S();
+    s.props = [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }];
+    s.cues = [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: null } }] }];
+    const snapshot = JSON.stringify(s);
+    const result = parseScenario(s);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(JSON.stringify(s)).toBe(snapshot);
+    result.data.props[0].name = 'Changed';
+    expect((s.props as Array<{ name: string }>)[0].name).toBe('P1');
+  });
+
+  it('root optional description own undefined omitted', () => {
+    const s = S();
+    s.description = undefined;
+    const result = parseScenario(s);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(Object.hasOwn(result.data, 'description')).toBe(false);
+  });
+
+  it('root optional description inherited invalid omitted', () => {
+    const s = S();
+    const proto = { description: 12345 };
+    Object.setPrototypeOf(s, proto);
+    const result = parseScenario(s);
+    if (!result.success) throw new Error(result.errors.join('; '));
+    expect(Object.hasOwn(result.data, 'description')).toBe(false);
+  });
+});
+
+describe('edit: updateAction optional destination/note ownership', () => {
+  it('update action with no existing note succeeds', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const result = updateAction(s, 'c1', 'a1', { kind: 'place' });
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].kind).toBe('place');
+  });
+
+  it('update transfer to consume clears destination with own undefined', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }, { id: 'B', name: 'Bob' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: 'A' } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'transfer', requiredSource: { zoneId: 'L', holderId: 'A' }, destination: { zoneId: 'L', holderId: 'B' } }] }],
+    };
+    const snapshot = JSON.stringify(s);
+    const result = updateAction(s, 'c1', 'a1', { kind: 'consume', destination: undefined });
+    if (result.blocked) throw new Error(result.reason);
+    expect(JSON.stringify(s)).toBe(snapshot);
+    expect(Object.hasOwn(result.result.cues[0].actions[0], 'destination')).toBe(false);
+    expect(result.result.cues[0].actions[0].kind).toBe('consume');
+    const runResult = runScenario(result.result);
+    expect(runResult.frames.length).toBe(1);
+    expect(runResult.frames[0].applied).toBe(true);
+    expect(runResult.final.p1.status).toBe('consumed');
+    expect(runResult.issues.length).toBe(0);
+  });
+
+  it('omitted destination retains old value', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const result = updateAction(s, 'c1', 'a1', { kind: 'collect' });
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].destination).toEqual({ zoneId: 'L', holderId: 'A' });
+  });
+
+  it('inherited destination retains old value', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const proto = { destination: { zoneId: 'invalid', holderId: null } };
+    const updates: Partial<Action> = { kind: 'collect' };
+    Object.setPrototypeOf(updates, proto);
+    const result = updateAction(s, 'c1', 'a1', updates);
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].destination).toEqual({ zoneId: 'L', holderId: 'A' });
+  });
+
+  it('own note undefined clears existing note', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' }, note: 'old note' }] }],
+    };
+    const result = updateAction(s, 'c1', 'a1', { note: undefined });
+    if (result.blocked) throw new Error(result.reason);
+    expect(Object.hasOwn(result.result.cues[0].actions[0], 'note')).toBe(false);
+  });
+
+  it('note empty string preserved', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' }, note: 'old' }] }],
+    };
+    const result = updateAction(s, 'c1', 'a1', { note: '' });
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].note).toBe('');
+  });
+
+  it('own replacement destination copied independently', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }, { id: 'R', name: 'Right' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'carryOff', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const newDest = { zoneId: 'R', holderId: 'A' };
+    const result = updateAction(s, 'c1', 'a1', { destination: newDest });
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].destination).toEqual({ zoneId: 'R', holderId: 'A' });
+    expect(result.result.cues[0].actions[0].destination).not.toBe(newDest);
+  });
+
+  it('requiredSource remains authored', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: 'A' } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'place', requiredSource: { zoneId: 'L', holderId: 'A' }, destination: { zoneId: 'L', holderId: null } }] }],
+    };
+    const result = updateAction(s, 'c1', 'a1', { note: 'updated' });
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].requiredSource).toEqual({ zoneId: 'L', holderId: 'A' });
+  });
+});
+
+describe('edit: moveAction integer/range validation', () => {
+  it('moveAction NaN rejected unchanged', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }, { id: 'a2', propId: 'p1', kind: 'place', requiredSource: { zoneId: 'L', holderId: 'A' }, destination: { zoneId: 'L', holderId: null } }] }],
+    };
+    const snapshot = JSON.stringify(s);
+    const result = moveAction(s, 'c1', 'a1', NaN);
+    if (!result.blocked) throw new Error('Expected block for NaN index');
+    expect(result.reason).toContain('integer');
+    expect(JSON.stringify(s)).toBe(snapshot);
+  });
+
+  it('moveAction 0.5 rejected unchanged', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }, { id: 'a2', propId: 'p1', kind: 'place', requiredSource: { zoneId: 'L', holderId: 'A' }, destination: { zoneId: 'L', holderId: null } }] }],
+    };
+    const snapshot = JSON.stringify(s);
+    const result = moveAction(s, 'c1', 'a1', 0.5);
+    if (!result.blocked) throw new Error('Expected block for fractional index');
+    expect(result.reason).toContain('integer');
+    expect(JSON.stringify(s)).toBe(snapshot);
+  });
+
+  it('moveAction valid reorder changes action order', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }, { id: 'a2', propId: 'p1', kind: 'place', requiredSource: { zoneId: 'L', holderId: 'A' }, destination: { zoneId: 'L', holderId: null } }] }],
+    };
+    const result = moveAction(s, 'c1', 'a1', 1);
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].id).toBe('a2');
+    expect(result.result.cues[0].actions[1].id).toBe('a1');
+  });
+
+  it('moveAction invalid scene no-op rejected', () => {
+    const s: Scenario = {
+      version: 1,
+      title: '',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: null } }] }],
+    };
+    const result = moveAction(s, 'c1', 'a1', 0);
+    if (!result.blocked) throw new Error('Expected block for invalid scene');
+    expect(result.reason).toContain('invalid scene');
+  });
+
+  it('moveAction valid no-op returns owned normalized copy', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const result = moveAction(s, 'c1', 'a1', 0);
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result).not.toBe(s);
+    expect(result.result.cues).not.toBe(s.cues);
+    expect(result.result.cues[0].actions[0].id).toBe('a1');
+  });
+});
+
+describe('edit: update helpers reject own differing ID', () => {
+  it.each([
+    ['Prop', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateProp(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }], cues: [] }), 'p1'],
+    ['Zone', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateZone(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'z1', name: 'Zone 1' }], holders: [], props: [], cues: [] }), 'z1'],
+    ['Holder', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateHolder(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [{ id: 'h1', name: 'Holder 1' }], props: [], cues: [] }), 'h1'],
+    ['Cue', (s: Scenario, id: string, updates: Partial<{ id: string; title: string }>) => updateCue(s, id, updates as Partial<Cue>), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [], cues: [{ id: 'c1', title: 'Cue 1', actions: [] }] }), 'c1'],
+  ])('update%s undefined ID rejected', (_entity, updateFn, scenarioFn, entityId) => {
+    const s = scenarioFn();
+    const snapshot = JSON.stringify(s);
+    const result = updateFn(s, entityId, { id: undefined });
+    if (!result.blocked) throw new Error(`Expected block for undefined ${name} ID`);
+    expect(result.reason).toContain('Cannot change');
+    expect(JSON.stringify(s)).toBe(snapshot);
+  });
+
+  it.each([
+    ['Prop', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateProp(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }], cues: [] }), 'p1'],
+    ['Zone', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateZone(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'z1', name: 'Zone 1' }], holders: [], props: [], cues: [] }), 'z1'],
+    ['Holder', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateHolder(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [{ id: 'h1', name: 'Holder 1' }], props: [], cues: [] }), 'h1'],
+    ['Cue', (s: Scenario, id: string, updates: Partial<{ id: string; title: string }>) => updateCue(s, id, updates as Partial<Cue>), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [], cues: [{ id: 'c1', title: 'Cue 1', actions: [] }] }), 'c1'],
+  ])('update%s empty ID rejected', (_entity, updateFn, scenarioFn, entityId) => {
+    const s = scenarioFn();
+    const snapshot = JSON.stringify(s);
+    const result = updateFn(s, entityId, { id: '' });
+    if (!result.blocked) throw new Error(`Expected block for empty ${name} ID`);
+    expect(result.reason).toContain('Cannot change');
+    expect(JSON.stringify(s)).toBe(snapshot);
+  });
+
+  it.each([
+    ['Prop', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateProp(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }], cues: [] }), 'p1'],
+    ['Zone', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateZone(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'z1', name: 'Zone 1' }], holders: [], props: [], cues: [] }), 'z1'],
+    ['Holder', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateHolder(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [{ id: 'h1', name: 'Holder 1' }], props: [], cues: [] }), 'h1'],
+    ['Cue', (s: Scenario, id: string, updates: Partial<{ id: string; title: string }>) => updateCue(s, id, updates as Partial<Cue>), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [], cues: [{ id: 'c1', title: 'Cue 1', actions: [] }] }), 'c1'],
+  ])('update%s different ID rejected', (_entity, updateFn, scenarioFn, entityId) => {
+    const s = scenarioFn();
+    const snapshot = JSON.stringify(s);
+    const result = updateFn(s, entityId, { id: 'different' });
+    if (!result.blocked) throw new Error(`Expected block for different ${name} ID`);
+    expect(result.reason).toContain('Cannot change');
+    expect(JSON.stringify(s)).toBe(snapshot);
+  });
+
+  it.each([
+    ['Prop', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateProp(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }], cues: [] }), 'p1'],
+    ['Zone', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateZone(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'z1', name: 'Zone 1' }], holders: [], props: [], cues: [] }), 'z1'],
+    ['Holder', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateHolder(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [{ id: 'h1', name: 'Holder 1' }], props: [], cues: [] }), 'h1'],
+    ['Cue', (s: Scenario, id: string, updates: Partial<{ id: string; title: string }>) => updateCue(s, id, updates as Partial<Cue>), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [], cues: [{ id: 'c1', title: 'Cue 1', actions: [] }] }), 'c1'],
+  ])('update%s same ID succeeds', (_entity, updateFn, scenarioFn, entityId) => {
+    const s = scenarioFn();
+    const result = updateFn(s, entityId, { id: entityId, name: 'Updated' } as { id: string; name?: string; title?: string });
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result).toBeDefined();
+  });
+
+  it.each([
+    ['Prop', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateProp(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }], cues: [] }), 'p1'],
+    ['Zone', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateZone(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'z1', name: 'Zone 1' }], holders: [], props: [], cues: [] }), 'z1'],
+    ['Holder', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateHolder(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [{ id: 'h1', name: 'Holder 1' }], props: [], cues: [] }), 'h1'],
+    ['Cue', (s: Scenario, id: string, updates: Partial<{ id: string; title: string }>) => updateCue(s, id, updates as Partial<Cue>), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [], cues: [{ id: 'c1', title: 'Cue 1', actions: [] }] }), 'c1'],
+  ])('update%s omitted ID succeeds', (_entity, updateFn, scenarioFn, entityId) => {
+    const s = scenarioFn();
+    const result = updateFn(s, entityId, { name: 'Updated' });
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result).toBeDefined();
+  });
+
+  it.each([
+    ['Prop', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateProp(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }], cues: [] }), 'p1'],
+    ['Zone', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateZone(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'z1', name: 'Zone 1' }], holders: [], props: [], cues: [] }), 'z1'],
+    ['Holder', (s: Scenario, id: string, updates: Partial<{ id: string; name: string }>) => updateHolder(s, id, updates), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [{ id: 'h1', name: 'Holder 1' }], props: [], cues: [] }), 'h1'],
+    ['Cue', (s: Scenario, id: string, updates: Partial<{ id: string; title: string }>) => updateCue(s, id, updates as Partial<Cue>), (): Scenario => ({ version: 1, title: 'Test', zones: [{ id: 'L', name: 'Left' }], holders: [], props: [], cues: [{ id: 'c1', title: 'Cue 1', actions: [] }] }), 'c1'],
+  ])('update%s inherited differing ID ignored', (_entity, updateFn, scenarioFn, entityId) => {
+    const s = scenarioFn();
+    const proto = { id: 'inherited-different' };
+    const updates: Partial<{ id: string; name: string }> = { name: 'Updated' };
+    Object.setPrototypeOf(updates, proto);
+    const result = updateFn(s, entityId, updates);
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result).toBeDefined();
+  });
+
+  it('updateAction undefined ID rejected', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const snapshot = JSON.stringify(s);
+    const result = updateAction(s, 'c1', 'a1', { id: undefined });
+    if (!result.blocked) throw new Error('Expected block for undefined action ID');
+    expect(result.reason).toContain('Cannot change');
+    expect(JSON.stringify(s)).toBe(snapshot);
+  });
+
+  it('updateAction empty ID rejected', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const snapshot = JSON.stringify(s);
+    const result = updateAction(s, 'c1', 'a1', { id: '' });
+    if (!result.blocked) throw new Error('Expected block for empty action ID');
+    expect(result.reason).toContain('Cannot change');
+    expect(JSON.stringify(s)).toBe(snapshot);
+  });
+
+  it('updateAction different ID rejected', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const snapshot = JSON.stringify(s);
+    const result = updateAction(s, 'c1', 'a1', { id: 'different' });
+    if (!result.blocked) throw new Error('Expected block for different action ID');
+    expect(result.reason).toContain('Cannot change');
+    expect(JSON.stringify(s)).toBe(snapshot);
+  });
+
+  it('updateAction same ID succeeds', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const result = updateAction(s, 'c1', 'a1', { id: 'a1', note: 'test' });
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].id).toBe('a1');
+  });
+
+  it('updateAction omitted ID succeeds', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const result = updateAction(s, 'c1', 'a1', { note: 'test' });
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].id).toBe('a1');
+  });
+
+  it('updateAction inherited differing ID ignored', () => {
+    const s: Scenario = {
+      version: 1,
+      title: 'Test',
+      zones: [{ id: 'L', name: 'Left' }],
+      holders: [{ id: 'A', name: 'Alice' }],
+      props: [{ id: 'p1', name: 'P1', kind: 'test', initial: { status: 'available', zoneId: 'L', holderId: null } }],
+      cues: [{ id: 'c1', title: 'Cue 1', actions: [{ id: 'a1', propId: 'p1', kind: 'collect', requiredSource: { zoneId: 'L', holderId: null }, destination: { zoneId: 'L', holderId: 'A' } }] }],
+    };
+    const proto = { id: 'inherited-different' };
+    const updates: Partial<Action> = { note: 'test' };
+    Object.setPrototypeOf(updates, proto);
+    const result = updateAction(s, 'c1', 'a1', updates);
+    if (result.blocked) throw new Error(result.reason);
+    expect(result.result.cues[0].actions[0].id).toBe('a1');
   });
 });
