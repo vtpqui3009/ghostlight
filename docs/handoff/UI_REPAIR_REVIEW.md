@@ -1,8 +1,8 @@
 # Ghostlight UI repair and blocked-writer handoff
 
-Original **Codex** review, 2026-11-01 00:58 UTC. Kiro authored the initial UI draft; Codex independently inspected it and ran the limited probes below. No Codex application/test implementation is substituted for the requested Kiro authoring.
+Original **Codex** review, 2026-11-01 00:58 UTC; diagnosis updated 01:07 UTC. Kiro authored the initial UI draft; Codex independently inspected it and ran the limited probes below. No Codex application/test implementation is substituted for the requested Kiro authoring.
 
-**Product work is paused by an unresolved native-writer response blocker. The local UI draft is unaccepted, uncommitted and unpushed.** This is not a completed product or a voluntary stop after documentation. Preserve the working files; resume implementation only after the bounded native-responsiveness and FREE-entitlement gate below is met.
+**Product work is paused by native service rate throttling. The local UI draft is unaccepted, uncommitted and unpushed.** This is not a completed product or a voluntary stop after documentation. Preserve the working files; resume implementation only after the bounded native-responsiveness and FREE-entitlement gate below is met.
 
 ## Preserved checkpoints and exact scope
 
@@ -16,11 +16,11 @@ The initial UI's independent four-check result was: **165 existing tests passed;
 
 After producing the initial draft, the official native Sonnet 4.5 session received an Editor repair request. It produced no output or tool activity for over five minutes. A narrower ActionForm request likewise produced none for over two minutes. Both were cancelled without file changes and that client was closed. A fresh official native Auto session then received the ActionForm request; again there was no output/tool activity for over three minutes. It was cancelled and closed. **No ActionForm write was performed.**
 
-**Exact cause remains unknown.** No server error, network denial or approval rejection was reported. Do not relabel this as quota exhaustion, a confirmed outage, a firewall failure or rejected permission. All native writers and the read-only usage observer exited normally. Last verified native usage was **KIRO FREE 25.35/50 used at 2026-11-01 00:55 UTC**, displayed reset **2026-12-01**. No upgrade, purchase, overage, billing change or paid allowance was enabled.
+**The earlier terminal-only cause assessment is superseded by non-inference log review.** Logs show HTTP 429 `ThrottlingException`, reason `CREDIT_CONSUMPTION_RATE_EXCEEDED`, a one-hour retry hint and five-minute CLI backoff. See [sanitized evidence and recovery gate](KIRO_THROTTLE_DIAGNOSTIC.md), including the distinction between the detailed title-helper error and authoring retry hints. Monthly quota exhaustion, a general outage, firewall cause or approval rejection is not established. All native writers and the read-only usage observer exited normally. Last verified native usage was **KIRO FREE 25.35/50 used at 2026-11-01 01:06 UTC**, displayed reset **2026-12-01**. No upgrade, purchase, overage, billing change or paid allowance was enabled.
 
 Cleanup was confirmed: native sessions 81795, 10788, 77056 and usage observer 2251 exited 0. The Vite npm session exited 130, its remaining owned process was terminated, and port 5173 had no listener. No writer or preview server is claimed active; no background product coding is continuing. The accepted primary worktree was rechecked clean at `d8a1a61`.
 
-Inference is paused. Do not submit more blind retries, cycle models repeatedly, switch inference backends, or take over product implementation with Codex. Before resumption, verify current FREE entitlement and establish official native responsiveness through a bounded recovery check with a clear deadline and observable response. A working read-only usage panel alone does not prove that an authoring request will respond. If responsiveness is still unestablished, retain this blocker and checkpoint; do not start a new coding loop. After recovery, use one writer and one small, explicit implementation scope at a time.
+Inference is paused. Do not submit more blind retries, cycle models repeatedly, switch inference backends, or take over product implementation with Codex. Respect the latest retry hint: no inference before **01:52 UTC on November 1**, with no guarantee that throttling ends then. Before resumption, verify current FREE entitlement and establish official native responsiveness through a bounded recovery check with a clear deadline and observable response. A working read-only usage panel alone does not prove that an authoring request will respond. If responsiveness is still unestablished, retain this blocker and checkpoint; do not start a new coding loop. After recovery, use one writer and one small, explicit implementation scope at a time.
 
 ## Executed evidence: limited probes, not broad acceptance
 
@@ -65,7 +65,7 @@ These findings are static review unless corroborated by the executed evidence ab
 
 | Order / dependency | Narrow implementation target | Required evidence before moving on |
 |---|---|---|
-| 0. External writer gate | Current official native responsiveness and FREE allowance; no duplicate writer | Explicit bounded response/recovery evidence. If none, stop inference and retain the blocker rather than another blind attempt. |
+| 0. External writer gate | Respect [cooldown gate](KIRO_THROTTLE_DIAGNOSTIC.md), then current official native responsiveness and FREE allowance; no duplicate writer | Explicit bounded response/recovery evidence. If none, stop inference and retain the blocker rather than another blind attempt. |
 | 1. Depends on 0 | First a real action form and integration; then the remaining scene/entity/cue forms | Add/edit/delete a physical action using independently entered kind/source/destination, preserve stable IDs, show field errors, keep draft on failed save and support Save/Cancel without native dialogs. A request must produce an inspectable implementation, not another plan. |
 | 2. Depends on 1 | Storage/App recovery, consistent selection, REQUIRED/BEFORE/AFTER, playback and cause links | The four storage probes above pass; denied getter still yields usable UI; corrupt bytes survive until explicit successful recovery; no false Saved. Editing/reorder pauses playback, preserves or resets the right selection, and causes navigate to the real source. |
 | 3. Depends on 2 | Owned demos, import/export, report IDs and accessible/print behavior | Wrong-duplicate failure plus valid control; round-trip identity/order/requirements; file-read/size/parse failures retain work; persistent accessible errors and dark print warning text. |
@@ -93,7 +93,8 @@ blocker. Read START_HERE.md and docs/handoff/UI_REPAIR_REVIEW.md. Preserve revie
 3d1a7bb0f363ab9ce161a8eb098de08dbfd1fb59, the separate accepted d8a1a61 engine tree, main,
 and all existing local UI changes. Inspect the current state before restoring anything.
 
-Inference is paused: first verify FREE entitlement and establish official native
+Inference is paused: read docs/handoff/KIRO_THROTTLE_DIAGNOSTIC.md and respect the
+service cooldown gate first. Then verify FREE entitlement and establish official native
 responsiveness with a bounded recovery check. Do not loop blindly, switch backends,
 buy allowance or replace Kiro application authorship with Codex. Once responsive,
 use one Kiro writer and one small scope: real action/other forms, then storage/App
