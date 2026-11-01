@@ -1,5 +1,7 @@
 # Post-cooldown getter repair: focused checks pass; UI remains unaccepted
 
+> **Current status supersedes this historical checkpoint:** [Action-editor WIP and remaining asynchronous import blocker](ACTIONFORM_CHECKPOINT.md), 2026-11-01 02:44 UTC. Source `7a9e2a4` builds; 222 tests/lint/typecheck/build pass. The old missing-form/unused-symbol failures below are resolved. Remaining untouched UI defects still apply. No active Kiro writer; FREE44.65/50, reserve pause.
+
 ## Latest verification — 2026-11-01 02:06 UTC
 
 A second, separately authorized **single Kiro request** repaired only `tests/persistence/store.test.ts`: a valid one-zone Scenario with a failing parser precondition, two discriminated load-error guards with throwing else branches, and typed descriptor cleanup without `any` or ESLint suppression. All 13 cases remain. Source/test hash comparison confirmed no application source changes in this request. Independent static review found no blocker within this narrow repair.

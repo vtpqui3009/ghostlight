@@ -1,5 +1,7 @@
 # Ghostlight UI repair and blocked-writer handoff
 
+> **Current status supersedes this historical checkpoint:** [Action-editor WIP and remaining asynchronous import blocker](ACTIONFORM_CHECKPOINT.md), 2026-11-01 02:44 UTC. Source `7a9e2a4` builds; 222 tests/lint/typecheck/build pass. The old missing-form/unused-symbol failures below are resolved. Remaining untouched UI defects still apply. No active Kiro writer; FREE44.65/50, reserve pause.
+
 > **Later evidence, 2026-11-01 02:06 UTC:** two separately authorized post-cooldown requests responded without a new throttle hint. The scoped getter/test repair passes focused tests, strict TS and lint. Full tests pass 178/178, but full lint/typecheck/build retain 16 existing UI errors. Read [the latest verification checkpoint](POST_COOLDOWN_GETTER_REVIEW.md) first; the older status below is historical, not an instruction to repeat the prior recovery attempt.
 
 Original **Codex** review, 2026-11-01 00:58 UTC; diagnosis updated 01:07 UTC. Kiro authored the initial UI draft; Codex independently inspected it and ran the limited probes below. No Codex application/test implementation is substituted for the requested Kiro authoring.

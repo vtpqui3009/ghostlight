@@ -2,9 +2,9 @@
 
 Original handoff documentation by **Codex**, 2026-11-01. This file helps a new agent or human continue the project without the previous chat or a private skill package. Kiro remains the primary author of product specifications, application code, tests, and fixes; this document is orchestration and review, not evidence of Kiro implementation.
 
-**Status snapshot: 2026-11-01 02:06 UTC — focused getter/test repair verified; UI remains unaccepted.** Reviewed domain code **`3d1a7bb0f363ab9ce161a8eb098de08dbfd1fb59`** remains preserved. A separately authorized narrow Kiro request fixed all three new storage-test TypeScript errors and removed the unnecessary suppression. Independent focused tests (**13/13**), strict TypeScript and ESLint pass. Full tests now pass **178/178**, while full lint/typecheck/build still fail on **16 existing unused-symbol errors in Editor and StageView**. See [latest getter verification and exact next item](docs/handoff/POST_COOLDOWN_GETTER_REVIEW.md). No new throttle appeared; clients are closed. No complete UI acceptance, product-source push or sustained-service guarantee is claimed.
+**Status snapshot: 2026-11-01 02:44 UTC — runnable action-editor WIP committed; asynchronous import blocker remains.** Kiro-authored source **`7a9e2a48fc27c926dc089e31e868c4c84dc9c70f`** contains the real UI, all six action forms and the storage getter repair. Independent **222/222 tests**, lint, strict TypeScript and production build pass. Focused browser workflows pass, but a delayed FileReader callback can bypass the draft guard and let old form values overwrite an imported action. Read [current evidence, reproduction and next bounded repair](docs/handoff/ACTIONFORM_CHECKPOINT.md). This is a private recovery checkpoint, **not accepted full UI/MVP**. Native usage is **44.65/50 FREE**; inference is paused to preserve a 5-credit reserve. Writer and QA browser are closed; no sustained-service promise is made.
 
-<!-- CHECKPOINT OWNER: refresh timestamp, exact commit/diff identity, UI/browser results, remaining defects, next task and evidence links after the next writer stops. This document certifies only the bounded domain repair at 3d1a7bb. -->
+<!-- CHECKPOINT OWNER: refresh timestamp, exact commit/diff identity, UI/browser results, remaining defects, next task and evidence links after the next writer stops. The latest source is a runnable WIP with a reproduced import blocker; full UI acceptance remains pending. -->
 
 ## Read in this order
 
@@ -13,7 +13,7 @@ Original handoff documentation by **Codex**, 2026-11-01. This file helps a new a
 3. [Implementation tasks](.kiro/specs/ghostlight/tasks.md), then the next unfinished step below. Task checkboxes and proposed file layouts are plans, not proof of implemented behavior.
 4. [Independent acceptance handoff](KIRO_CODING_HANDOFF.md): A01–A18 hand-calculated examples. These are original Codex requirements/oracles; their existence does not mean they passed.
 5. [UI direction](docs/handoff/UI_DIRECTION.md) and [browser QA plan](docs/handoff/BROWSER_QA_PLAN.md) when moving into the real interface.
-6. [Latest getter repair verification](docs/handoff/POST_COOLDOWN_GETTER_REVIEW.md), then [rate-throttle diagnosis](docs/handoff/KIRO_THROTTLE_DIAGNOSTIC.md) and [UI repair review](docs/handoff/UI_REPAIR_REVIEW.md): exact draft failures, blocked-writer evidence, optional local recovery and ordered resumption gates.
+6. [Current action-editor WIP checkpoint](docs/handoff/ACTIONFORM_CHECKPOINT.md), then historical [getter repair verification](docs/handoff/POST_COOLDOWN_GETTER_REVIEW.md), [rate-throttle diagnosis](docs/handoff/KIRO_THROTTLE_DIAGNOSTIC.md) and [UI repair review](docs/handoff/UI_REPAIR_REVIEW.md): exact draft failures, blocked-writer evidence, optional local recovery and ordered resumption gates.
 
 These are canonical sources; do not create competing copies of their contracts. Current user instructions take precedence over historical execution gates. The user's later build authorization supersedes the validation-only restriction in [the old final review](KIROWEEN_FINAL_REVIEW.md). Its market, usefulness, and eligibility caveats remain valid.
 
@@ -33,7 +33,7 @@ The six-operation contract is settled in the design; do not reopen it casually. 
 
 The app models **planned state**. It is not live tracking, automatic stage detection, or a safety system. Synthetic tests are not real-user validation. Local computation after assets load is intended; guaranteed cold-offline reopening is not established.
 
-Implementation choices still needed include component/state organization, stable ID allocation in the editor, concrete demo data, persistence key/version/save timing and recovery interactions, and portable browser-test wiring. Resolve these coherently against the canonical requirements and record material choices. They are not permission to weaken the requirements. Audience demand, differentiation, contest eligibility and real-user usefulness remain unvalidated.
+Current WIP uses explicit user-entered globally unique action IDs, read-only IDs on edit, a retained Editor draft and manual scene saving with storage key `ghostlight-scene-v1`. These decisions are implemented, not open planning items. Remaining decisions concern robust asynchronous replacement, recovery/save-state UX, playback/selection organization, complete demos, and portable browser-test wiring. Resolve them against the canonical requirements. Audience demand, differentiation, contest eligibility and real-user usefulness remain unvalidated.
 
 ## Checkpoints and actual validation
 
@@ -42,7 +42,7 @@ Implementation choices still needed include component/state organization, stable
 | Accepted engine baseline | `d8a1a611cb9a704bc2052917dca8ad0fe1c5e25a`; branch `codex/ghostlight-kiro-cloud-wip-20261031`; [draft PR #1](https://github.com/vtpqui3009/ghostlight/pull/1) | Reviewed engine slice and passing compilation stub. **Not a finished MVP.** |
 | Current domain continuation branch | `codex/ghostlight-domain-draft-20261031`; [reviewed code `3d1a7bb`](https://github.com/vtpqui3009/ghostlight/commit/3d1a7bb0f363ab9ce161a8eb098de08dbfd1fb59) | Bounded parser/editor repairs and test corrections are reviewed, committed and pushed. Remote branch identity was verified with `git ls-remote`. Full T2 and UI acceptance remain incomplete. |
 | Published original handoff | `eda5ca5a463913eaea40eee800e417bc4baf48ce` | Documentation committed/pushed and remote identity verified. PR #1 body links the continuation, while its head remains `d8a1a61`. |
-| Local UI draft and getter repair — unaccepted | Original nine source files plus a new persistence test; [latest evidence](docs/handoff/POST_COOLDOWN_GETTER_REVIEW.md); **no UI commit/push** | Incomplete forms, comparison/recovery/playback and other defects; preserved only in the working tree and optional private source archive. Do not mix into a documentation commit. |
+| Runnable UI WIP | `7a9e2a48fc27c926dc089e31e868c4c84dc9c70f` on the domain continuation branch | 222 tests/lint/typecheck/build pass and focused action-editor browser checks pass; delayed FileReader import race and broader UI work remain. See [current checkpoint](docs/handoff/ACTIONFORM_CHECKPOINT.md). |
 | Historical unaccepted draft | `7760205e0c464e746635b969ecaffcada0bdcd85` | Preserved pre-repair parser/report/editor draft and handoff. Its failures are historical; use the newer code checkpoint for continuation. |
 | Original main baseline | `1a2f9521111f0ba67a085474a441f26a61d709b9` | Preserved scaffold baseline; no merge is authorized by this handoff. |
 
@@ -56,10 +56,11 @@ In the current cloud workspace, `/workspace/ghostlight` remains clean at the acc
 | 2026-11-01 00:22:41; Phase 2 final | Independent **122/122 tests** passed (31 engine + 91 acceptance); lint, typecheck and build each exited 0. | Reviewed bounded parser repair in the intermediate working tree preceding `3d1a7bb`; no separate Phase 2 commit is claimed. |
 | 2026-11-01 00:30:48; Phase 3 final | Independent **165/165 tests** passed (31 engine + 134 acceptance); lint, typecheck and build each exited 0. | Reviewed bounded editor repair, subsequently committed with the other repair changes as `3d1a7bb`. Full matrix/property/browser acceptance remains incomplete. |
 | 2026-11-01; later initial local UI draft | **165 existing tests passed**; lint failed with 16 unused-symbol errors; typecheck/build failed with 16 unused-symbol diagnostics. Targeted storage and desktop browser probes reproduced failures. | No new UI test acceptance. No broad responsive/keyboard/print/accessibility acceptance. See [exact evidence and corrected probe result](docs/handoff/UI_REPAIR_REVIEW.md). |
+| 2026-11-01 02:38–02:43; action-editor WIP | Independent **222/222 tests**, lint, strict typecheck and production build each exit 0; focused browser controls pass. | Delayed FileReader import race reproduced; no complete UI acceptance. See [current evidence](docs/handoff/ACTIONFORM_CHECKPOINT.md). |
 
 The [November 1 QA record](docs/qa/NOV01_DOMAIN_REPAIR.md) preserves the sanitized command history, repair scope, authorship and evidence limits. Exact command outputs remain in the private runtime review ledger; raw authenticated transcripts are not deliverables. Tests/lint/typecheck ran independently, with build afterward, so an early failure did not hide later check outcomes.
 
-Checkpoint sequence: Kiro-authored domain source/tests were committed first as `3d1a7bb0f363ab9ce161a8eb098de08dbfd1fb59`, then original handoff docs as `eda5ca5a463913eaea40eee800e417bc4baf48ce`; both were pushed and remote identity verified. The local UI draft remains uncommitted/unpushed. The blocker/repair documentation was separately committed and pushed as `a8a40de3a8723c7f55b2aa0aa323f70133cbfb8e`; the new rate-throttle diagnosis is an original-doc follow-up, not UI acceptance. Future UI work needs separate source identity and evidence.
+Checkpoint sequence: Kiro-authored domain source/tests were committed first as `3d1a7bb0f363ab9ce161a8eb098de08dbfd1fb59`, then original handoff docs as `eda5ca5a463913eaea40eee800e417bc4baf48ce`; both were pushed and remote identity verified. The initial local UI was later incorporated into runnable WIP source `7a9e2a4`; it remains unaccepted as a complete product. The blocker/repair documentation was separately committed and pushed as `a8a40de3a8723c7f55b2aa0aa323f70133cbfb8e`; the new rate-throttle diagnosis is an original-doc follow-up, not UI acceptance. Future UI work needs separate source identity and evidence.
 
 Known coverage limits: generic successful Prop/Zone/Holder/Cue ID-update controls assert a defined result rather than the returned stable ID; valid no-op ownership tests cover outer containers, not all nested positions/actions. Independent code review found no product blocker for this repair scope, but those assertions must not support stronger claims. Generated property tests, the complete A01–A18 matrix, UI, persistence and browser acceptance remain unfinished.
 
@@ -67,7 +68,7 @@ Known coverage limits: generic successful Prop/Zone/Holder/Cue ID-update control
 
 ## Architecture and local commands
 
-Accepted inventory at reviewed source `3d1a7bb` (the later unaccepted UI working files are inventoried separately in [UI repair review](docs/handoff/UI_REPAIR_REVIEW.md)):
+Domain inventory at reviewed source `3d1a7bb`; the later real UI/module closure and its evidence are recorded in [current action-editor checkpoint](docs/handoff/ACTIONFORM_CHECKPOINT.md):
 
 | Path | Responsibility/status |
 |---|---|
@@ -76,7 +77,7 @@ Accepted inventory at reviewed source `3d1a7bb` (the later unaccepted UI working
 | `src/domain/engine.ts` | Pure deterministic `runScenario` replay and causal issues. |
 | `src/domain/report.ts`, `edit.ts` | Report/reference-edit helpers; reproduced editor safeguards repaired and reviewed. Broader acceptance remains incomplete. |
 | `tests/domain/engine.test.ts`, `acceptance.test.ts` | Engine checks and domain acceptance examples; coverage is narrower than the complete matrix. |
-| `src/main.tsx`, `App.tsx`, `styles.css` | React/Vite entry and compilation stub at the accepted code commit. The local replacement UI is incomplete and unaccepted. |
+| `src/main.tsx`, `App.tsx`, `styles.css` | React/Vite entry and compilation stub at the accepted code commit. The replacement at `7a9e2a4` builds successfully; full UI acceptance remains blocked by the documented import race and unfinished features. |
 
 The intended data path is validated scene → pure replay → derived reports/UI. Edit candidates must become valid owned scenes before replacement. Persistence/import failures must preserve current in-memory work. Proposed directories in the design are not evidence those modules already exist.
 
@@ -102,7 +103,7 @@ npm run build
 
 Focused diagnosis: `npm test -- tests/domain/acceptance.test.ts`. The convenience command `npm run check` runs lint → typecheck → tests → build and stops at the first failing stage; it does not replace recording all four outcomes when a phase is expected to fail. Avoid repeating unchanged passing checks. For a successfully built bundle, `npm run preview` serves a local preview.
 
-`npm run test:e2e` is declared, but portable project Playwright dependencies/configuration and a complete working UI have not been established. Do not report it runnable or passing merely because the script exists. Targeted desktop browser inspection has now run and found failures, as recorded in [UI repair review](docs/handoff/UI_REPAIR_REVIEW.md). The broader [browser QA plan](docs/handoff/BROWSER_QA_PLAN.md) remains outstanding; no full browser acceptance has passed.
+`npm run test:e2e` is declared, but portable project Playwright dependencies/configuration and a complete working UI have not been established. Do not report it runnable or passing merely because the script exists. Targeted action-editor desktop/mobile browser probes now pass most scoped controls and reproduce an asynchronous import failure; see [current evidence](docs/handoff/ACTIONFORM_CHECKPOINT.md). The broader [browser QA plan](docs/handoff/BROWSER_QA_PLAN.md) remains outstanding; no full browser acceptance has passed.
 
 ## Ordered continuation
 
@@ -111,11 +112,11 @@ Focused diagnosis: `npm test -- tests/domain/acceptance.test.ts`. The convenienc
 | 1. Test-oracle repair — reviewed | `tests/domain/acceptance.test.ts` | Correct declared-ID/collection/inheritance/ownership fixtures, static imports and throwing type guards; Phase 1 results above. Do not reopen passing fixtures without a concrete finding. |
 | 2. Parser repair — reviewed; depends on 1 | `src/domain/schema.ts` and focused acceptance cases | Bounded collection and optional-field repairs passed four checks and independent review. Preserve required-source and own-field rules; do not rerun the old repair plan without a new failure. |
 | 3. Editor repair — reviewed; depends on 2 | `src/domain/edit.ts` and focused acceptance cases | Optional retain/clear behavior, integer action reorder, validated no-ops and own differing-ID guards passed the scoped checks/review. See coverage qualifications above; no full T2 claim. |
-| 4. UI repair — getter/test slice verified; domain repair dependency met | Next implement the real inline action form and Editor wiring in the existing UI plan; verify FREE before another native request | Follow [ordered UI repairs](docs/handoff/UI_REPAIR_REVIEW.md): real action/other forms; storage/App recovery and state comparison/playback/cause; demos/import/report accessibility; then portable tests/browser QA. All writers are closed. No blind inference retry or Codex implementation substitution. |
+| 4. UI repair — action-editor WIP exists; domain dependency met | First fix latest-state import validation at FileReader completion; verify fresh FREE capacity before another native request | Follow the exact [asynchronous reproduction and acceptance gates](docs/handoff/ACTIONFORM_CHECKPOINT.md). Then continue remaining entity forms, storage/App recovery, state comparison/playback/cause, demos/import/report accessibility and portable browser QA from the canonical plan. No writer is active; preserve the free reserve and Kiro authorship. |
 | 5. Browser review and fixes — depends on working UI | Reviewer executes; Kiro fixes assigned product/test paths | Execute [browser oracles](docs/handoff/BROWSER_QA_PLAN.md): replay/cause/edit, round trip and failed-import retention, storage failures, keyboard/focus, mobile/zoom, reduced motion and reports/print. Record unperformed checks plainly. |
 | 6. Reviewed private checkpoint | Documentation/evidence and authorized private branch/PR | Stop writers, review diffs and provenance, verify checks and credential/proprietary exclusions, update this handoff and record exact commit/PR. Private checkpointing is not deployment or final product acceptance. |
 
-For a bounded implementation failure, send the concrete input, invariant and observed result to Kiro only after responsiveness is established. One grouped correction followed by checks is the default. The earlier native-response blocker had bounded original/narrowed/fresh-client attempts; one post-cooldown request then recovered. The three-error test-only repair is now verified; resume the existing UI implementation order and stop on any new retry hint. Use [UI repair review](docs/handoff/UI_REPAIR_REVIEW.md) for current failures and optional source recovery. The old [domain repair brief](docs/handoff/DOMAIN_REPAIR_BRIEF.md) is historical background, not the next task.
+For a bounded implementation failure, send the concrete input, invariant and observed result to Kiro only after responsiveness is established. One grouped correction followed by checks is the default. The earlier native-response blocker had bounded original/narrowed/fresh-client attempts; one post-cooldown request then recovered. The action editor is now runnable WIP; the asynchronous import completion guard is the exact next repair after fresh free-capacity verification. Stop on any new retry hint. Use [UI repair review](docs/handoff/UI_REPAIR_REVIEW.md) for current failures and optional source recovery. The old [domain repair brief](docs/handoff/DOMAIN_REPAIR_BRIEF.md) is historical background, not the next task.
 
 ## Authorship, budget and recovery boundaries
 
@@ -126,7 +127,7 @@ Keep Kiro configuration/data/session directories outside the checkout with owner
 The effective managed-cloud policy verified on November 1 included these seven explicitly approved Kiro installation/service hosts: `cli.kiro.dev`, `desktop-release.q.us-east-1.amazonaws.com`, `prod.download.cli.kiro.dev`, `oidc.us-east-1.amazonaws.com`, `runtime.us-east-1.kiro.dev`, `management.us-east-1.kiro.dev`, and `q.us-east-1.amazonaws.com`, plus the environment's package-manager preset. This is an observed environment configuration, not a universal firewall recipe or permission to widen access. After a denial, report the exact destination/action and wait for materially relevant authorization or policy evidence; do not switch routes or transfer credentials to bypass it.
 
 - Keep **one native Kiro product writer** at a time. Record its task, allowed paths, base commit, dependencies and acceptance commands. Reviewers may work on separate original handoff documents, but do not race the product writer or substitute their own application/test implementation.
-- Use **verified KIRO FREE allowance only**. Last native read-only observation: **28.06/50 used at 2026-11-01 02:05 UTC**, displayed reset **2026-12-01**. Earlier domain-checkpoint usage is retained in its QA record. This estimate is not a promise of current balance; the historical service rate throttle cleared enough for two separately authorized bounded requests, with no new wait hint. Follow the [current verification checkpoint](docs/handoff/POST_COOLDOWN_GETTER_REVIEW.md) and respect any later service retry hint. Verify entitlement/capacity and responsiveness before resumption. No purchases, upgrades, overages, paid allowance or billing changes.
+- Use **verified KIRO FREE allowance only**. Last native observation: **44.65/50 used at 2026-11-01 02:38 UTC**, displayed reset **2026-12-01**. About 5.35 covered credits remain; inference is deliberately paused to preserve a 5-credit safety reserve. No new service retry hint appeared in the action-form phase. Verify fresh actual free capacity before more inference; no purchases, upgrades, overages, paid allowance, billing changes or alternative inference route. See [current checkpoint](docs/handoff/ACTIONFORM_CHECKPOINT.md).
 - **Private ClaudeKit transfer is BLOCKED and not installed/applied.** The supported materialization attempt failed; no local licensed archive or read skills are claimed. Continue with the original repository guidance. Do not retrieve alternate copies, publish purchased content, or present these original docs as ClaudeKit-derived.
 - Secrets, account identifiers, tokens, device-approval codes/URLs, raw authenticated transcripts, private databases, browser profiles and licensed archives stay outside Git. The durable handoff needs none of them. Preserve sanitized command results and authorship, not session secrets.
 - On a new machine, use authorized private-repository access and the recorded checkpoint; inspect local changes before checkout/recovery. Install dependencies from the existing lockfile, read this file and the canonical contracts, verify whether a writer is already active, then establish any needed official native authentication without copying credential stores into the repo. Persistent login across environment replacement is not guaranteed.
@@ -136,27 +137,24 @@ The effective managed-cloud policy verified on November 1 included these seven e
 ## Copyable continuation request
 
 ```text
-Continue Ghostlight from reviewed domain code 3d1a7bb0f363ab9ce161a8eb098de08dbfd1fb59,
-preserving the later unaccepted local UI draft, accepted d8a1a61 engine tree and main.
-Read START_HERE.md and docs/handoff/POST_COOLDOWN_GETTER_REVIEW.md before acting. The
-protected localStorage getter and test-only repairs now pass focused checks. Full tests
-pass 178/178; lint/typecheck/build still have 16 existing Editor/StageView unused-symbol
-errors. All writers are closed. Verify FREE before the next narrow action-form/Editor
-scope from the existing UI plan; stop on a new retry hint. Do not loop blindly or switch
-backends, and do not equate the test count with UI acceptance.
+Continue Ghostlight from WIP source 7a9e2a48fc27c926dc089e31e868c4c84dc9c70f on
+codex/ghostlight-domain-draft-20261031, preserving accepted d8a1a61, reviewed domain
+3d1a7bb and main. Read START_HERE.md and docs/handoff/ACTIONFORM_CHECKPOINT.md,
+then canonical .kiro requirements/design/tasks. The real action editor exists;
+222 tests, lint, strict typecheck and production build pass. Focused six-kind,
+ID/draft/edit/export/keyboard/mobile checks pass. A delayed FileReader callback
+still bypasses the import draft guard and can overwrite imported action data.
 
-Once responsive, keep one Kiro product/spec/test writer; Codex orchestrates/reviews/QA.
-Implement real action/other forms, then storage/App recovery and state comparison/
-playback/cause, then demos/import/report accessibility, then portable tests/browser QA.
-Use the recorded exact failure oracles and canonical .kiro contracts. Preserve authored
-requirements, dirty work and corrupt recovery data. Do not delete missing features just
-to pass lint. After each stopped scope record tests, lint, typecheck and build separately.
-The existing 165 domain tests are not UI acceptance. Refresh evidence/source identity.
+No writer is active. Last verified FREE 44.65/50 leaves 5.35; inference paused to
+preserve a 5-credit reserve. Verify fresh covered capacity before a bounded Kiro request.
+Keep Kiro as the sole primary product/test author; Codex orchestrates/reviews/QA.
+First repair current-state validation at asynchronous import completion, retain
+scene+draft on rejection, test controlled delayed read and normal Save/Cancel/
+import, then all four gates and independent browser review. Continue the remaining
+canonical UI/MVP plan afterward. Do not call this WIP a finished product.
 
-No purchases, paid allowance, billing changes, backend bypass or Codex application-code
-substitution. ClaudeKit remains blocked/not installed; credentials/raw auth/purchased
-content stay outside Git. Optional local archive recovery must use separate scratch,
-never overwrite the working tree. game-moba is paused. No merge/deployment or 24/7 promise.
-Report the concrete responsiveness outcome or unresolved blocker, accepted checkpoint
-and next task. Documentation alone does not complete the product.
+No purchases/paid allowance/billing/backend bypass, raw credentials/proprietary
+content, merge/deployment or 24/7 guarantee. ClaudeKit remains blocked/not installed;
+game-moba paused. Preserve exact evidence and publish only reviewed private
+checkpoints. Documentation alone does not complete the product.
 ```
