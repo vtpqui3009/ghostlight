@@ -1,4 +1,33 @@
-# Post-cooldown getter repair: responsive, not yet accepted
+# Post-cooldown getter repair: focused checks pass; UI remains unaccepted
+
+## Latest verification — 2026-11-01 02:06 UTC
+
+A second, separately authorized **single Kiro request** repaired only `tests/persistence/store.test.ts`: a valid one-zone Scenario with a failing parser precondition, two discriminated load-error guards with throwing else branches, and typed descriptor cleanup without `any` or ESLint suppression. All 13 cases remain. Source/test hash comparison confirmed no application source changes in this request. Independent static review found no blocker within this narrow repair.
+
+| Independent command at 02:05 UTC | Actual outcome |
+|---|---|
+| Focused store test command below | **13/13 passed**, exit 0. |
+| Focused ESLint command below | Exit 0, now without the unnecessary suppression. |
+| Focused strict TypeScript command below | Exit 0; the earlier three test errors are repaired. |
+| `npm test` | **178/178 passed**: 31 engine, 134 domain acceptance, 13 persistence. Exit 0. |
+| `npm run lint` | Exit 1: **16 existing unused-symbol errors**, 14 in `src/ui/Editor.tsx`, 2 in `src/ui/StageView.tsx`. |
+| `npm run typecheck` | Exit 1: the same **16 existing UI unused-symbol diagnostics**; no persistence-test diagnostics. |
+| `npm run build` | Exit 1 on those 16 TypeScript diagnostics; Vite production bundling was not reached. |
+
+The focused getter/test repair passes its checks and review. **The overall UI/WIP is still unaccepted; no new product-source commit or push is claimed.** Full test success does not certify UI behavior. Earlier strict-test failures below remain historical evidence, not current blockers.
+
+Native FREE usage was **26.86/50 before** this request and **28.06/50 afterward at 02:05 UTC**, with reset December 1. The turn footer estimated 1.19 credits; the account observation increased by 1.20. No new throttle/retry event appeared. The client quit with exit 0 and no live writer remained. No additional inference, billing/security/network changes or broader application edits followed.
+
+**Next product item:** resume step 1 of [the existing UI repair plan](UI_REPAIR_REVIEW.md): a real inline action form wired into Editor for add/edit/delete, with all six kinds, independently entered required source/destination, stable IDs, Save/Cancel and field errors. Do not merely delete planned imports to produce a green build while leaving those controls absent. After a narrow implementation scope, run focused checks, then full relevant gates and browser evidence; stop on a new native retry hint. The current full-check diagnostics are in Editor/StageView, and the other documented persistence/import/recovery defects remain outstanding.
+
+Coverage limit to retain: the existing healthy persistence controls still do not prove a parsed successful load or observable write/remove effects for both omitted and explicit-undefined adapters. The prior temporary independent probe covers those observations locally; portable strengthening is still a follow-up, not claimed by the 13-case suite. The authorized three-error repair did not silently expand to that work.
+
+Preserved current source identities: store SHA-256 `950542ae951eb32af211c02f17e31300b5fb34683bf28e793d09de5c4efd89f6`; test SHA-256 `6532ce58ca49a1154b200bc58ba31de33ac4ec6d5167148e7f047951266c0bc5`. A new **local-only** two-file archive is `/workspace/.ghostlight-kiro-runtime/review/STORAGE_GETTER_REVIEWED_20261101.tar.gz`, SHA-256 `89ffa51a97e04a327e972a851e7045d93496b43f58180b93eb144249eb0b2d24`, 2,050 bytes, mode 0600. Older archives remain unchanged. Recovery precautions below apply. Full outputs remain in private `STORAGE_TEST_FIX_FULL_{test,lint,typecheck,build}.log` and focused output in `STORAGE_TEST_FIX_FOCUSED_CHECKS.txt`; no raw authentication data is published.
+
+---
+
+## Historical first recovery request — 01:59 UTC
+
 
 Original Codex evidence/review, **2026-11-01 01:59 UTC**. This supersedes the active-blocker status in the earlier [rate-throttle diagnosis](KIRO_THROTTLE_DIAGNOSTIC.md), whose log evidence remains valid history. Kiro authored the source/test changes; Codex only orchestrated, reviewed and ran independent checks.
 
