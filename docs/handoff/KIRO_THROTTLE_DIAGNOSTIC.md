@@ -1,5 +1,7 @@
 # Kiro rate-throttle diagnosis and recovery gate
 
+> **Later evidence, 2026-11-01 01:59 UTC:** one post-cooldown request responded without a new throttle hint. Its getter source change passed independent probes, but the new tests have three TypeScript errors and remain unaccepted. Read [the latest verification checkpoint](POST_COOLDOWN_GETTER_REVIEW.md) first; the older status below is historical, not an instruction to repeat the prior recovery attempt.
+
 Original Codex non-inference investigation, **2026-11-01 01:07 UTC**. This updates the earlier unknown-cause report in [UI repair review](UI_REPAIR_REVIEW.md). No application files were changed and no model prompt was submitted during this diagnostic.
 
 ## Finding and evidence limits

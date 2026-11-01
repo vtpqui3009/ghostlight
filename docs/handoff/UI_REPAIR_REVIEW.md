@@ -1,5 +1,7 @@
 # Ghostlight UI repair and blocked-writer handoff
 
+> **Later evidence, 2026-11-01 01:59 UTC:** one post-cooldown request responded without a new throttle hint. Its getter source change passed independent probes, but the new tests have three TypeScript errors and remain unaccepted. Read [the latest verification checkpoint](POST_COOLDOWN_GETTER_REVIEW.md) first; the older status below is historical, not an instruction to repeat the prior recovery attempt.
+
 Original **Codex** review, 2026-11-01 00:58 UTC; diagnosis updated 01:07 UTC. Kiro authored the initial UI draft; Codex independently inspected it and ran the limited probes below. No Codex application/test implementation is substituted for the requested Kiro authoring.
 
 **Product work is paused by native service rate throttling. The local UI draft is unaccepted, uncommitted and unpushed.** This is not a completed product or a voluntary stop after documentation. Preserve the working files; resume implementation only after the bounded native-responsiveness and FREE-entitlement gate below is met.
