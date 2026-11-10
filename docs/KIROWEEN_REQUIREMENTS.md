@@ -1,96 +1,127 @@
 # Kiroween 2026 — requirements reference
 
-Single place to check the submission against the event's rules. Every line says where it came from
-and when, because the two sources have different weight.
+Read directly from <https://kiroween.devpost.com> on **2026-11-10**: the Overview, Rules, Resources,
+Updates and FAQ tabs. This supersedes the partial notes of 2026-10-31. Quotations are the site's own
+wording. The Official Rules remain the deciding source if anything here drifts.
 
-## Source status — read this first
-
-| Source | What it is | When |
-|---|---|---|
-| **S1** | A direct read of <https://kiroween.devpost.com/rules> recorded in `KIROWEEN_RESEARCH_EVIDENCE.md` §A and `GHOSTLIGHT_VALIDATION_PLAN.md` §2 | 2026-10-31 |
-| **S2** | A web-search summary, mixing the official page with third-party write-ups | 2026-11-10 |
-
-**The tabs were NOT re-read on 2026-11-10.** `kiroween.devpost.com` and `devpost.com` do not resolve
-from this cloud session: every fetch returned `getaddrinfo ENOTFOUND`, which is how the session's
-network proxy denies a host. A personal environment named `ghostlight` was created with both hosts
-allowed, but the proxy had not picked up the change within the session (it can cache for up to about
-an hour). Nothing here was invented to fill the gap.
-
-**Anything marked S2 is unconfirmed against the official page.** The rules are the deciding source;
-where S1 and S2 disagree, re-read the page before acting.
+Tabs on the site: Overview · My projects · Participants (11,316) · Resources · Rules ·
+Project gallery · Updates · Discussions · Frequently Asked Questions.
 
 ## Dates
 
-- Project period: **2026-10-30 09:00 Pacific → 2026-12-04 14:00 PST** (S1, confirmed by S2).
-- That deadline is **2026-12-05 05:00 Vietnam time** (S1).
-- Only new projects count. Work started before 2026-10-30, including Kiroween 2025 projects, is not
-  eligible (S2). Ghostlight's first commit is 2026-10-31, inside the window; the research documents
-  were written 2026-10-31 and are declared as prior planning material, not prior code.
-
-## Categories
-
-Four categories (S2, names only — the full official descriptions have not been re-read):
-
-| Category | What it asks for (S2 summary) |
+| What | When |
 |---|---|
-| Resurrection | Bring a dead technology back to life |
-| Frankenstein | Stitch together technologies that do not usually work together |
-| Skeleton Crew | A lean code template, then two different apps built from it |
-| **Costume Contest** | Any app with a haunting, polished user interface |
+| Submission period | 2026-10-30 → **2026-12-04 at 2:00 PM Pacific** |
+| In Vietnam | **2026-12-05, 05:00** |
+| Kiro credit requests | by 2026-12-01, 12:00 PM PT |
+| **Redeem Kiro credits** | **by 2026-12-04** — redeemed credits then expire 2026-12-31 |
+| No edits after the deadline | drafts can be saved any time before it |
 
-**Ghostlight targets Costume Contest.** The ghost-versus-solid reading of a prop plan is the
-interface idea, not decoration. This remains our inference about category fit; the organisers judge
-the actual submission.
+"Only new projects are eligible. You must build your project during the Submission Period
+(October 30 to December 4, 2026). Projects you started before October 30, including Kiroween 2025
+projects, are not eligible." Ghostlight's first commit is 2026-10-31, inside the window.
 
-## Submission requirements
+## Eligibility
 
-From S1, recorded in `GHOSTLIGHT_VALIDATION_PLAN.md` §2:
+Individuals at the age of majority; **teams of at most 3**; organizations. Excluded: Quebec,
+Argentina, Australia, Brazil, Italy, Philippines, Russia, Cuba, Iran, North Korea, Syria, Belarus,
+Crimea, DNR, LNR, UAE, and any comprehensively OFAC-sanctioned country. **Vietnam is not on that
+list**, so the owner is eligible. Indonesia was added as eligible in the 2026-11-04 update.
 
-| Requirement | Current state |
+One project goes into **one category only**. It may also apply for any bonus prizes it qualifies for.
+
+## The four categories
+
+> **Resurrection** — Bring your favorite dead technology back to life.
+> **Frankenstein** — Stitch together a chimera of technologies into one app.
+> **Skeleton Crew** — Build a skeleton code template … Show us its versatility with two distinct applications.
+> **Costume Contest** — "Build any app but show us a **haunting user interface that's polished and
+> unforgettable. Bring in spooky design elements that enhance your app's function.**"
+
+**Ghostlight is entered in Costume Contest.** Read that wording again against the current build: the
+interface is a restrained parchment-and-plum theatre desk. The ghost-versus-solid idea is exactly
+the "spooky element that enhances function" the category asks for, but the *visual* language is
+muted. This is a real gap for the chosen category and is tracked as a roadmap item, not glossed over.
+
+## What must be submitted
+
+- **Category**, plus any bonus prizes being claimed.
+- **Public GitHub repository** — "NOT GitLab or BitBucket" — containing all source, assets and
+  instructions needed to run the project.
+  - An **open source license file, "detectable and visible at the top of the repository page (in the
+    About section)"**. A `LICENSE` file is not enough on its own: check GitHub actually shows it.
+  - **`/.kiro` at the root**, showing specs, hooks and steering. "Do NOT add the /.kiro directory or
+    sub-folders to your .gitignore, **as this could disqualify your submission**."
+- **URL to the working app.** If a login is needed, put test credentials in the Devpost form, which
+  only judges see.
+- **Text description** of features and functionality.
+- **Demo video**: under three minutes, showing the project working on its target device, uploaded to
+  **YouTube and public**, no third-party trademarks or copyrighted music without permission.
+- **A write-up on how Kiro was used.** "Judges must understand how effectively you used Kiro." The
+  site lists what it wants covered — this is effectively the marking scheme for 20% of the score:
+  - Kiro IDE, CLI, Web, Crew — which, and how did they differ?
+  - Custom agents — created or used any? In which Kiro app? What impact?
+  - Agent hooks — which workflows were automated? How did they improve development?
+  - Spec-driven development — how was the spec structured? How did it compare to vibe coding?
+  - Steering docs — what strategy made the biggest difference?
+  - MCP — what did extending Kiro enable that would otherwise have been hard?
+  - **Property-based testing** — did PBT catch issues unit tests missed? For which requirements?
+  - Kiro powers — which were used? Any third-party tooling or integrations?
+
+## Judging
+
+Stage One is pass/fail: does the project "reasonably fit the theme and reasonably apply the required
+tools". Stage Two scores five **equally weighted** criteria, 20% / 10 points each.
+
+| Criterion | The question asked |
 |---|---|
-| New project built inside the submission window | Met. Declare the pre-existing research documents. |
-| Meaningful use of Kiro, with real evidence of decisions, checks and fixes | Partly met. `KIRO_SESSION_EVIDENCE.md` records genuine native Kiro CLI 2.37.0 sessions that authored the specs, engine and tests. More Kiro work is queued in `SUBMISSION_ROADMAP.md` §B. |
-| Public repository with source, assets and run instructions, under a recognised open-source licence shown on the repo | **Not met — the repository is private.** MIT `LICENSE` is present. |
-| `/.kiro` committed at the root, not gitignored, including sub-directories | Met. `.kiro/specs`, `.kiro/steering`, `.kiro/hooks` are tracked; `.gitignore` does not exclude them. |
-| A working app with a URL the judges can use | **Not met.** Pages workflow is roadmap item C3; enabling Pages is U2. |
-| Judge access instructions in the submission's own field if a login is needed | Not applicable so far — the app is local-first with no login. |
-| Public YouTube video, under three minutes, showing the app on its target device, using content you have the rights to | **Not met.** Script is roadmap item C6; recording is U3. |
-| English, or an English translation of the video, description, instructions and documents | Repository documentation is English; the research documents are Vietnamese and are internal, not submission material. |
-| Category and team: submit to one category, at most three people | Costume Contest. 2026's team-size limit was not re-confirmed today; 2025's was three (S2). |
+| Potential Impact | "Does the project make a credible case for solving a real problem for a real audience? … How useful, intuitive, and accessible is it? Would someone actually use this?" |
+| Technological Implementation | "**How thoroughly and skillfully does the project use Kiro?** Was there a thoughtful strategy to AI development? **Was a variety of Kiro tools used impactfully?** Does the project show a deep understanding of Kiro features? **Was there experimentation?**" |
+| Design | "Does the project deliver a complete, coherent product experience, not just a technical proof of concept? Is the design intuitive, polished, and intentional?" |
+| Innovation/Idea | "How creative and novel is the concept, and does the project differ from existing concepts?" |
+| Presentation | "Does the video clearly demonstrate the project working end-to-end? … Is the presentation creative and memorable?" |
 
-An app does **not** have to contain an LLM, and there is no rule that every line be written by Kiro
-(S1). Kiro simply has to contribute substantially, with evidence.
+Note what Technological Implementation actually rewards: **variety of Kiro tools and
+experimentation**, not merely that Kiro wrote the code. Ghostlight currently has specs, steering and
+one hook whose automatic trigger has never been observed. No MCP, no custom agents, no Kiro Crew, no
+Kiro powers, and no property-based tests on `main`.
 
-## Judging — five criteria, 20% each
-
-From S1 (`GHOSTLIGHT_VALIDATION_PLAN.md` §2, read from the rules page's Judges & Criteria section):
-
-| Criterion | What we would need to show |
-|---|---|
-| Potential Impact | A real anonymised situation, how it is handled today, what the tool surfaces, and what testers said |
-| Technological Implementation | Specs, steering, hooks and property tests genuinely used in Kiro; one requirement traced to a check, a bug found, and the code change |
-| Design | A complete flow, ghost/solid explaining a real mismatch, a static list equivalent, keyboard, contrast and reduced motion |
-| Innovation / Idea | Per-physical-instance checking and independent source requirements compared against CueCall, DigiScript and Standby, naming what already exists |
-| Presentation | Under three minutes: one problem, the app end to end, one cause explained and fixed, with demo data distinguished from real-user evidence |
+Ties are re-scored from scratch at 20 points per criterion, then +10 per round until broken.
 
 ## Prizes
 
-S2 only, not re-verified: about US$100,000 in total. A project can win one Overall **or** one
-Category prize, not both, and any number of bonus prizes. A **bonus blog prize** is listed, which
-requires a public post about Kiro and the project — this is not in the 2026-10-31 notes and is worth
-confirming, since the Kiro evidence already written up would make such a post cheap to produce.
+$100,000+. Overall: $30,000 / $20,000 / $10,000. Each category: $5,000. A project can win **one**
+Overall **or** one Category prize, not both, plus any number of bonus prizes.
 
-## Still to read when the host is reachable
+| Bonus prize | What it needs | Worth claiming here? |
+|---|---|---|
+| Best Demo | nothing — all eligible submissions considered | automatic |
+| **Bonus Blog Prize** | public blog post about Kiro and the project, on any third-party platform, during the submission period, mentioning Kiroween 2026. **100 winners**, 2,000 bonus Kiro credits each | **yes — cheap.** `KIRO_SESSION_EVIDENCE.md` is most of the draft already |
+| **Social Blitz** | public social post starting with `#KiroweenHackathon26`, judged on originality — "original thoughts vs AI writing" | yes, if written by the owner in their own words |
+| Best Ghost of Kiroween Past | confirm registration for Kiroween 2025, verified against records | **only the owner knows** — check |
+| Best Student Project | all members students, with proof | only if applicable |
+| Best Startup Project | founder, LinkedIn + startup site | only if applicable |
+| Best Kiro Crew App | a separate public repo for a Kiro Crew app | out of scope unless Crew gets used |
 
-The daily run should finish this file once `kiroween.devpost.com` resolves. Re-read, in order:
+## Kiro credits
 
-1. `/rules` — confirm the criteria wording and weights, team size, licence wording, and the full
-   category descriptions.
-2. `/details/faqs` — it failed to load on the last 2026-10-31 attempt, so it has never been read.
-3. `/details/resources` — tooling and any required Kiro setup.
-4. `/updates` — the submissions-are-open post and anything later; this is where rule changes appear.
-5. `/` overview — prizes, bonus challenges, and the blog prize's actual conditions.
-6. `/project-gallery` — only to see what is being submitted; not a requirement.
+"Kiroween participants can request 4,000 free Kiro credits to use during the Submission Period." ID
+verification required; one-time grant, no additional credits. **Request by 2026-12-01 12:00 PT,
+redeem by 2026-12-04, redeemed credits expire 2026-12-31.** The owner reported holding 4,000 credits
+on 2026-11-10 — if they are not yet redeemed, redeem before 2026-12-04.
 
-Record what each page actually says, with the date. Do not paraphrase a third-party summary into
-this file as if it were the official text.
+## Other things the rules say
+
+- Intellectual property: the submission must be the entrant's original work and solely owned by
+  them. Open source may be used under its licence, provided the submission "enhances and builds upon"
+  it. A third party may give technical assistance provided the components are the entrant's own work
+  product.
+- Judging "may utilize expert panels, peer review, automated AI-driven analysis, or any combination".
+- No material changes to criteria, eligibility or prizes without notifying registered participants.
+
+## Updates posted so far
+
+- **2026-11-04** — Indonesia became eligible; rules updated.
+- **2026-10-30** — submissions opened.
+
+Nothing posted so far changes anything above.

@@ -77,13 +77,16 @@ The harness scans four screens under `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` 
 
 | ID | Task | Done when |
 |---|---|---|
-| U1 | Make the repository **public** | Public on GitHub, MIT `LICENSE` visible, `.kiro/` present and not ignored. Do it with time to spare, not on the last day. |
+| U1 | Make the repository **public** | Public on **GitHub** (GitLab and Bitbucket are rejected). The licence must be "detectable and visible at the top of the repository page (in the About section)" — after going public, **look at the About sidebar and confirm GitHub shows "MIT License"**; a `LICENSE` file that GitHub fails to detect does not satisfy this. `.kiro/` present and not in `.gitignore` — the rules say ignoring it "could disqualify your submission". |
 | U2 | Enable **GitHub Pages** (Settings → Pages → Build from GitHub Actions) after the deploy workflow lands | The published URL loads the app and is written into `docs/submission.md` |
 | U3 | Record and upload the **demo video**, public on YouTube, under three minutes | Link in `docs/submission.md`; follows `docs/demo-script.md`; says on screen that demo scenes are synthetic |
 | U4 | **User validation**: two experienced stage managers / ASMs, one anonymised real run sheet, consent recorded | Notes in `docs/user-research/`; quotes recorded verbatim, counter-evidence included. If it does not happen, the submission says so plainly instead of implying it did. |
 | U5 | **Competitor comparison executed** against CueCall, DigiScript, Standby with the same five scenarios | `docs/competitor-comparison.md` filled from actual runs, with what could not be accessed stated. Use only access you are entitled to. |
 | U6 | **Devpost submission**: Costume Contest, English, judge access notes, team ≤ 3, declare what pre-dated the window | Submitted before 2026-12-04 14:00 PST. All repository commits are inside the window (first commit 2026-10-31); the research documents were written 2026-10-31 and are declared as prior planning material. |
 | U7 | Run the **Kiro briefs** in `ops/kiro-brief.md` and record evidence | Each session appends real observations to `KIRO_SESSION_EVIDENCE.md`: `/usage` before and after, model and mode, what Kiro wrote, what failed, what was fixed |
+| U8 | **Redeem the Kiro credits if they are not already redeemed** | Redemption closes **2026-12-04**, and redeemed credits expire 2026-12-31. One-time grant; no more will be issued. |
+| U9 | Answer two bonus-prize questions only you can | (a) Did you register for **Kiroween 2025**? If so, claim Best Ghost of Kiroween Past — it is verified against their records. (b) Are you a student, or a startup founder? Each has its own bonus prize and its own evidence requirements. |
+| U10 | Publish the **blog post** and the **social post** | Blog: any third-party platform, during the submission period, mentioning Kiroween 2026 — **100 winners get 2,000 bonus Kiro credits**. Social: a public post beginning with `#KiroweenHackathon26`, judged on "original thoughts vs AI writing", so write it yourself. Drafts are C13. |
 
 ## B. Kiro work — briefs prepared for you, you run them in Kiro
 
@@ -105,6 +108,9 @@ they looked. That is recorded here so the credits are not spent rebuilding what 
 | K6 | **Reports: 390 px overflow and CSV** | **Half done 2026-11-10 — by the reviewer.** The 73 px overflow is fixed: each table sits in a focusable, labelled scroll region, so `known-failures.json` is now empty. **CSV export is still open and still Kiro's.** [`K6.md`](../ops/kiro-briefs/K6.md) |
 | K7 | **Empty state and first screen** | The honesty subtitle is already there and smoke-tested; the empty state itself is seven bare buttons under "No Scene Loaded". Do K2 first — it rewrites the same region. [`K7.md`](../ops/kiro-briefs/K7.md) |
 | K8 | **Automatic hook triggering verified** in a native Kiro session | Recorded as NOT VERIFIED since 2026-10-31; a manual invocation is not evidence of a trigger. Cheap, and it is exactly what Technological Implementation asks about. [`K8.md`](../ops/kiro-briefs/K8.md) |
+| K10 | **A haunting interface** — the category's actual wording | Costume Contest asks for "a haunting user interface that's polished and unforgettable … spooky design elements that **enhance your app's function**". The ghost-versus-solid idea is exactly that; the current parchment-and-plum visual language is muted. This is the chosen category's own criterion, so it is not optional polish. Still no jump scares and no hidden controls — the research plan rules those out, and so does Design's "intuitive". |
+| K11 | **Property-based testing, through Kiro** | The submission's Kiro write-up explicitly asks "did PBT catch any issues you might have missed with unit tests? What kind of requirements did you enable PBT for?" `main` has none. The engine's invariants — single custody, terminal consumption, determinism, backwards-only causes — are textbook PBT material. |
+| K12 | **Variety and experimentation with Kiro tools** | Technological Implementation (20%) rewards "a **variety** of Kiro tools used impactfully" and "was there **experimentation**?". Today: specs, steering, one hook whose automatic trigger has never been observed. Untouched: MCP, custom agents, Kiro Crew, Kiro powers. Pick the ones that genuinely help this project and record what each changed — do not bolt on features for a checklist, which the research plan already warned against. |
 | K9 | **Dependency advisories** — `vitest` ≤4.0.0-beta.19 and `tinypool` ≤2.1.1 critical, `vite` ≤6.4.3 high | All dev-only — `npm audit --omit=dev` is clean — but a public repository shows them. Last, because a major bump can break the 222 Kiro-authored tests. [`K9.md`](../ops/kiro-briefs/K9.md) |
 
 ## C. Automated daily run (Claude) — no application source
@@ -121,7 +127,9 @@ they looked. That is recorded here so the credits are not spent rebuilding what 
 | C8 | `docs/competitor-comparison.md`: matrix and method, marked NOT RUN until U5 happens | TODO |
 | C9 | `docs/submission.md`: Devpost draft in English, with placeholders only the owner can fill | TODO |
 | C10 | Refresh `ops/kiro-brief.md` every run, and review whatever Kiro produced since the last run | Every run |
-| C11 | Finish `docs/KIROWEEN_REQUIREMENTS.md` by reading the Devpost tabs directly | TODO — blocked on the network. `kiroween.devpost.com` returned `getaddrinfo ENOTFOUND` on every attempt on 2026-11-10; the hosts are allowed on the `ghostlight` environment but the proxy had not picked it up. Retry; the tab list and what to look for are at the end of that file. |
+| C11 | Finish `docs/KIROWEEN_REQUIREMENTS.md` by reading the Devpost tabs directly | **DONE 2026-11-10** — all six tabs read directly once the proxy picked up the `ghostlight` environment. `WebFetch` still fails on this host because it resolves DNS itself; `curl` through the session proxy works, which is how the pages were fetched. |
+| C12 | Draft the **"how Kiro was used" write-up**, a required submission field | TODO — the site lists exactly what it wants covered (IDE/CLI/Web/Crew, custom agents, hooks, spec-driven development, steering, MCP, PBT, powers). `KIRO_SESSION_EVIDENCE.md` already answers several honestly. Leave placeholders for what has not happened rather than filling them in. |
+| C13 | Draft the **blog post** and the **social post** | TODO — the blog prize has 100 winners and pays 2,000 bonus Kiro credits, so it is the cheapest prize on the board. The social post is judged on "original thoughts vs AI writing": draft a skeleton and facts, and let the owner write it in their own voice. |
 
 ## D. Already done
 

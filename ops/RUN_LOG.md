@@ -213,3 +213,40 @@ CSV export (K6's other half), K4, K5, K3, K7, K8, K9 — all still Kiro's. The c
 covers one scheme and one demo, so CI would not catch a dark-scheme regression; that gap is
 recorded in `QA_RESULTS.md` rather than papered over. Repository still private, no Pages, no video,
 no user sessions, no competitor comparison, and no Kiro session since 2026-11-01.
+
+## 2026-11-10 — run 6 (interactive): the Devpost tabs, read directly at last
+
+`kiroween.devpost.com` became reachable once the proxy picked up the `ghostlight` environment.
+**`WebFetch` still fails on it** with `getaddrinfo ENOTFOUND`, because it resolves DNS itself rather
+than going through the session proxy; `curl` works. That is the route to use for this host.
+
+All six tabs read: Overview, Rules, Resources, Updates, FAQ, and the tab list itself.
+`docs/KIROWEEN_REQUIREMENTS.md` is rewritten from that read and no longer carries the 2026-10-31
+"not re-verified" caveats.
+
+### What the read changed
+
+- **Vietnam is not on the excluded list.** The owner is eligible. Teams up to 3; one category only.
+- **The judging weights our notes claimed are correct**: five criteria, 20% and 10 points each, after
+  a pass/fail Stage One on theme fit and tool use.
+- **Technological Implementation is entirely about Kiro**, and specifically rewards "a **variety** of
+  Kiro tools used impactfully" and "was there **experimentation**?". We have specs, steering and one
+  hook whose automatic trigger has never been observed. Added **K12** for variety, and **K11** for
+  property-based testing, which the submission form asks about by name and `main` does not have.
+- **A "write-up on how Kiro was used" is a required submission field**, with a published list of
+  what judges want covered. That is effectively the marking scheme for 20% of the score and we had
+  no deliverable for it. Added **C12**.
+- **Costume Contest wants "a haunting user interface … spooky design elements that enhance your
+  app's function."** Ghostlight's interface is a restrained parchment-and-plum theatre desk. The
+  ghost-versus-solid idea fits the wording exactly; the visual language does not yet. Added **K10**,
+  with the research plan's ban on jump scares and hidden controls intact.
+- **The licence must be visible in GitHub's About section**, not merely present as a file. U1 now
+  says to look at the sidebar after going public.
+- **Credits must be redeemed by 2026-12-04** and expire 2026-12-31. Added **U8**.
+- **Bonus prizes**: the Blog Prize has **100 winners** paying 2,000 bonus Kiro credits — the cheapest
+  prize on the board, and `KIRO_SESSION_EVIDENCE.md` is most of the draft already. Best Demo is
+  automatic. Social Blitz is judged on "original thoughts vs AI writing", so the owner must write it.
+  Ghost of Kiroween Past needs a fact only the owner has. Added **C13**, **U9**, **U10**.
+- Two updates are posted; neither changes anything. Indonesia became eligible on 2026-11-04.
+
+Nothing in `src/` was touched in this run.
