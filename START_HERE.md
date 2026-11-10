@@ -6,6 +6,27 @@ Original handoff documentation by **Codex**, 2026-11-01. This file helps a new a
 
 <!-- CHECKPOINT OWNER: refresh timestamp, exact commit/diff identity, UI/browser results, remaining defects, next task and evidence links after the next writer stops. The latest source is a runnable WIP with a reproduced import blocker; full UI acceptance remains pending. -->
 
+## 2026-11-10 update — lineage, budget and automation
+
+`main` now **is** this lineage: it was fast-forwarded from the old scaffold `1a2f952` to `260bca4`,
+the commit previously only on `codex/ghostlight-domain-draft-20261031`. Nothing was rewritten or
+deleted. Work on `main` from here.
+
+Independently re-verified on `main` on 2026-11-10 after a clean `npm ci`: lint, strict typecheck,
+**222/222 tests** and the Vite production build all pass. An independent Chromium observation of the
+production build found the app loads and runs, with **3 axe-core violations** on the first screen
+(`color-contrast` ×3, `landmark-one-main`, `region`). The delayed-`FileReader` import race recorded
+below is still the open product blocker.
+
+The free-only constraint has changed: the owner reports about **4,000 Kiro credits** available as of
+2026-11-10, so the 50-credit ceiling and the 5-credit reserve pause in the older documents no longer
+govern. Check native `/usage` each session and record what it actually says.
+
+A scheduled daily session now runs as orchestrator and reviewer only. It does not author application
+source; see [ops/daily-run.md](ops/daily-run.md). Submission-level status and ownership live in
+[docs/SUBMISSION_ROADMAP.md](docs/SUBMISSION_ROADMAP.md); the current Kiro task is always in
+[ops/kiro-brief.md](ops/kiro-brief.md).
+
 ## Read in this order
 
 1. [Product requirements](.kiro/specs/ghostlight/requirements.md) and [product boundaries](.kiro/steering/product.md): what to build and what not to claim.
@@ -13,7 +34,8 @@ Original handoff documentation by **Codex**, 2026-11-01. This file helps a new a
 3. [Implementation tasks](.kiro/specs/ghostlight/tasks.md), then the next unfinished step below. Task checkboxes and proposed file layouts are plans, not proof of implemented behavior.
 4. [Independent acceptance handoff](KIRO_CODING_HANDOFF.md): A01–A18 hand-calculated examples. These are original Codex requirements/oracles; their existence does not mean they passed.
 5. [UI direction](docs/handoff/UI_DIRECTION.md) and [browser QA plan](docs/handoff/BROWSER_QA_PLAN.md) when moving into the real interface.
-6. [Current action-editor WIP checkpoint](docs/handoff/ACTIONFORM_CHECKPOINT.md), then historical [getter repair verification](docs/handoff/POST_COOLDOWN_GETTER_REVIEW.md), [rate-throttle diagnosis](docs/handoff/KIRO_THROTTLE_DIAGNOSTIC.md) and [UI repair review](docs/handoff/UI_REPAIR_REVIEW.md): exact draft failures, blocked-writer evidence, optional local recovery and ordered resumption gates.
+6. [Submission roadmap](docs/SUBMISSION_ROADMAP.md) and the [daily run contract](ops/daily-run.md): what the submission still needs, and who owns each part.
+7. [Current action-editor WIP checkpoint](docs/handoff/ACTIONFORM_CHECKPOINT.md), then historical [getter repair verification](docs/handoff/POST_COOLDOWN_GETTER_REVIEW.md), [rate-throttle diagnosis](docs/handoff/KIRO_THROTTLE_DIAGNOSTIC.md) and [UI repair review](docs/handoff/UI_REPAIR_REVIEW.md): exact draft failures, blocked-writer evidence, optional local recovery and ordered resumption gates.
 
 These are canonical sources; do not create competing copies of their contracts. Current user instructions take precedence over historical execution gates. The user's later build authorization supersedes the validation-only restriction in [the old final review](KIROWEEN_FINAL_REVIEW.md). Its market, usefulness, and eligibility caveats remain valid.
 
