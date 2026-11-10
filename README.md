@@ -66,6 +66,9 @@ inferred from the git history:
 | `src/ui/Editor.tsx` | colour tokens only | reviewer |
 | `src/styles.css` | the WCAG AA colour token pass, both schemes | reviewer |
 | `tests/ui/importGuard.test.ts` (new) | regression test for the import race | reviewer |
+| `src/domain/guidedFix.ts` (new) | the guided fix: when one edit is unambiguous, and what it is | reviewer |
+| `src/ui/StageView.tsx` | the cause rendered as a control, and the guided-fix panel | reviewer |
+| `tests/domain/guidedFix.test.ts` (new) | 8 tests for the guided fix | reviewer |
 
 Everything else under `src/` — the engine, the parser, the edit layer, persistence, the
 action editor and the stage view — is Kiro's, as is every test outside that list.

@@ -24,11 +24,11 @@ CI runs exactly these on every push and pull request: `.github/workflows/ci.yml`
 |---|---|---|
 | Lint | `npm run lint` | clean |
 | Types | `npm run typecheck` (`tsc -b`, strict) | clean |
-| Unit and acceptance tests | `npm test` | **227 passed, 0 failed** — 31 engine, 134 domain acceptance, 13 persistence, 44 action-form helper, 5 import guard |
+| Unit and acceptance tests | `npm test` | **235 passed, 0 failed** — 31 engine, 134 domain acceptance, 13 persistence, 44 action-form helper, 5 import guard, 8 guided fix |
 | Production build | `npm run build` | built, 46 modules |
 | Project-page build | `npx vite build --base=/ghostlight/` | emits `/ghostlight/assets/…` |
-| End-to-end and accessibility | `npm run test:e2e` | **17 passed, 0 failed** |
-| Same, with every known failure fatal | `npm run test:e2e -- --strict` | **17 passed, 0 failed** |
+| End-to-end and accessibility | `npm run test:e2e` | **20 passed, 0 failed** |
+| Same, with every known failure fatal | `npm run test:e2e -- --strict` | **20 passed, 0 failed** |
 | Runtime dependencies | `npm audit --omit=dev` | **0 vulnerabilities** |
 | All dependencies | `npm audit` | 12 (9 moderate, 1 high, 2 critical) — all dev-only, see below |
 

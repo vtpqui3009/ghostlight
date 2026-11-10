@@ -876,3 +876,20 @@ textarea {
   outline: 2px solid var(--focus-outline);
   outline-offset: 2px;
 }
+
+/* A cause rendered as a control: it reads as a link but is a real button, so it is
+   reachable by keyboard and announced as a button. */
+button.link-button {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+button.link-button:hover:not(:disabled) {
+  background: none;
+  text-decoration-thickness: 2px;
+}

@@ -223,6 +223,7 @@ export function App() {
                 selectedFrame={selectedFrame}
                 onSelectFrame={handleSelectFrame}
                 runResult={runResult}
+                onUpdate={handleScenarioUpdate}
               />
             )}
             {view === 'reports' && (

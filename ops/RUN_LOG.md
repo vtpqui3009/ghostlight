@@ -313,3 +313,65 @@ Everything remaining needs either Kiro, a camera, a person, or the owner's own w
 
 The daily run's standing instruction now applies: with section C empty it should review whatever
 Kiro has produced, sharpen the next brief, re-run the checks, and say it is waiting on the owner.
+
+## 2026-11-10 — run 9 (interactive, owner-directed): K4 and K5
+
+The owner asked for K4 and K5 and offered to send a Kiro key. **Kiro cannot run from this
+container regardless of any key**, and that was checked rather than assumed: `kiro` and `kiro-cli`
+are not installed; the `kiro-cli` package on npm is version **0.0.1**, which is not the official
+CLI (the real one is 2.37.0) and was not installed; and `app.kiro.dev` and `kiro.dev` are both
+unreachable (000) because the `ghostlight` environment allows only the two Devpost hosts. Kiro also
+authenticates through a Builder ID browser flow, not an API key. The owner was told not to send one.
+
+So K4 and K5 were implemented by the reviewer, under the same explicit direction as K1 and K2, and
+are named in the README's authorship table.
+
+### K4 — the cause is now a control
+
+`src/ui/StageView.tsx` rendered the cause as inert text with raw ids —
+"Earlier action a1 in cue cue-1". It is now a button that names the cue and what the action does in
+words — *Cue "Act 1 Scene 1" — Actor A collects Sealed Letter (letter-A)* — and selecting it jumps
+to that step. An `initial` cause has nowhere to jump to, so it says plainly that the starting
+declaration is where to look rather than pretending to be a link.
+
+The union narrowing had to move out of the JSX to typecheck cleanly; the cause and fix nodes are
+built above the `return`.
+
+### K5 — the guided fix
+
+`src/domain/guidedFix.ts`, deliberately narrow. Two unambiguous cases:
+
+- zones agree and only the holder differs → insert a **handoff** from the planned holder to the
+  required one, immediately before the failing step;
+- zones differ and neither side has a holder → insert a **move**.
+
+Everything else returns advice in words and **no apply button**. Consumed reuse gets a specific
+sentence naming the replenish step and a second instance, because there is no edit that fixes it.
+
+The invariant that matters: a fix changes the **plan**, never the authored `requiredSource`. A fix
+that edited the requirement would silence the finding by destroying the thing that makes the check
+mean anything. `tests/domain/guidedFix.test.ts` asserts it directly, along with insertion position,
+a clean re-run afterwards, id collision avoidance, and that the original scene object is untouched.
+
+### Verified
+
+`npm run check` green — **235/235 tests**. `npm run test:e2e -- --strict` — **20 passed, 0 failed**,
+including three new tests for this beat: the cause names its cue and jumps to the right earlier
+step, the fix is described before it is applied and the re-run is clean, and a consumed instance is
+refused an apply button. The widened contrast sweep still reports **0** across two schemes, three
+demos and three views.
+
+One of those three tests failed first because **my assertion was wrong, not the app**: I expected
+the cause of the carryOff mismatch to be the carryOff, when it is the earlier `collect` that put
+the letter in Actor A's hands. The app was right.
+
+### Noticed, not fixed
+
+The selected timeline row is painted mint green even when it is the failing step, so a red error
+sits on a green background. It reads as "this one is fine". Pre-existing, not introduced here, and
+it belongs with **K10** or **K7**.
+
+### Bonus prize
+
+The owner did not register for Kiroween 2025, so **Best Ghost of Kiroween Past is not available**.
+Removed from the submission checklist rather than left as an open question.

@@ -22,7 +22,7 @@ Fill the `TO FILL` items before submitting. **No edits are possible after 2026-1
 - [x] **Best Demo** — automatic, no extra steps.
 - [ ] **Bonus Blog Prize** — needs the post URL. 100 winners, 2,000 bonus Kiro credits. Draft in `docs/blog-post.md`.
 - [ ] **Social Blitz** — needs the post URL, starting with `#KiroweenHackathon26`. Write it yourself; it is judged on "original thoughts vs AI writing".
-- [ ] **Best Ghost of Kiroween Past** — only if you registered for Kiroween 2025. `TO FILL: did you?`
+- ~~Best Ghost of Kiroween Past~~ — **not eligible**: the owner did not register for Kiroween 2025 (confirmed 2026-11-10).
 - [ ] **Best Student Project** — only if you are a student. `TO FILL`
 - [ ] **Best Startup Project** — only if you are a founder. `TO FILL`
 

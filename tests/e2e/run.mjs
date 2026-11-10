@@ -114,6 +114,7 @@ async function main() {
     await import('./specs/smoke.spec.mjs');
     await import('./specs/responsive.spec.mjs');
     await import('./specs/import-race.spec.mjs');
+    await import('./specs/guided-fix.spec.mjs');
     const a11y = await import('./specs/accessibility.spec.mjs');
 
     result = await runAll({ browser, baseUrl: server.baseUrl, strict, record, repoRoot, here });

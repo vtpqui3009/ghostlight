@@ -1,13 +1,32 @@
-import type { Scenario, Frame, RunResult } from '../domain/types';
+import { useState } from 'react';
+import { runScenario } from '../domain/engine';
+import { applyFix, isGuidedFix, suggestFix } from '../domain/guidedFix';
+import type { Action, Scenario, Frame, RunResult } from '../domain/types';
 
 interface StageViewProps {
   scenario: Scenario;
   selectedFrame: Frame | null;
   onSelectFrame: (index: number | null) => void;
   runResult: RunResult;
+  onUpdate: (scenario: Scenario) => void;
 }
 
-export function StageView({ scenario, selectedFrame }: StageViewProps) {
+/** What an action does, in words, so a cause can be named without raw ids. */
+function describeAction(action: Action, scenario: Scenario): string {
+  const prop = scenario.props.find(p => p.id === action.propId);
+  const holder = (id: string | null | undefined) =>
+    id ? scenario.holders.find(h => h.id === id)?.name ?? id : null;
+  const subject = holder(action.destination?.holderId) ?? holder(action.requiredSource?.holderId);
+  const verb: Record<string, string> = {
+    place: 'places', collect: 'collects', transfer: 'hands over',
+    carryOff: 'carries off', consume: 'uses up', replenish: 'brings on',
+  };
+  const name = prop ? `${prop.name} (${action.propId})` : action.propId;
+  return subject ? `${subject} ${verb[action.kind] ?? action.kind} ${name}` : `${verb[action.kind] ?? action.kind} ${name}`;
+}
+
+export function StageView({ scenario, selectedFrame, onSelectFrame, runResult, onUpdate }: StageViewProps) {
+  const [fixError, setFixError] = useState<string | null>(null);
   if (!selectedFrame) {
     return (
       <div className="card">
@@ -99,6 +118,76 @@ export function StageView({ scenario, selectedFrame }: StageViewProps) {
 
   const issue = issues.length > 0 ? issues[0] : null;
 
+  // Built outside the JSX so TypeScript can narrow the Cause union properly.
+  const cause = issue?.cause;
+  let causeNode: React.ReactNode = null;
+  if (cause?.kind === 'initial') {
+    const causeProp = scenario.props.find(p => p.id === cause.propId);
+    causeNode = (
+      <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
+        <em>Cause:</em> the recorded starting state of {causeProp?.name ?? cause.propId} ({cause.propId}).
+        Nothing earlier moved it, so the starting declaration is where to look.
+      </div>
+    );
+  } else if (cause?.kind === 'action') {
+    const causeFrame = runResult.frames.find(f => f.actionId === cause.ref.actionId);
+    const cueTitle = scenario.cues.find(c => c.id === cause.ref.cueId)?.title ?? cause.ref.cueId;
+    causeNode = (
+      <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
+        <em>Cause:</em>{' '}
+        {causeFrame ? (
+          <button type="button" className="small link-button" onClick={() => onSelectFrame(causeFrame.index)}>
+            Cue &ldquo;{cueTitle}&rdquo; — {describeAction(causeFrame.action, scenario)}
+          </button>
+        ) : (
+          <>an earlier action in cue &ldquo;{cueTitle}&rdquo;.</>
+        )}
+      </div>
+    );
+  }
+
+  const outcome = suggestFix(scenario, selectedFrame);
+  let fixNode: React.ReactNode = null;
+  if (outcome && !isGuidedFix(outcome)) {
+    fixNode = (
+      <div style={{ marginTop: '0.75rem', fontSize: '0.875rem' }}>
+        <em>No single fix:</em> {outcome.advice}
+      </div>
+    );
+  } else if (outcome) {
+    const fix = outcome;
+    fixNode = (
+      <div style={{ marginTop: '0.75rem', fontSize: '0.875rem' }}>
+        <em>Suggested fix:</em> {fix.description}
+        <div style={{ marginTop: '0.5rem' }}>
+          <button
+            type="button"
+            className="small"
+            onClick={() => {
+              const applied = applyFix(scenario, fix);
+              if (applied.blocked) {
+                setFixError(applied.reason);
+                return;
+              }
+              setFixError(null);
+              const next = applied.result;
+              const index = runScenario(next).frames.findIndex(f => f.actionId === fix.action.id);
+              onUpdate(next);
+              onSelectFrame(index >= 0 ? index : null);
+            }}
+          >
+            Add this step and replay
+          </button>
+        </div>
+        {fixError && (
+          <div style={{ marginTop: '0.5rem', color: 'var(--error-text)' }}>
+            The edit was refused: {fixError}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="card">
       <h2 className="panel-header">Stage View — {selectedFrame.cueId}</h2>
@@ -109,13 +198,8 @@ export function StageView({ scenario, selectedFrame }: StageViewProps) {
           <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
             <em>Suggestion:</em> {issue.suggestion}
           </div>
-          {issue.cause && (
-            <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
-              <em>Cause:</em> {issue.cause.kind === 'initial' 
-                ? `Initial state of ${issue.cause.propId}` 
-                : `Earlier action ${issue.cause.ref.actionId} in cue ${issue.cause.ref.cueId}`}
-            </div>
-          )}
+          {causeNode}
+          {fixNode}
         </div>
       )}
 
