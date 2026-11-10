@@ -45,9 +45,14 @@ here would quietly destroy the thing being protected.
 
 ## The run, in order
 
-**Step 0 — prove you can push.** `git fetch origin && git checkout main && git pull --ff-only`.
-Confirm write access before doing work; if the remote rejects you, stop and report the exact error
-rather than working around it.
+**Step 0 — prove you can push.** `git fetch origin && git checkout main && git pull --ff-only`,
+then `git push --dry-run origin main`. The dry run does the full authentication handshake and
+writes nothing, so it proves write access on its own. If the remote rejects you, stop and report
+the exact error rather than working around it.
+
+Do **not** create a probe branch to test this. Run 2 pushed `ops/push-probe-20261110`, which then
+had to be removed by hand; one throwaway branch per day would leave two dozen of them in a
+repository that is about to be public.
 
 **Step 1 — read.** The last two entries of `ops/RUN_LOG.md`, then `docs/SUBMISSION_ROADMAP.md`, then
 `START_HERE.md` if the roadmap's state table looks stale. Check `git log` since the last run: if the
