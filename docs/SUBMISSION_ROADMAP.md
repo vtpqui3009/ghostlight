@@ -93,6 +93,7 @@ Ordered. The daily run keeps `ops/kiro-brief.md` pointed at the first unfinished
 | K6 | **Reports**: preset, per-runner and reset, with CSV and a print stylesheet | Requirement 5; the printed sheet is what a crew actually carries |
 | K7 | **Empty and error states**, and a prominent "planned state, not live tracking" banner | Honesty requirement 7, and the first screen a judge sees |
 | K8 | **Automatic hook triggering verified** in a native Kiro session | Recorded as NOT VERIFIED in `KIRO_SESSION_EVIDENCE.md`; a manual invocation is not evidence of a trigger |
+| K9 | **Dependency modernisation**: `vitest` ≤4.0.0-beta.19 and `tinypool` ≤2.1.1 carry critical advisories, `vite` ≤6.4.3 a high one | All dev-only — `npm audit --omit=dev` is clean — but a public repository shows them. Open since 2026-10-31, when npm reported the selected ESLint version unsupported. A vite and vitest major jump can break the Kiro-authored tests, so it is Kiro's, not a reviewer bump. |
 
 ## C. Automated daily run (Claude) — no application source
 
@@ -101,8 +102,8 @@ Ordered. The daily run keeps `ops/kiro-brief.md` pointed at the first unfinished
 | C1 | Consolidate `main`, write this roadmap and the run contract | DONE 2026-11-10 |
 | C2 | Committed **end-to-end + axe harness** (`tests/e2e/`, `npm run test:e2e`) so the browser evidence is reproducible from the repository | **DONE 2026-11-10** — 15 tests across smoke, 390 px responsive and axe on four screens; baseline ledger in `tests/e2e/axe-baseline.json`; found 2 previously unrecorded defects. No `playwright.config.*`: see `tests/e2e/README.md` for why. |
 | C3 | **CI workflow** (lint, typecheck, tests, build) and the **Pages deploy workflow** with the correct Vite base path | **DONE 2026-11-10** — `.github/workflows/ci.yml` runs check then e2e on every push and pull request, installing Playwright with `--no-save` so `package.json` stays clean. The red `test:e2e` was resolved by adding `tests/e2e/known-failures.json`, a ledger with the same semantics as the axe baseline, so CI is green on written-down debt and red on anything new. `.github/workflows/pages.yml` is **`workflow_dispatch` only**: publishing is the owner's moment, and it builds with `--base=/<repo>/` on the command line rather than editing `vite.config.ts`. |
-| C4 | `QA_RESULTS.md` on `main`: only checks actually run, with their real numbers | TODO |
-| C5 | `README.md` refresh for a public repository: what it is, scope limits, how to run, who wrote what | TODO |
+| C4 | `QA_RESULTS.md` on `main`: only checks actually run, with their real numbers | **DONE 2026-11-10** — real numbers, the accessibility debt per screen, the four open items with owners, and an explicit list of what the checks do not show. |
+| C5 | `README.md` refresh for a public repository: what it is, scope limits, how to run, who wrote what | **DONE 2026-11-10** — written for a reader who is not the project, with a table stating plainly which paths are Kiro's and which are the reviewer's. |
 | C6 | `docs/demo-script.md`: English, timed under 3:00, following the plan's beats | TODO |
 | C7 | `docs/user-research/` kit: consent, anonymisation checklist, interview questions, baseline sheet | TODO |
 | C8 | `docs/competitor-comparison.md`: matrix and method, marked NOT RUN until U5 happens | TODO |
