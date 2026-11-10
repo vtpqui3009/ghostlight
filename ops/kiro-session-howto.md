@@ -1,5 +1,59 @@
 # Running a Kiro session on this project
 
+## First-time setup
+
+Everything in this section marked **verified** comes from `CLOUD_KIRO_READINESS.md`, recorded on
+2026-10-31 from a setup that actually worked and authenticated. Everything marked **unverified**
+could not be checked from the cloud session, because `cli.kiro.dev` and `kiro.dev` are outside its
+network allowlist. Do not treat the unverified parts as instructions — check them against the
+official site.
+
+### Two paths
+
+- **Kiro IDE** — the desktop app, from `kiro.dev`. Probably the easier path on Windows, and the
+  submission's write-up explicitly asks how the surfaces differed if you tried more than one, so
+  using it for at least one task is worth points. *Unverified: the download and install steps.*
+- **Kiro CLI** — what this project has used so far, and what every brief is written for.
+
+### Kiro CLI — the verified record
+
+**Verified**, from the 2026-10-31 setup:
+
+- Official installer at `https://cli.kiro.dev/install`. It was downloaded, inspected before running,
+  and installed into a user-local bin directory.
+- `kiro-cli --version` then reported **2.37.0**.
+- The official 2.37.0 **Linux x86_64** archive was independently checked against the HTTPS manifest:
+  SHA-256 `79b238338c7d94cf7005f67f3508aa5dd474778157f2a1c8481f47e716433aaf`. The installer enforces
+  SHA-256 verification itself.
+- Login used `login --license free --use-device-flow`. It printed an official approval URL and a
+  code, the browser approval completed, and the session reported `Device authorized` and
+  `Logged in successfully`.
+- `whoami --format json` then returned an authenticated account with `accountType` and `region`;
+  before login the same command returned `account: null`. That is the check for "am I actually
+  signed in".
+- `/usage` inside the chat reported the plan and credits — at that point `KIRO FREE, 0.33 of 50`.
+
+**Unverified / platform caveat:** that record is **Linux x86_64**. The account screenshot of
+2026-11-10 appears to be Windows, where the installer and the SHA-256 will be different. Take the
+installer from the official site for your platform; do not reuse the Linux hash above as if it
+applied.
+
+### Network hosts Kiro needs
+
+Verified as the set in use on 2026-10-31. Only relevant if you are behind a restrictive firewall:
+
+`cli.kiro.dev`, `prod.download.cli.kiro.dev`, `desktop-release.q.us-east-1.amazonaws.com`,
+`oidc.us-east-1.amazonaws.com`, `runtime.us-east-1.kiro.dev`, `management.us-east-1.kiro.dev`,
+`q.us-east-1.amazonaws.com`.
+
+### Confirming the credits are visible to the CLI
+
+After login, open a chat and run `/usage`. You are looking for the bonus pool to be visible, not
+just the Kiro Free allowance. The 2026-11-10 dashboard showed `kiroween-2026` at 0 / 4000 with 52
+days left, next to Kiro Free at 44.65 / 50 resetting 12-01. If `/usage` shows only the free
+allowance, check the account page at `app.kiro.dev/settings/account` before spending time on a
+session — and **write down what it actually says**, because that number is submission evidence.
+
 The 4,000 `kiroween-2026` credits are **already on the account** — the dashboard showed them at
 0 / 4000 used with 52 days left on 2026-11-10. There is nothing further to "apply". They are spent
 by doing work in Kiro against this repository.
