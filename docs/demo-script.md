@@ -1,6 +1,14 @@
 # Demo video script — Kiroween submission
 
-Target **2:50**, under the three-minute limit with room to spare. English narration. Public on
+Target **2:50**, under the three-minute limit with room to spare.
+
+**Revised 2026-11-10, after the rules were read.** The first draft spent 0:25 on "how Kiro built
+this". That was a mistake: Kiro usage is scored on **Technological Implementation**, through the
+*written* write-up (`docs/kiro-writeup.md`), which is a separate required submission field. The
+video is scored on **Presentation**: "Does the video clearly demonstrate the project working
+end-to-end? Does the pitch communicate what problem is solved, who it's for, and why it matters?
+Is the presentation creative and memorable?" So the Kiro section shrinks to one sentence and the
+time goes back to the product and to who it is for. English narration. Public on
 YouTube. Everything on screen is a scene invented for this demo; say so in the first twenty seconds
 and leave a corner caption up for the whole video.
 
@@ -14,13 +22,16 @@ against today's build would mean reshooting.
 | Beat | Needs | State |
 |---|---|---|
 | 1:00–1:45 "open the cause, fix it, re-run" | **K4** causal navigation, **K5** guided fix | not built |
-| 1:45–2:05 "copies and consumables" | works today on the bundled demos | ready |
-| 2:05–2:15 "list view and keyboard" | **K3** list equivalent, keyboard pass | not built |
+| "copies and consumables" | works today on the bundled demos | ready |
+| "list view and keyboard" | **K3** list equivalent, keyboard pass | not built |
+| the whole video reading as "creative and memorable" | **K10** the haunting interface | not built |
 | 0:40–1:00 "the printed sheet" | **K6** reports, CSV and print | partly — preset report renders, print and CSV are not done |
 | Any wide shot of Reports on a phone | **K6** 390 px overflow fix | fails today by 73 px |
 
-Also before shooting: **K2** accessibility, because the video shows the UI closely and the contrast
-debt is visible. The honest order is K1 → K2 → K4 → K5 → K3 → K6, then record.
+**K1 and K2 are done** as of 2026-11-10, so the UI in shot is already accessibility-clean. The
+remaining order before recording is **K4 → K5 → K3 → K10**, then record. K10 matters for the video
+specifically: Presentation rewards a presentation that is "creative and memorable", and Costume
+Contest asks for a haunting interface.
 
 ## Setup
 
@@ -82,7 +93,7 @@ Actor A.*
 
 > Add the handoff the run sheet was missing, replay, and the scene is clean.
 
-### 1:45–2:05 — copies and consumables
+### 1:45–2:00 — copies and consumables
 
 *Load `Duplicate Names — Distinct IDs`, then `Consumed Reuse — Terminal State`.*
 
@@ -91,27 +102,30 @@ Actor A.*
 > because a reset does not un-break it. Bring on a second seal and that is a different physical
 > instance, with its own identity.
 
-### 2:05–2:15 — reading it without the diagram
+### 2:00–2:12 — reading it without the diagram
 
 *Switch to the list view and tab through the timeline with the keyboard — **needs K3**.*
 
 > The same information without the diagram, for a crew sheet, for reduced motion, and for anyone
 > working by keyboard.
 
-### 2:15–2:40 — how Kiro built it
+### 2:12–2:28 — who this is for, and the honest limit
 
-*On screen: `.kiro/specs/ghostlight/design.md`, then `KIRO_SESSION_EVIDENCE.md`, then a test run.*
+*On screen: the reset report, then the printed sheet.*
 
-> Kiro wrote the specification first: the six step kinds, what each one requires, and what counts as
-> uncertainty rather than an error. Review pushed back on the contract — unknown recovery, cause
-> identity, state copying — and Kiro revised the spec before any code existed. Then Kiro implemented
-> it and wrote the tests: 222 of them. One test exposed a bad test, not a bad engine, and that is in
-> the record too.
->
-> To be straight with you: no stage manager has used this yet. The accessibility debt and the open
-> defects are listed in the repository, not hidden.
+> This is for the person doing paper tech at eleven at night with a pencil and a run sheet, trying
+> to work out whether the plan they have written actually holds together. It is not live tracking —
+> it never sees the real stage, and it says so on the first screen. No stage manager has used it
+> yet, and the open defects are listed in the repository rather than hidden.
 
-### 2:40–2:50 — where to find it
+### 2:28–2:38 — built with Kiro
+
+*On screen: `.kiro/specs/ghostlight/design.md` beside a passing test run.*
+
+> Kiro wrote the specification before any code existed, then implemented it and wrote the tests.
+> The full account, including what Kiro got wrong, is in the submission write-up.
+
+### 2:38–2:50 — where to find it
 
 *On screen: the live URL and the repository.*
 

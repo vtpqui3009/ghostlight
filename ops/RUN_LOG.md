@@ -250,3 +250,34 @@ All six tabs read: Overview, Rules, Resources, Updates, FAQ, and the tab list it
 - Two updates are posted; neither changes anything. Indonesia became eligible on 2026-11-04.
 
 Nothing in `src/` was touched in this run.
+
+## 2026-11-10 — run 7 (interactive): realign the plan around the verified rules
+
+The owner confirmed the Kiro credits from a dashboard screenshot: bonus pool `kiroween-2026` at
+**0 / 4000 used, 52 days left**, next to a Kiro Free allowance at 44.65 / 50 that resets 12-01. So
+the hackathon budget is intact and untouched — and the free allowance is nearly gone, so the work
+should be spent against the bonus pool. **U8 is done**, not pending.
+
+- **A dated schedule to 2026-12-04** is now in `docs/SUBMISSION_ROADMAP.md`, split into the owner's
+  Kiro sessions, the owner's away-from-keyboard work, and the automated run's work. The ordering
+  follows what the criteria actually reward: the repository going public and lining up the two
+  interviews are week 1 because they have the longest lead time, and K4 and K5 come before the
+  prettier work because three beats of the video cannot be filmed without them.
+- **C12 done** — `docs/kiro-writeup.md`. This is a required submission field and the place
+  Technological Implementation is actually scored, so it answers Devpost's published question list
+  in order. Everything that has not happened is a `TO FILL` block rather than a sentence written as
+  if it had: MCP, custom agents, Kiro powers, PBT, the hook trigger, and the user sessions. It also
+  carries a "what Kiro got wrong" section, which is the most useful part — the non-converging Haiku
+  writer, the self-referential test that proved itself right, and the refusal to relax the compiler.
+- **C7 done** — `docs/user-research/`. Protocol, plain-language consent, a 45-minute session guide
+  and a findings template whose first section is counter-evidence. The guide deliberately runs a
+  no-demo baseline and a paper control before the tool is ever mentioned, so the reaction has
+  something to be measured against, and it separates instruction time from task time.
+- **C6 revised.** The first draft spent 0:25 of 2:50 on "how Kiro built this" — written before the
+  rules were read. Kiro usage is scored through the separate written write-up; the video is scored
+  on Presentation. The Kiro section is now 0:10 and the reclaimed time went to who the tool is for
+  and the honest limit. K10 was added to its pre-shoot checklist, because Presentation rewards a
+  presentation that is "creative and memorable".
+
+Nothing in `src/` was touched. Remaining for the reviewer: C8 competitor comparison template, C9
+submission description, C13 blog and social drafts.

@@ -107,8 +107,10 @@ Overall **or** one Category prize, not both, plus any number of bonus prizes.
 
 "Kiroween participants can request 4,000 free Kiro credits to use during the Submission Period." ID
 verification required; one-time grant, no additional credits. **Request by 2026-12-01 12:00 PT,
-redeem by 2026-12-04, redeemed credits expire 2026-12-31.** The owner reported holding 4,000 credits
-on 2026-11-10 — if they are not yet redeemed, redeem before 2026-12-04.
+redeem by 2026-12-04, redeemed credits expire 2026-12-31.** **Confirmed redeemed on 2026-11-10**: the Kiro account dashboard shows bonus credits
+`kiroween-2026` at **0 / 4000 used, 52 days left**, alongside a separate Kiro Free allowance of
+44.65 / 50 used that resets on 12-01. So the hackathon budget is intact and untouched, and the free
+allowance is nearly spent — do the hackathon work against the bonus credits.
 
 ## Other things the rules say
 

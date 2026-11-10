@@ -73,6 +73,39 @@ The earlier figure of "3 axe violations" was first-screen only and used axe's de
 The harness scans four screens under `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` and
 `best-practice`; the project's own landmark promises are best-practice rules, so that tag stays on.
 
+
+## Schedule to the deadline
+
+24 days from 2026-11-10 to **2026-12-04 14:00 PST**. The budget is 4,000 untouched Kiro credits.
+Dates are suggestions; the ordering is not — it follows what the five criteria actually reward and
+what blocks what.
+
+| Week | Kiro (owner, in Kiro) | Owner, away from the keyboard | Automated run / reviewer |
+|---|---|---|---|
+| **1 — Nov 10–16** | K4 cause navigation, K5 guided fix. These unblock three beats of the video. | **Make the repo public (U1)** and check the About sidebar shows MIT. Enable Pages (U2). **Line up the two stage managers (U4)** — this has the longest lead time of anything left. | C12 Kiro write-up draft, C7 interview kit, revise C6 so the video stops spending 25s on Kiro. |
+| **2 — Nov 17–23** | K3 list equivalent, K10 the haunting interface, K7 empty state. | **Run the two interviews.** Run the competitor comparison (U5) against CueCall, DigiScript, Standby with the same five scenarios. | C8 comparison template, C9 submission description, C13 blog and social drafts. |
+| **3 — Nov 24–30** | K11 property-based testing, K8 verify the hook actually triggers, K12 whichever of MCP / custom agents / Crew / powers genuinely helps. K6 CSV. | **Record and upload the video (U3).** Publish the blog post and the social post (U10). | Fold the interview findings into the description honestly, including anything that contradicts the idea. Re-run every check. |
+| **4 — Dec 1–4** | K9 dependency advisories, only if the suite stays green. Nothing else new. | **Submit on Devpost (U6)** with days to spare — no edits are possible after the deadline. Answer the bonus-prize questions (U9). | Final conformance pass against `docs/KIROWEEN_REQUIREMENTS.md`. Freeze. |
+
+### Why this order
+
+- **The repository going public and the interviews are week 1** because they have the longest lead
+  time and everything else can proceed around them. Potential Impact is 20% and is currently zero.
+- **K4 and K5 come before the prettier work** because three beats of the demo script cannot be
+  filmed without them, and the video gates Presentation.
+- **K11 and K12 are real work, not box-ticking.** Technological Implementation asks about variety
+  and experimentation by name, and the submission form asks about property-based testing
+  specifically. But the research plan's warning stands: do not add an MCP server or a power purely
+  to have used one.
+- **Nothing new lands in week 4.** A broken suite in the final days costs more than any feature.
+
+### Credit budget
+
+4,000 credits, 0 used. The 2026-10-31 sessions spent about 33 credits of the free 50 to produce the
+specs, the engine and 222 tests — so the remaining work is well within budget. Check `/usage` at the
+start and end of every session and record both numbers; the budget is not the constraint, but the
+evidence is worth having.
+
 ## A. Only the owner can do these
 
 | ID | Task | Done when |
@@ -84,7 +117,7 @@ The harness scans four screens under `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` 
 | U5 | **Competitor comparison executed** against CueCall, DigiScript, Standby with the same five scenarios | `docs/competitor-comparison.md` filled from actual runs, with what could not be accessed stated. Use only access you are entitled to. |
 | U6 | **Devpost submission**: Costume Contest, English, judge access notes, team ≤ 3, declare what pre-dated the window | Submitted before 2026-12-04 14:00 PST. All repository commits are inside the window (first commit 2026-10-31); the research documents were written 2026-10-31 and are declared as prior planning material. |
 | U7 | Run the **Kiro briefs** in `ops/kiro-brief.md` and record evidence | Each session appends real observations to `KIRO_SESSION_EVIDENCE.md`: `/usage` before and after, model and mode, what Kiro wrote, what failed, what was fixed |
-| U8 | **Redeem the Kiro credits if they are not already redeemed** | Redemption closes **2026-12-04**, and redeemed credits expire 2026-12-31. One-time grant; no more will be issued. |
+| U8 | ~~Redeem the Kiro credits~~ | **DONE 2026-11-10** — dashboard shows `kiroween-2026` bonus credits at **0 / 4000 used, 52 days left**. The separate Kiro Free allowance is at 44.65 / 50 and resets 12-01, so spend the bonus pool, not the free one. |
 | U9 | Answer two bonus-prize questions only you can | (a) Did you register for **Kiroween 2025**? If so, claim Best Ghost of Kiroween Past — it is verified against their records. (b) Are you a student, or a startup founder? Each has its own bonus prize and its own evidence requirements. |
 | U10 | Publish the **blog post** and the **social post** | Blog: any third-party platform, during the submission period, mentioning Kiroween 2026 — **100 winners get 2,000 bonus Kiro credits**. Social: a public post beginning with `#KiroweenHackathon26`, judged on "original thoughts vs AI writing", so write it yourself. Drafts are C13. |
 
@@ -122,13 +155,13 @@ they looked. That is recorded here so the credits are not spent rebuilding what 
 | C3 | **CI workflow** (lint, typecheck, tests, build) and the **Pages deploy workflow** with the correct Vite base path | **DONE 2026-11-10** — `.github/workflows/ci.yml` runs check then e2e on every push and pull request, installing Playwright with `--no-save` so `package.json` stays clean. The red `test:e2e` was resolved by adding `tests/e2e/known-failures.json`, a ledger with the same semantics as the axe baseline, so CI is green on written-down debt and red on anything new. `.github/workflows/pages.yml` is **`workflow_dispatch` only**: publishing is the owner's moment, and it builds with `--base=/<repo>/` on the command line rather than editing `vite.config.ts`. |
 | C4 | `QA_RESULTS.md` on `main`: only checks actually run, with their real numbers | **DONE 2026-11-10** — real numbers, the accessibility debt per screen, the four open items with owners, and an explicit list of what the checks do not show. |
 | C5 | `README.md` refresh for a public repository: what it is, scope limits, how to run, who wrote what | **DONE 2026-11-10** — written for a reader who is not the project, with a table stating plainly which paths are Kiro's and which are the reviewer's. |
-| C6 | `docs/demo-script.md`: English, timed under 3:00, following the plan's beats | **DONE 2026-11-10** — includes a "before you can shoot this" table mapping four beats to the K-items they depend on, so the video is not filmed against a build that cannot show them. Shooting order: K1 → K2 → K4 → K5 → K3 → K6, then record. |
-| C7 | `docs/user-research/` kit: consent, anonymisation checklist, interview questions, baseline sheet | TODO |
+| C6 | `docs/demo-script.md`: English, timed under 3:00, following the plan's beats | **DONE 2026-11-10, revised the same day after the rules were read** — the Kiro section shrank from 0:25 to 0:10 because Kiro usage is scored through the separate written write-up, not the video; the time went back to who the tool is for. Also **DONE 2026-11-10** — includes a "before you can shoot this" table mapping four beats to the K-items they depend on, so the video is not filmed against a build that cannot show them. Shooting order: K1 → K2 → K4 → K5 → K3 → K6, then record. |
+| C7 | `docs/user-research/` kit: consent, anonymisation checklist, interview questions, baseline sheet | **DONE 2026-11-10** — protocol, plain-language consent, a 45-minute session guide with a no-demo baseline section and a paper control, and a findings template that puts counter-evidence first. |
 | C8 | `docs/competitor-comparison.md`: matrix and method, marked NOT RUN until U5 happens | TODO |
 | C9 | `docs/submission.md`: Devpost draft in English, with placeholders only the owner can fill | TODO |
 | C10 | Refresh `ops/kiro-brief.md` every run, and review whatever Kiro produced since the last run | Every run |
 | C11 | Finish `docs/KIROWEEN_REQUIREMENTS.md` by reading the Devpost tabs directly | **DONE 2026-11-10** — all six tabs read directly once the proxy picked up the `ghostlight` environment. `WebFetch` still fails on this host because it resolves DNS itself; `curl` through the session proxy works, which is how the pages were fetched. |
-| C12 | Draft the **"how Kiro was used" write-up**, a required submission field | TODO — the site lists exactly what it wants covered (IDE/CLI/Web/Crew, custom agents, hooks, spec-driven development, steering, MCP, PBT, powers). `KIRO_SESSION_EVIDENCE.md` already answers several honestly. Leave placeholders for what has not happened rather than filling them in. |
+| C12 | Draft the **"how Kiro was used" write-up**, a required submission field | **DONE 2026-11-10** — `docs/kiro-writeup.md`, answering Devpost's published question list in order, with `TO FILL` blocks for everything that has not happened and a "what Kiro got wrong" section. Original note — the site lists exactly what it wants covered (IDE/CLI/Web/Crew, custom agents, hooks, spec-driven development, steering, MCP, PBT, powers). `KIRO_SESSION_EVIDENCE.md` already answers several honestly. Leave placeholders for what has not happened rather than filling them in. |
 | C13 | Draft the **blog post** and the **social post** | TODO — the blog prize has 100 winners and pays 2,000 bonus Kiro credits, so it is the cheapest prize on the board. The social post is judged on "original thoughts vs AI writing": draft a skeleton and facts, and let the owner write it in their own voice. |
 
 ## D. Already done
