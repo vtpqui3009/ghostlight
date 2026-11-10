@@ -25,16 +25,34 @@ days remaining; do not trust a number written here.
    free-only 50-credit ceiling and the 5-credit reserve pause no longer govern. Still check native
    `/usage` at the start of each Kiro session and record the observation; do not invent numbers.
 
-## Verified state of `main` — 2026-11-10
+## Verified state of `main` — 2026-11-10 (second run of the day)
+
+Re-verified from a clean `npm ci`. Every number below was observed, not estimated.
 
 | Check | Result |
 |---|---|
-| `npm run lint` / `typecheck` / `build` | pass |
+| `npm run lint` / `typecheck` / `build` | pass (production build, 46 modules) |
 | `npm test` | 222 passed (31 engine, 134 acceptance, 13 persistence, 44 action-form) |
-| axe-core on the first screen | **3 violations**: color-contrast ×3, landmark-one-main, region |
+| `npm run test:e2e` (new, reviewer-authored) | **14 passed, 1 failed** — Playwright 1.63.0, axe-core 4.14.0 |
+| axe-core, first screen | **3 violations**: `color-contrast` ×3, `landmark-one-main` ×1, `region` ×2 |
+| axe-core, loaded views | stage `color-contrast` ×5; reports ×6; editor ×18; plus `label-content-name-mismatch` ×4 on every loaded view |
+| 390 px horizontal overflow | first screen, stage and editor clean; **Reports overflows by 73 px** (`table.report-table`) |
 | Open product blocker | delayed `FileReader` import race — `docs/handoff/ACTIONFORM_CHECKPOINT.md` |
 | Repository visibility | **private** |
 | Public URL, video, user validation, competitor comparison | none |
+
+### Defects the harness found that the hand-run had missed
+
+1. **Reports table overflows a 390 px viewport by 73 px.** A real responsive defect, not an
+   accessibility nit. Assigned to **K6**. Previously unrecorded.
+2. **`label-content-name-mismatch` ×4 on every loaded view**, on the timeline's `role="treeitem"`
+   cue headers and action rows in `src/ui/Timeline.tsx`. Assigned to **K2**. Previously unrecorded.
+3. The earlier hand-run's three first-screen violations were reproduced **exactly**, which is what
+   validates the harness against that independent observation.
+
+The earlier figure of "3 axe violations" was first-screen only and used axe's default rule set.
+The harness scans four screens under `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` and
+`best-practice`; the project's own landmark promises are best-practice rules, so that tag stays on.
 
 ## A. Only the owner can do these
 
@@ -68,8 +86,8 @@ Ordered. The daily run keeps `ops/kiro-brief.md` pointed at the first unfinished
 | ID | Task | Status |
 |---|---|---|
 | C1 | Consolidate `main`, write this roadmap and the run contract | DONE 2026-11-10 |
-| C2 | Committed **end-to-end + axe harness** (`tests/e2e/`, Playwright config, `npm run test:e2e`) so the browser evidence is reproducible from the repository | TODO |
-| C3 | **CI workflow** (lint, typecheck, tests, build) and the **Pages deploy workflow** with the correct Vite base path | TODO |
+| C2 | Committed **end-to-end + axe harness** (`tests/e2e/`, `npm run test:e2e`) so the browser evidence is reproducible from the repository | **DONE 2026-11-10** — 15 tests across smoke, 390 px responsive and axe on four screens; baseline ledger in `tests/e2e/axe-baseline.json`; found 2 previously unrecorded defects. No `playwright.config.*`: see `tests/e2e/README.md` for why. |
+| C3 | **CI workflow** (lint, typecheck, tests, build) and the **Pages deploy workflow** with the correct Vite base path | TODO — next C-item. Must install Playwright explicitly (`npm i -D playwright@1.63.0 && npx playwright install chromium`); and decide how to wire `test:e2e` in while it is legitimately red on the K6 Reports overflow. |
 | C4 | `QA_RESULTS.md` on `main`: only checks actually run, with their real numbers | TODO |
 | C5 | `README.md` refresh for a public repository: what it is, scope limits, how to run, who wrote what | TODO |
 | C6 | `docs/demo-script.md`: English, timed under 3:00, following the plan's beats | TODO |
