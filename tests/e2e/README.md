@@ -23,7 +23,7 @@ Flags:
 | Flag | Effect |
 |---|---|
 | *(none)* | Run every spec. Known accessibility debt is printed but does not fail the run. |
-| `--strict` | Fail on **any** accessibility violation, baselined or not. Use this once Kiro item K2 has landed. |
+| `--strict` | Fail on **any** accessibility violation or ledgered test failure, baselined or not. Use this once Kiro items K2 and K6 have landed. |
 | `--record` | Rewrite `axe-baseline.json` from this run's scan. Never hand-edit the counts; re-record them. |
 | `--headed` | Run with a visible browser, for local debugging. |
 
@@ -50,6 +50,25 @@ GHOSTLIGHT_CHROMIUM=/opt/pw-browsers/chromium npm run test:e2e
 
 `axe-core` **is** a declared devDependency, because it is plain JavaScript injected into the page
 and downloads nothing.
+
+## Two debt ledgers, not two silencers
+
+| File | Written by | Holds |
+|---|---|---|
+| `axe-baseline.json` | `--record`, straight from the scan | accessibility violations that exist today, per screen |
+| `known-failures.json` | by hand | whole tests that fail today, each with an owner and a reason |
+
+Both work the same way, and neither one hides anything:
+
+- a violation or a failure that is **not** in the ledger fails the run;
+- a baselined accessibility rule that **gains nodes** fails the run;
+- a ledgered test that starts **passing** fails the run, naming the entry to delete, so the file
+  cannot quietly go stale after a fix lands;
+- `--strict` fails on everything, ledger or not.
+
+`known-failures.json` is hand-written on purpose. A recorded count is enough for an accessibility
+rule, but a failing test needs a sentence saying who owns it and why it is still open — usually
+because it lives in `src/`, which belongs to Kiro under the provenance rule.
 
 ## What it covers
 

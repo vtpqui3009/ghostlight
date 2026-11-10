@@ -56,10 +56,11 @@ export function assert(condition, message) {
   if (!condition) throw new AssertionError(message);
 }
 
-// Runs every registered suite. Returns { passed, failed, failures, notes }.
+// Runs every registered suite. Returns { passed, failed, failures, passedTests, notes }.
 export async function runAll(context) {
   let passed = 0;
   const failures = [];
+  const passedTests = [];
   const notes = [];
   const note = (text) => notes.push(text);
 
@@ -70,6 +71,7 @@ export async function runAll(context) {
       try {
         await t.fn({ ...context, note });
         passed += 1;
+        passedTests.push({ suite: suite.name, test: t.name });
         console.log(`    PASS  ${t.name}  (${Date.now() - started}ms)`);
       } catch (err) {
         failures.push({ suite: suite.name, test: t.name, error: err });
@@ -78,5 +80,5 @@ export async function runAll(context) {
       }
     }
   }
-  return { passed, failed: failures.length, failures, notes };
+  return { passed, failed: failures.length, failures, passedTests, notes };
 }

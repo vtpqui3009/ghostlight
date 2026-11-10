@@ -1,0 +1,54 @@
+# Reviewer-authored (automated daily run), not Kiro. See ops/daily-run.md.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: lint, types, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    name: end-to-end and accessibility
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Playwright is deliberately not a declared dependency: the cloud container that
+      # runs the daily build ships its own, and a second copy would not find that
+      # browser. CI has no ambient Playwright, so install one here without touching
+      # package.json. Keep this version in step with tests/e2e/README.md.
+      - run: npm i --no-save playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      # Green while the only failures are the ones written down in
+      # tests/e2e/known-failures.json. Red on a new failure, and red when a
+      # ledgered test starts passing and its entry was not removed.
+      - run: npm run test:e2e

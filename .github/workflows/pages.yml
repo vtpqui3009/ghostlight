@@ -1,0 +1,52 @@
+# Reviewer-authored (automated daily run), not Kiro. See ops/daily-run.md.
+#
+# Manual on purpose. Publishing the app is the owner's decision and the owner's
+# moment, so this does not fire on push. Once the repository is public and Pages
+# is set to "GitHub Actions" (Settings -> Pages), run it from the Actions tab.
+# To deploy automatically afterwards, add these two lines under `on:`
+#
+#   push:
+#     branches: [main]
+name: Deploy to GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      # A project page is served from /<repo>/, so the bundle needs that base.
+      # Passed on the command line rather than edited into vite.config.ts, which
+      # keeps deployment plumbing out of the application source Kiro owns.
+      - run: npx vite build --base="/${{ github.event.repository.name }}/"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

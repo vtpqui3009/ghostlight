@@ -95,3 +95,31 @@ historical and must be re-checked in the next Kiro session, not assumed.
 - **U7**: K1 has not been run in Kiro yet. Everything in section B is still waiting on a Kiro
   session.
 - Delete the leftover `ops/push-probe-20261110` branch; this session cannot.
+
+## 2026-11-10 — run 3 (interactive, owner-directed)
+
+- Days to deadline: 24.
+- Branch cleanup asked for by the owner: `ops/push-probe-20261110` **could not be deleted**. Four
+  attempts at `git push origin --delete` and `git push origin :refs/heads/...` each ended in
+  `send-pack: unexpected disconnect while reading sideband packet` / `the remote end hung up
+  unexpectedly`, while ordinary pushes from the same session succeeded minutes earlier. This
+  session's GitHub grant appears to allow creating and updating refs but not deleting them, and the
+  GitHub MCP server has no branch-deletion tool. The branch is fully contained in `main`
+  (`8612e94`), so nothing is lost by removing it; it is left to the owner.
+- `docs/KIROWEEN_REQUIREMENTS.md` added in the previous commit; the Devpost tabs are still unread.
+  `kiroween.devpost.com` returned `getaddrinfo ENOTFOUND` on five attempts across about forty
+  minutes, including after a `ghostlight` environment was created with the host allowed. Tomorrow's
+  run inherits that environment, so **C11 should be retried first thing**.
+- **C3 done.** `.github/workflows/ci.yml` (check → e2e, Playwright installed with `--no-save`) and
+  `.github/workflows/pages.yml` (`workflow_dispatch` only; builds with `--base=/<repo>/` passed on
+  the command line so `vite.config.ts` stays untouched).
+- To make CI meaningful rather than permanently red, the harness gained
+  `tests/e2e/known-failures.json`: a hand-written ledger carrying the one open failure, the Reports
+  390 px overflow, with its owner (K6) and reason. Verified both directions — with the ledger the
+  run exits 0; with an entry for a test that actually passes it exits 1 and names the entry to
+  delete. Nothing was skipped, silenced or weakened, and `--strict` still fails on everything.
+- Verified here: `npm run check` green (222/222 tests), `npm run test:e2e` 14 passed / 1 known
+  failure / exit 0, and `npx vite build --base=/ghostlight/` emits `/ghostlight/assets/...`.
+- Blocked on the owner, unchanged: repository private, Pages not enabled, no video, no user
+  sessions, no executed competitor comparison, and **no Kiro session has run since 2026-11-01** —
+  every K-item is still waiting.

@@ -1,0 +1,11 @@
+{
+  "_comment": "Tests that fail today, each one written down with an owner and a reason. REVIEWER-AUTHORED, hand-written on purpose: unlike axe-baseline.json, which is recorded from a scan, a failing test needs a sentence saying who owns it. The harness fails on any failure that is NOT in here, and fails just as loudly when an entry starts passing, so this file cannot quietly go stale. Delete an entry the moment its fix lands.",
+  "failures": [
+    {
+      "suite": "responsive — 390 px phone viewport",
+      "test": "Reports view has no horizontal overflow with a scene loaded",
+      "owner": "Kiro item K6 (reports, CSV and print)",
+      "reason": "table.report-table spills 73px past a 390px viewport. It lives in src/, so under the provenance rule in ops/daily-run.md it is Kiro's to fix, not the reviewer's. Found by this harness on 2026-11-10; see ops/RUN_LOG.md."
+    }
+  ]
+}

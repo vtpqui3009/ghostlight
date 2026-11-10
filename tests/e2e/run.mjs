@@ -3,7 +3,7 @@
 // This is NOT Kiro-authored application source. See tests/e2e/README.md and QA_RESULTS.md.
 //
 //   npm run test:e2e              run every spec against the production build in dist/
-//   npm run test:e2e -- --strict  additionally fail on any baselined accessibility violation
+//   npm run test:e2e -- --strict  additionally fail on any baselined a11y violation or ledgered test
 //   npm run test:e2e -- --record  rewrite the accessibility baseline from this run's scan
 //   npm run test:e2e -- --headed  run with a visible browser (local debugging only)
 //
@@ -12,7 +12,7 @@
 // Chromium; installing a second, differently versioned copy would not find that browser.
 
 import { createRequire } from 'node:module';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -130,16 +130,66 @@ async function main() {
     for (const n of result.notes) console.log(`  - ${n}`);
   }
 
+  // A known failure is a debt that is written down and owned, not a silenced test.
+  // The run still fails if a NEW test breaks, and it fails just as loudly when a
+  // ledgered test starts passing, so the ledger cannot quietly go stale.
+  const ledger = loadKnownFailures();
+  const same = (a, b) => a.suite === b.suite && a.test === b.test;
+  const expected = result.failures.filter((f) => ledger.some((k) => same(k, f)));
+  const unexpected = result.failures.filter((f) => !ledger.some((k) => same(k, f)));
+  const fixed = ledger.filter((k) => result.passedTests.some((p) => same(k, p)));
+
   console.log(`\n${result.passed} passed, ${result.failed} failed`);
 
-  if (result.failed > 0) {
+  if (expected.length) {
+    console.log('\nKnown failures (written down in known-failures.json)');
+    for (const f of expected) {
+      const entry = ledger.find((k) => same(k, f));
+      console.log(`  ${f.suite} > ${f.test}`);
+      console.log(`    owned by ${entry.owner}: ${entry.reason}`);
+      console.log(`    ${f.error && f.error.message ? f.error.message.split('\n').join('\n    ') : f.error}`);
+    }
+  }
+
+  if (unexpected.length) {
     console.log('\nFailures');
-    for (const f of result.failures) {
+    for (const f of unexpected) {
       console.log(`  ${f.suite} > ${f.test}`);
       console.log(`    ${f.error && f.error.message ? f.error.message.split('\n').join('\n    ') : f.error}`);
     }
+  }
+
+  if (fixed.length) {
+    console.log('\nThese tests are in known-failures.json but now PASS. Remove their entries:');
+    for (const k of fixed) console.log(`  ${k.suite} > ${k.test}  (was owned by ${k.owner})`);
+  }
+
+  if (unexpected.length || fixed.length) process.exit(1);
+  if (strict && expected.length) {
+    console.log('\n--strict: known failures are fatal.');
     process.exit(1);
   }
+}
+
+// The ledger is hand-written, unlike axe-baseline.json which is recorded from a scan,
+// because a failure needs a human sentence saying who owns it and why it is open.
+function loadKnownFailures() {
+  const path = join(here, 'known-failures.json');
+  if (!existsSync(path)) return [];
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (err) {
+    fail(`known-failures.json is not valid JSON: ${err.message}`);
+  }
+  const entries = Array.isArray(parsed) ? parsed : parsed.failures;
+  if (!Array.isArray(entries)) fail('known-failures.json must hold a "failures" array.');
+  for (const entry of entries) {
+    if (!entry || !entry.suite || !entry.test || !entry.owner || !entry.reason) {
+      fail('every known-failures.json entry needs suite, test, owner and reason.');
+    }
+  }
+  return entries;
 }
 
 // Writes the baseline straight from the scan results, so the recorded counts are
