@@ -1,12 +1,16 @@
 # Kiro brief — current task
 
-**K1 is done.** It was implemented on 2026-11-10 by the reviewer, not by Kiro, at the owner's
-explicit direction — see the authorship table in `README.md`. K2 and the responsive half of K6 went
-the same way. The brief below is kept for the record of what the defect was and how it was proven.
+**K1, K2, K4, K5 and the responsive half of K6 are done** — all implemented on 2026-11-10 by the
+reviewer, not by Kiro, at the owner's explicit direction. Every file is named in the authorship
+table in `README.md`. The K1 brief is kept below for the record of what the defect was and how it
+was proven.
 
-**The next unfinished item is [K4 — make the cause navigable](kiro-briefs/K4.md).** It is small:
-the causal trace is already computed and already printed, it is just inert. After that: K5, K3, the
-CSV half of K6, K7, K8, K9.
+**Start your next Kiro session with [`kiro-session-howto.md`](kiro-session-howto.md)**, which has
+the recommended order and what to record. The short version: **K8 → K11 → K10 → K3 → K7 → K6 CSV →
+K12 → K9**, starting with K8 because it is the cheapest and it closes a gap that has been recorded
+as NOT VERIFIED since 2026-10-31.
+
+---
 
 ---
 
