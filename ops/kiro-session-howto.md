@@ -2,61 +2,98 @@
 
 ## First-time setup
 
-Everything in this section marked **verified** comes from `CLOUD_KIRO_READINESS.md`, recorded on
-2026-10-31 from a setup that actually worked and authenticated. Everything marked **unverified**
-could not be checked from the cloud session, because `cli.kiro.dev` and `kiro.dev` are outside its
-network allowlist. Do not treat the unverified parts as instructions — check them against the
-official site.
+Read from the official docs on **2026-11-10**: `kiro.dev/docs/getting-started/installation`,
+`kiro.dev/docs/getting-started/authentication`, and the installer scripts at `cli.kiro.dev`.
 
-### Two paths
+> **The record in `CLOUD_KIRO_READINESS.md` is now out of date.** It describes Kiro CLI **2.37.0**
+> installed on Linux with `login --license free --use-device-flow`. The current line is **3.0.0+**,
+> 2.x was the old desktop-app generation, and the login command has changed. Keep that file as the
+> historical record of the 2026-10-31 session — do not follow it as instructions.
 
-- **Kiro IDE** — the desktop app, from `kiro.dev`. Probably the easier path on Windows, and the
-  submission's write-up explicitly asks how the surfaces differed if you tried more than one, so
-  using it for at least one task is worth points. *Unverified: the download and install steps.*
-- **Kiro CLI** — what this project has used so far, and what every brief is written for.
+### Pick a surface
 
-### Kiro CLI — the verified record
+Kiro ships as a desktop **IDE**, a **CLI**, a **web app**, a mobile app, and **Crew**. Your `.kiro`
+configuration — the specs, steering and hooks already in this repository — **is shared across all of
+them**, so you can switch surfaces without redoing anything.
 
-**Verified**, from the 2026-10-31 setup:
+The submission's Kiro write-up asks "Kiro IDE, CLI, Web, Crew? How did they differ, if you tried
+multiple?" Only the CLI has been used so far, so running at least one task on a second surface is
+worth real points for very little effort.
 
-- Official installer at `https://cli.kiro.dev/install`. It was downloaded, inspected before running,
-  and installed into a user-local bin directory.
-- `kiro-cli --version` then reported **2.37.0**.
-- The official 2.37.0 **Linux x86_64** archive was independently checked against the HTTPS manifest:
-  SHA-256 `79b238338c7d94cf7005f67f3508aa5dd474778157f2a1c8481f47e716433aaf`. The installer enforces
-  SHA-256 verification itself.
-- Login used `login --license free --use-device-flow`. It printed an official approval URL and a
-  code, the browser approval completed, and the session reported `Device authorized` and
-  `Logged in successfully`.
-- `whoami --format json` then returned an authenticated account with `accountType` and `region`;
-  before login the same command returned `account: null`. That is the check for "am I actually
-  signed in".
-- `/usage` inside the chat reported the plan and credits — at that point `KIRO FREE, 0.33 of 50`.
+### System requirements
 
-**Unverified / platform caveat:** that record is **Linux x86_64**. The account screenshot of
-2026-11-10 appears to be Windows, where the installer and the SHA-256 will be different. Take the
-installer from the official site for your platform; do not reuse the Linux hash above as if it
-applied.
+- **IDE** — macOS, **Windows 10/11 on x64 or ARM64**, or Linux.
+- **CLI** — macOS, **Windows 11 (PowerShell)**, or Linux (glibc 2.34+, or the musl build).
 
-### Network hosts Kiro needs
+### Install — Windows
 
-Verified as the set in use on 2026-10-31. Only relevant if you are behind a restrictive firewall:
+Your account screenshot is Windows, so this is the path that applies.
 
-`cli.kiro.dev`, `prod.download.cli.kiro.dev`, `desktop-release.q.us-east-1.amazonaws.com`,
+**CLI**, in PowerShell:
+
+```powershell
+irm https://cli.kiro.dev/install.ps1 | iex
+```
+
+That script reads `prod.download.cli.kiro.dev/stable/latest/manifest.json`, takes the checksum from
+it, and installs `kiro-cli-x86_64-pc-windows-msvc.msi`. It is **x86_64 only** — on an ARM64 Windows
+machine use the IDE instead.
+
+**IDE**: download the installer from `kiro.dev` and run it.
+
+### Install — macOS or Linux
+
+```bash
+curl -fsSL https://cli.kiro.dev/install | bash
+```
+
+That script supports Darwin and Linux only; on anything else it stops with "Unsupported operating
+system". It verifies SHA-256 itself and installs to `~/.local/bin`, which you may need to add to
+`PATH`.
+
+### Confirm the version
+
+```
+kiro-cli --version
+```
+
+It must report **3.0.0 or later**. If it still shows 2.x you are on the old desktop-app line: run
+`kiro-cli update` (twice if the first run does not take), or re-run the install script.
+
+### Sign in
+
+```
+kiro-cli login
+```
+
+Then choose your sign-in method. **Pick "Use with Builder ID"** — your account page shows
+"Signed in with BuilderId", so matching it keeps you on the account that holds the credits. Builder
+ID, Google, GitHub and IAM Identity Center all support **device flow**, where the CLI prints a URL
+and a one-time code you enter in any browser.
+
+Check it took:
+
+```
+kiro-cli whoami --format json
+```
+
+Before login this returns `account: null`; after, it returns the account with `accountType` and
+`region`.
+
+### Confirm the credits are visible
+
+Start a chat and run `/usage`. You want the **bonus pool** to appear, not just the Kiro Free
+allowance. On 2026-11-10 the account page showed `kiroween-2026` at 0 / 4000 with 52 days left,
+beside Kiro Free at 44.65 / 50 resetting 12-01. If `/usage` shows only the free allowance, check
+`app.kiro.dev/settings/account` before spending time — and **write down exactly what it says**,
+because that number is submission evidence.
+
+### Network hosts
+
+Only relevant behind a restrictive firewall. In use on 2026-10-31: `cli.kiro.dev`,
+`prod.download.cli.kiro.dev`, `desktop-release.q.us-east-1.amazonaws.com`,
 `oidc.us-east-1.amazonaws.com`, `runtime.us-east-1.kiro.dev`, `management.us-east-1.kiro.dev`,
 `q.us-east-1.amazonaws.com`.
-
-### Confirming the credits are visible to the CLI
-
-After login, open a chat and run `/usage`. You are looking for the bonus pool to be visible, not
-just the Kiro Free allowance. The 2026-11-10 dashboard showed `kiroween-2026` at 0 / 4000 with 52
-days left, next to Kiro Free at 44.65 / 50 resetting 12-01. If `/usage` shows only the free
-allowance, check the account page at `app.kiro.dev/settings/account` before spending time on a
-session — and **write down what it actually says**, because that number is submission evidence.
-
-The 4,000 `kiroween-2026` credits are **already on the account** — the dashboard showed them at
-0 / 4000 used with 52 days left on 2026-11-10. There is nothing further to "apply". They are spent
-by doing work in Kiro against this repository.
 
 ## Before the session
 
@@ -83,14 +120,13 @@ Open `ops/kiro-brief.md`, or the specific file under `ops/kiro-briefs/`. Each br
 block written to be pasted straight in. It states the goal, the files Kiro may touch, the
 acceptance checks and what must not change.
 
-What worked on 2026-10-31, from `KIRO_SESSION_EVIDENCE.md`: **Kiro CLI 2.37.0**, Builder ID login,
-`kiro-cli chat --v3 --mode spec` for specification work and `--v3 --mode default` for
-implementation, with `--trust-tools=` left **empty** so every tool action is reviewed one at a time.
-No whole-tool or whole-folder trust rule was granted then and none is needed now.
+On 2026-10-31, under CLI 2.37.0, the sessions ran as `kiro-cli chat --v3 --mode spec` for
+specification work and `--v3 --mode default` for implementation, with `--trust-tools=` left
+**empty** so every tool action was reviewed one at a time. **Those flags are from the 2.x line and
+may have changed in 3.x** — check `kiro-cli chat --help` once you are installed. The principle
+carries over regardless: do not grant a whole-tool or whole-folder trust rule.
 
-**Trying more than one Kiro surface is itself worth points.** The submission's Kiro write-up asks
-"Kiro IDE, CLI, Web, Crew? How did they differ, if you tried multiple?" — so far only the CLI has
-been used. If you open one of the others for a task, note what was better or worse.
+If you open a second surface for a task, note what was better or worse — the write-up asks.
 
 ## Finish the session
 
