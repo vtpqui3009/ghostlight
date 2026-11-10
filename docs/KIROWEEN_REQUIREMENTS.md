@@ -125,3 +125,46 @@ on 2026-11-10 — if they are not yet redeemed, redeem before 2026-12-04.
 - **2026-10-30** — submissions opened.
 
 Nothing posted so far changes anything above.
+
+---
+
+# Conformance check — 2026-11-10
+
+Each line checked against the repository as it stands, not from memory.
+
+## Pass/fail requirements
+
+| Requirement | State | Verdict |
+|---|---|---|
+| New project, built inside the window | First commit 2026-10-31, inside 10-30 → 12-04. The research documents are dated 2026-10-31 too; the one earlier date in them (16/10/2026) is a cited forum thread's date, not project work | **pass** |
+| Public GitHub repository | **private** | **fail — U1** |
+| Open source licence detectable in the About section | `LICENSE` is verbatim 21-line MIT, which GitHub detects. Still needs eyes on the sidebar once public | pass, pending visual confirmation |
+| `/.kiro` at root, not gitignored | 7 files tracked across `specs/`, `steering/`, `hooks/`; `.gitignore` does not mention kiro | **pass** |
+| Repo holds all source, assets and run instructions | yes; `README.md` carries the commands | **pass** |
+| URL to a working app | none. `pages.yml` exists but is `workflow_dispatch` only, and Pages needs the repo public first | **fail — U1 then U2** |
+| Text description of the project | not drafted | **fail — C9** |
+| Demo video, under 3 min, public on YouTube | none. Script exists, but three of its beats cannot be filmed yet | **fail — U3** |
+| Write-up on how Kiro was used | none | **fail — C12** |
+| One category, team of at most 3, eligible country | Costume Contest, one person, Vietnam not excluded | **pass** |
+
+## The five criteria, honestly scored against what exists
+
+| Criterion | Where we stand |
+|---|---|
+| **Potential Impact** | Weakest. "Would someone actually use this?" — there is **no user evidence at all**. No stage manager has seen it. This gate has been NOT RUN since 2026-10-31 and nothing in the code changes it. |
+| **Technological Implementation** | This criterion is *only* about Kiro, and rewards **variety** and **experimentation**. Present: specs, steering, one hook. Missing: a verified hook trigger, MCP, custom agents, Kiro Crew, Kiro powers, property-based testing. And on 2026-11-10 the engine's import fix, the whole accessibility pass and the responsive fix were written **by the reviewer, not Kiro** — that subtracts here directly. |
+| **Design** | Strongest. 227 tests, `--strict` accessibility clean, 0 contrast failures across two schemes, three demos and three views, no 390 px overflow. But the category asks for a **haunting** interface and the visual language is muted — K10. |
+| **Innovation/Idea** | The idea is genuinely differentiated — per-physical-instance checking with independently authored required sources. But the competitor comparison is still **NOT RUN**, so the claim cannot be made with evidence. |
+| **Presentation** | Script written and timed. No video. Nothing is blocked except the features three of its beats need. |
+
+## What this changes about the plan
+
+1. **Every further `src/` change should go through Kiro.** Technological Implementation is 20% and
+   measures Kiro usage directly. The reviewer-written changes are declared honestly in the README,
+   which is the right thing to do, but each one is a subtraction on that criterion.
+2. **`docs/demo-script.md` needs a revision.** It spends 0:25 of 2:50 on "how Kiro built it", which
+   was written before the rules were read. That material now belongs in the **required written
+   Kiro write-up**, which is where Technological Implementation is actually scored. The video is
+   scored on Presentation: problem, audience, the product working end to end. Reclaim that time.
+3. **User validation is the highest-value hour available.** It is the only thing that moves
+   Potential Impact, it is 20%, and it is currently zero.
