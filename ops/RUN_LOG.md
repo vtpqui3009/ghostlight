@@ -281,3 +281,35 @@ should be spent against the bonus pool. **U8 is done**, not pending.
 
 Nothing in `src/` was touched. Remaining for the reviewer: C8 competitor comparison template, C9
 submission description, C13 blog and social drafts.
+
+## 2026-11-10 — run 8 (interactive): the reviewer's lane is finished
+
+**Section C of the roadmap has no TODO left.** Everything that does not require Kiro, a browser
+recording, a real stage manager, or the owner's own voice is now drafted and in the repository.
+
+- **C8** `docs/competitor-comparison.md` — the claim split into its three separately testable parts,
+  the same five bundled scenarios to run against CueCall, DigiScript and Standby, and a results
+  table that is honestly full of NOT RUN. It carries two rules that matter: only use access you are
+  entitled to, and "not visible in the public docs" is not the same as "the product cannot do it".
+  If a competitor turns out to do all three parts, the instruction is to say so and narrow the claim.
+- **C9** `docs/submission.md` — the Devpost form fields, the bonus-prize tick list, and the full
+  description. `TO FILL` on the app URL, the video, the comparison paragraph and the user sessions.
+- **C13** `docs/blog-post.md` — a complete blog draft to be rewritten in the owner's own words. The
+  **social post is deliberately not drafted**: that prize is judged on "original thoughts vs AI
+  writing", so the file gives the constraints and the raw material and stops there. Drafting it
+  would have actively lost the prize.
+
+Verified after all of it: `npm run check` green, **227/227 tests**, production build, and
+`npm run test:e2e -- --strict` **17 passed, 0 failed**. Nothing in `src/` was touched.
+
+### What is left, and who owns it
+
+Everything remaining needs either Kiro, a camera, a person, or the owner's own words:
+
+- **Kiro**: K4, K5, K3, K10, K7, K11, K12, K8, K6's CSV half, K9.
+- **Owner, away from the keyboard**: make the repository public and check the About sidebar; enable
+  Pages; run the two interviews; run the competitor comparison; record and upload the video;
+  publish the blog and social posts; answer the bonus-prize questions; submit.
+
+The daily run's standing instruction now applies: with section C empty it should review whatever
+Kiro has produced, sharpen the next brief, re-run the checks, and say it is waiting on the owner.
