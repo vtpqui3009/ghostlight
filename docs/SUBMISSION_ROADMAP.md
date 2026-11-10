@@ -8,6 +8,10 @@ still needs and who has to do it.
 **Deadline: 2026-12-04 14:00 PST = 2026-12-05 05:00 Vietnam time.** The daily run recomputes the
 days remaining; do not trust a number written here.
 
+The event's own requirements, and how far each one is met, live in
+[docs/KIROWEEN_REQUIREMENTS.md](KIROWEEN_REQUIREMENTS.md). Check against that file, not against
+memory of the rules.
+
 ## Decisions of 2026-11-10
 
 1. **`main` is the Kiro lineage.** `main` was fast-forwarded to `codex/ghostlight-domain-draft-20261031`
@@ -19,9 +23,18 @@ days remaining; do not trust a number written here.
    69 tests, axe 0 violations, print/reduced-motion equivalents). It is **reference only**. Its code
    must not be copied into `main` silently; anything adopted from it has to be reimplemented through
    Kiro or recorded explicitly as reviewer-authored.
-4. **Hosting: GitHub Pages** via Actions. The workflow is prepared in the repository; enabling Pages
+4. **Branches are consolidated, with one deliberate exception.** Both `codex/ghostlight-domain-draft-20261031`
+   and `codex/ghostlight-kiro-cloud-wip-20261031` are fully contained in `main`. The one commit that
+   was only on `codex/ghostlight-claudekit-review-20261031` — a 95-line review document — was
+   cherry-picked onto `main` as `8016173`. **`claude/read-repo-continue-lwbi83` is deliberately not
+   merged:** a trial merge conflicts in 9 files, including the Kiro-authored
+   `src/domain/engine.ts`, `.kiro/specs/ghostlight/design.md` and `.kiro/specs/ghostlight/tasks.md`.
+   It is a second, independent implementation of the same app, so merging it would both wreck the
+   tree and destroy the Kiro provenance that decision 2 exists to protect. Its good ideas are
+   already queued as Kiro items K2–K6.
+5. **Hosting: GitHub Pages** via Actions. The workflow is prepared in the repository; enabling Pages
    is the owner's action.
-5. **Kiro budget changed.** The owner reports ~4,000 credits available on 2026-11-10. The earlier
+6. **Kiro budget changed.** The owner reports ~4,000 credits available on 2026-11-10. The earlier
    free-only 50-credit ceiling and the 5-credit reserve pause no longer govern. Still check native
    `/usage` at the start of each Kiro session and record the observation; do not invent numbers.
 
@@ -95,6 +108,7 @@ Ordered. The daily run keeps `ops/kiro-brief.md` pointed at the first unfinished
 | C8 | `docs/competitor-comparison.md`: matrix and method, marked NOT RUN until U5 happens | TODO |
 | C9 | `docs/submission.md`: Devpost draft in English, with placeholders only the owner can fill | TODO |
 | C10 | Refresh `ops/kiro-brief.md` every run, and review whatever Kiro produced since the last run | Every run |
+| C11 | Finish `docs/KIROWEEN_REQUIREMENTS.md` by reading the Devpost tabs directly | TODO — blocked on the network. `kiroween.devpost.com` returned `getaddrinfo ENOTFOUND` on every attempt on 2026-11-10; the hosts are allowed on the `ghostlight` environment but the proxy had not picked it up. Retry; the tab list and what to look for are at the end of that file. |
 
 ## D. Already done
 
