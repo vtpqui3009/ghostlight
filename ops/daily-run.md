@@ -81,6 +81,30 @@ the owner, in a few lines: days remaining, what this run finished, the headline 
 brief, and which section-A items are now on the critical path. Flag it loudly if the video, the
 public repository, the public URL or the user sessions are still missing inside the last ten days.
 
+## Model tiers and delegation
+
+The run itself stays on the strongest model available. The two things it must not get wrong are
+reviewing what Kiro produced and writing the next brief, and both are judgment; on top of that,
+every number it writes down becomes submission evidence.
+
+Delegate the mechanical parts instead, with the `Agent` tool's `model` field:
+
+- **Haiku** — scans and classification. Find where something lives, run `npm run check` or
+  `npm run test:e2e` and report the raw numbers, read a log, list what changed since the last run,
+  check that links resolve. Cheap, fast, and fine to run several at once.
+- **Sonnet** — a C-item whose shape is already decided: a document from an outline you fixed, a CI
+  workflow, filling a template. Hand it the acceptance criteria, then read what comes back before
+  committing it.
+- **This run** — Step 1 review, Step 4 brief, and any sentence claiming something was verified.
+
+Never delegate the judgement of whether a check passed, the `ops/RUN_LOG.md` entry, or anything
+under `src/`.
+
+**Do not add more parallel sessions.** Two writers on `main` collide. The split that matters here is
+by owner, not by model: Kiro owns `src/`, `tests/domain|ui|persistence/` and `.kiro/`; this run owns
+`docs/`, `ops/`, `tests/e2e/` and `.github/`; the owner owns the offline items in section A of the
+roadmap. Those lanes touch disjoint files, which is the only reason they are safe to run at once.
+
 ## Size and scope guards
 
 - One roadmap item per run. One commit per run where possible.
