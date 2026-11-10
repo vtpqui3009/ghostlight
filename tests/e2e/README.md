@@ -76,7 +76,16 @@ because it lives in `src/`, which belongs to Kiro under the provenance rule.
 |---|---|
 | `specs/smoke.spec.mjs` | The production build boots with no console or uncaught errors; the honesty subtitle is on the first screen; the empty state offers all six demo scenes; a demo loads and the timeline renders cues; stage, reports and editor all render; selecting a failing action does not break the app. |
 | `specs/responsive.spec.mjs` | No horizontal overflow at 390 px on the first screen and in each view, naming the widest offending element when it fails; and whether keyboard focus can reach the timeline. |
-| `specs/accessibility.spec.mjs` | axe-core against four screens, under `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` **and `best-practice`**. |
+| `specs/accessibility.spec.mjs` | axe-core against **nine screens**, under `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` **and `best-practice`**. Four light-scheme views; the stage view again with a failing timeline row **selected**; and dark-scheme runs of the first screen, the selected stage view, reports and the editor. |
+
+### Why nine, and not the original four
+
+The first version scanned four light-scheme screens and never clicked a timeline row. Both
+omissions mattered: **nothing in this app is painted mint until a row is selected**, and the dark
+palette re-tints surfaces independently. Together they hid 19 real `color-contrast` nodes — found
+2026-11-10, recorded in the baseline, owned by the reopened Kiro item K2. A scan that never reaches
+the state a judge looks at cannot speak for it, so every scan now names its scheme and the stage
+scans select a failing step.
 
 `best-practice` is included on purpose: the project's own promises — one `main` landmark, all
 content inside landmarks — are axe best-practice rules rather than WCAG success criteria, and

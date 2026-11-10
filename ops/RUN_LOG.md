@@ -375,3 +375,127 @@ it belongs with **K10** or **K7**.
 
 The owner did not register for Kiroween 2025, so **Best Ghost of Kiroween Past is not available**.
 Removed from the submission checklist rather than left as an open question.
+
+## 2026-11-10 — run 10 (scheduled, automated): the harness was lying by omission
+
+**24 days to the deadline.** Section C had no TODO left, so this run followed the standing
+instruction — review, re-verify, sharpen the brief, report — and Step 2 turned up something real.
+
+First, a gap in this log: the three commits before this one (`73c2578`, `f7e32bd`, `95eff47`, the
+Kiro session how-to and its two corrections) came from an interactive session that never wrote its
+own entry. Recorded here so the history is continuous. No `src/` changes since run 9, so **the
+owner has not run a Kiro session yet.**
+
+### Step 0 and Step 2 — verified, not assumed
+
+`git push --dry-run origin main` → `Everything up-to-date`, exit 0. Write access proven without
+creating a probe branch.
+
+From a clean `npm ci`: `npm run check` **green — 235/235 tests**, production build, 48 modules.
+`npm run test:e2e -- --strict` → **20 passed, 0 failed** on the harness as committed.
+
+And that last number was the problem.
+
+### The finding — 19 contrast failures the harness could not see
+
+Chasing run 9's parked note ("the selected timeline row is painted mint green even when it is the
+failing step"), I read the CSS, then measured computed styles out of a real Chromium page, then ran
+axe-core over three demos × three views × two schemes with a failing row selected:
+
+| Scope | `color-contrast` nodes |
+|---|---|
+| Committed harness, one demo, row selected | **1** light, **6** dark |
+| Wider sweep, 3 demos × 3 views × 2 schemes | **19** — every one on the stage view, all with a row selected |
+
+Worst measured ratios: **3.91:1** (`#5a5a5a` on `#7ed4ad`) in light, **1.91:1** (`#e8e5dc` on
+`#5eb88f`) in dark. First screen, reports and editor are clean in **both** schemes.
+
+Cause: `.action-item.selected` in `src/styles.css` sets `background: var(--mint)` and **no
+foreground**, so the row's text keeps the colour it had against parchment. The same class of bug
+K2 already fixed everywhere else with role tokens.
+
+**Why no scan caught it: nothing in this app is painted mint until a timeline row is clicked, and
+no scan had ever clicked one.** The committed harness also ran the light scheme only. Run 5's
+widened sweep — the source of the "0 contrast failures across two schemes" figure repeated in the
+roadmap and in `docs/KIROWEEN_REQUIREMENTS.md` — was a one-off script that was never committed, and
+it shared the same blind spot. That 0 was honestly measured and still wrong about the app. **The
+claim is corrected in both documents and in `QA_RESULTS.md` rather than quietly dropped.**
+
+### What I did and did not do about it
+
+The fix is in `src/styles.css`, which is **Kiro's**. I did not touch it. **K2 is reopened** for it
+in `ops/kiro-briefs/K2.md`, with the measured numbers, the one-line cause, the token-pair shape of
+the fix, and the note that the same rule paints a *rejected* step green — so the failing step reads
+as the passing one. That part overlaps K10 and the brief says so.
+
+The harness gap is **mine**, and it is closed (added as roadmap **C14**):
+
+- `tests/e2e/lib/page.mjs` — a `colorScheme` argument and a `selectFailingAction` helper.
+- `tests/e2e/specs/accessibility.spec.mjs` — **9 scans, up from 4**: the four originals, a selected
+  failing row in both schemes, and dark-scheme runs of the first screen, reports and editor.
+- A bootstrap bug fixed on the way: `--record` asserted a baseline entry already existed before it
+  would record one, so a newly added screen could never be recorded at all.
+
+Verified after the change: `npm run test:e2e -- --record` → 25 passed; plain `npm run test:e2e` →
+**25 passed, 0 failed** (green on written-down debt, which is what CI runs); `--strict` → **23
+passed, 2 failed**, failing on exactly the two selected-row scans and nothing else. The ledger
+behaves as designed in all three modes.
+
+**I added C14 beyond the original section C.** The contract says not to invent scope, and this is me
+saying plainly that I did: a harness reporting green over a live WCAG AA failure on the main view is
+not honest evidence, and making the claim reproducible is the job this run exists to do. Object if
+you disagree — it is confined to `tests/e2e/`.
+
+### Second finding — the ghost does not render
+
+`src/ui/StageView.tsx` emits glyph classes `required | planned | match | mismatch | other`.
+`src/styles.css` defines `.prop-glyph.ghost` and `.prop-glyph.solid`, which **match nothing**, and
+has no rule for `required`, `planned` or `other` — so three of the five types paint as a plain white
+box. Confirmed in the browser: `prop-glyph planned` computes to `rgb(255, 255, 255)`.
+
+So the ghost-versus-solid visual language — the thing the Costume Contest entry is built on —
+exists in the stylesheet and is applied to nothing. It survives only in the word labels, which is
+why 235 tests and nine axe scans all pass over it: the information is present, the visual language
+is not. **Anywhere this repository says "ghost versus solid already exists", it is true of the CSS
+and false of the screen.** Not fixed here; it is `src/`. It makes K10 materially bigger and
+undercuts K3's premise, and both briefs now say so.
+
+### Step 4 — the brief queue
+
+`ops/kiro-brief.md` was still carrying the **completed K1 brief** with 2026-11-10-morning numbers
+(222 tests, 14 passed / 1 failed, 33 axe violations, a 73 px overflow) — a Kiro session opening it
+today would have started from a task already done and baselines that had all moved. Rewritten to
+point at **K8** with today's verified numbers.
+
+Two briefs that the roadmap claimed existed did not exist. Written:
+
+- **`K11.md`** — property-based testing. This is **not new scope**: `.kiro/specs/ghostlight/tasks.md`
+  §2.6 and `design.md` line 235 already specify `tests/pbt/*.test.ts` with fast-check and name the
+  seven properties. Verified today: `tests/pbt/` does not exist and `fast-check` is not a
+  dependency. Kiro wrote the spec; Kiro should close it. The brief leans hard on reporting a
+  negative result honestly if the properties all hold first time.
+- **`K10.md`** — the haunting interface, now carrying the dead-CSS finding above.
+
+**K12 is deliberately left unbriefed** — which of MCP, custom agents, Crew or powers is worth using
+depends on what the first sessions teach, and a brief written now would be a guess. The roadmap no
+longer claims otherwise.
+
+Queue is now **K8 → K2 (reopened) → K11 → K10 → K3 → K7 → K6 CSV → K12 → K9**. K2's reopened part
+goes ahead of K11 because it is a live AA failure on the main view and is roughly one token pair.
+K8 stays first: it is ten minutes, costs no code, and the how-to's reasoning for it still holds.
+
+One thing checked so it does not mislead during K8: the hook script prints
+`[ghostlight hook] NOT RUN — dependencies not installed` when `node_modules` is absent. **That
+message is itself proof the hook fired.** The brief now says so, with `npm ci` first.
+
+### Blocked, and on whom
+
+Still **nothing from the owner's lane**: repository private, no Pages, no public URL, no video, no
+user sessions, no competitor comparison, **and no Kiro session since 2026-11-01**. Potential Impact
+is 20% of the score and is currently zero evidence.
+
+Inside week 1 the two long-lead items are **U1 (make the repository public)** and **U4 (line up two
+stage managers)**. U4 has the longest lead time of anything left and cannot be compressed later.
+
+Also noted, not acted on: `origin/ops/push-probe-20261110` from run 2 is **still on the remote**.
+Deleting a remote branch is the owner's call, so it is flagged rather than removed.

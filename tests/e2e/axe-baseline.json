@@ -8,6 +8,38 @@
     "first-screen": [],
     "stage-view": [],
     "reports-view": [],
-    "editor-view": []
+    "editor-view": [],
+    "stage-view-selected": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "nodeCount": 1,
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+        "targets": [
+          ".selected > .action-label > .action-secondary"
+        ]
+      }
+    ],
+    "first-screen-dark": [],
+    "stage-view-selected-dark": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "nodeCount": 6,
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+        "targets": [
+          ".selected > .action-label > .action-primary",
+          ".selected > .action-label > .action-secondary",
+          ".mismatch > .prop-id",
+          ".mismatch > .prop-position",
+          ".planned > .prop-id",
+          ".planned > .prop-position"
+        ]
+      }
+    ],
+    "reports-view-dark": [],
+    "editor-view-dark": []
   }
 }

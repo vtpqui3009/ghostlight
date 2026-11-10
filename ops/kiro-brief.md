@@ -1,141 +1,109 @@
 # Kiro brief — current task
 
-**K1, K2, K4, K5 and the responsive half of K6 are done** — all implemented on 2026-11-10 by the
-reviewer, not by Kiro, at the owner's explicit direction. Every file is named in the authorship
-table in `README.md`. The K1 brief is kept below for the record of what the defect was and how it
-was proven.
+Refreshed by the daily run on **2026-11-10**, against numbers it measured the same day. One brief
+at a time; the full queue is in [`kiro-briefs/`](kiro-briefs/).
 
-**Start your next Kiro session with [`kiro-session-howto.md`](kiro-session-howto.md)**, which has
-the recommended order and what to record. The short version: **K8 → K11 → K10 → K3 → K7 → K6 CSV →
-K12 → K9**, starting with K8 because it is the cheapest and it closes a gap that has been recorded
-as NOT VERIFIED since 2026-10-31.
+**Start with [`kiro-session-howto.md`](kiro-session-howto.md)** — install, sign-in, what to record.
 
----
+## Where the project actually stands, verified today
 
----
+From a clean `npm ci` on 2026-11-10:
 
-# Kiro brief — current task
+| Check | Result |
+|---|---|
+| `npm run lint` / `typecheck` / `build` | pass — production build, 48 modules |
+| `npm test` | **235 passed** (31 engine, 134 acceptance, 13 persistence, 44 action-form, 8 guided-fix, 5 import-guard) |
+| `npm run test:e2e` | **25 passed, 0 failed** — green on written-down debt |
+| `npm run test:e2e -- --strict` | **23 passed, 2 failed** — both the selected-row contrast below |
+| `known-failures.json` | empty |
 
-Refreshed by the daily run. Paste the block below into a native Kiro session. One brief at a time;
-the daily run replaces this file when the task is accepted.
+**K1, K2, K4, K5 and the responsive half of K6 are done** — implemented on 2026-11-10 by the
+reviewer, not by Kiro, at the owner's explicit direction, and named in the authorship table in
+`README.md`. That direction does not carry over: `src/` is Kiro's again.
 
-**Task K1 — repair the delayed-import race.** Prepared 2026-11-10. Full evidence:
-[`docs/handoff/ACTIONFORM_CHECKPOINT.md`](../docs/handoff/ACTIONFORM_CHECKPOINT.md).
+## Today's task — K8, and it costs no code
 
-## Before you start
+**[K8 — verify the hook actually triggers](kiro-briefs/K8.md).** Ten minutes, no source change, and
+it closes a line that has read **NOT VERIFIED** in `KIRO_SESSION_EVIDENCE.md` since 2026-10-31.
+`.kiro/hooks/domain-typecheck.json` declares a `PostFileSave` hook on `src/domain/.*\.tsx?$`. The
+JSON parses, the regex matches, the script runs. What has never been observed is Kiro firing it by
+itself.
 
-- Open the repository at `main` (now the Kiro lineage, `260bca4` or later). Run `npm ci` then
-  `npm run check` once and confirm the baseline: lint, strict typecheck, 222 tests, production build.
-  Verified green by the daily run on 2026-11-10.
-- Check native `/usage` and note the number. The owner reports about 4,000 credits as of 2026-11-10,
-  so the old free-only 50-credit ceiling no longer applies — but record what `/usage` actually says
-  rather than assuming.
-- Kiro is the author of application source and domain tests. Do not ask a reviewer to write them.
-- There is now a reviewer-authored browser harness: `npm run build && npm run test:e2e`
-  (see `tests/e2e/README.md`). It is **not** part of `npm run check`, and it is currently red on one
-  real defect that belongs to a later task — see "Known failures you are not fixing today" below.
-  Do not change anything under `tests/e2e/`; it is reviewer-owned, like the rest of the harness.
+1. Save a file under `src/domain/` — whitespace is enough; revert it after.
+2. Watch for the hook. Record **verbatim** what appeared.
+3. Save a file **outside** `src/domain/` and confirm it does **not** fire.
 
-## Paste this into Kiro
+One thing the daily run checked today so it does not confuse you: the hook script
+(`.kiro/hooks/typecheck-domain.sh`) deliberately skips when dependencies are missing and prints
 
-```text
-Repair one reproduced defect in Ghostlight, nothing else.
-
-Defect: in src/ui/ImportExport.tsx the FileReader.onload handler captures the
-onImport callback from the render in which the read started. That stale closure
-still sees editorHasDraft = false, so a file read that completes after an action
-draft has opened replaces the scene even though the draft guard should reject it.
-Saving the retained old draft then overwrites the freshly imported action with the
-old kind, prop, source, destination and note.
-
-Reproduce it first, with a controlled FileReader completion:
-1. Load a scene containing an action with id `shared`, no draft open.
-2. Begin importing a valid replacement scene that reuses the same cue and action
-   ids, but hold the read completion.
-3. Open `shared` in the current scene, change its note, keep the draft open.
-4. Release the read completion. Today the replacement is imported anyway.
-5. Save the retained draft. Today it overwrites the imported action.
-
-Fix: decide the import replacement using the draft state at completion and commit
-time, not a stale render callback. Use a stable callback reading current state, or
-an equivalent latest-state reference. On rejection, leave both the scene and the
-draft exactly as they were, and keep the existing rejection message. Parser
-ownership stays where it is: the replay still expects structurally validated input.
-
-Do not fix this by silently resetting the draft, by blocking imports permanently,
-or by rewriting unrelated UI. Imports must still work normally after a deliberate
-Save or Cancel, including a read that was started while editing and completes
-after the draft is resolved.
-
-Add a regression test that drives the controlled delayed-read sequence and asserts
-that the scene and the draft are both unchanged while a draft is active. Keep the
-existing tests passing; do not weaken an assertion to get green.
-
-When the edits are final, run once: npm run lint, npm run typecheck, npm test,
-npm run build. Report the real results, including any failure.
+```
+[ghostlight hook] NOT RUN — dependencies not installed. Run `npm install` first (T2).
 ```
 
-## Acceptance for this task
+**That message is itself proof the hook fired.** Run `npm ci` first and you should instead get
+`[ghostlight hook] Running typecheck after a domain-model change...` and a PASS. Either way, a
+negative result recorded honestly is worth more than a claim — write down whichever you see.
 
-- The delayed-read sequence is reproduced, then rejected: scene unchanged, draft unchanged.
-- Ordinary import after Save or Cancel still works, including a read started while editing.
-- Failed-import retention and the six action-kind editor controls still pass.
-- A regression test covers the race and is authored through Kiro.
-- `npm run check` passes with the test count at 223 or more, and the real number is reported.
-- `npm run build && npm run test:e2e` is no worse than the recorded 14 passed / 1 failed. The one
-  failure must still be the Reports 390 px overflow and nothing else; if a new failure appears, K1
-  caused it.
+## Then this, and it is ahead of K11 now
 
-## Must not change
+**[K2, reopened — the selected row](kiro-briefs/K2.md#reopened-2026-11-10--the-selected-row-the-first-scan-could-not-see).**
+Newly found today, one token pair to fix, and it corrects a claim this repository has been making.
 
-`src/domain/**` behaviour, the parser contract, the 200,000-byte import limit, the existing
-rejection messages, or any `.kiro/` specification — unless the repair genuinely requires it, in
-which case say so explicitly rather than editing quietly.
+K2 was closed on a scan that reported zero violations. The scan was not lying; the harness never
+put the app into the state where the defect lives. **Nothing is painted mint until a timeline row
+is clicked**, and the old scans never clicked one — nor did they ever run the dark scheme. Both
+gaps are closed now, and with a failing row selected axe-core 4.14.0 measures:
 
-## Evidence to record afterwards
+| Scheme | Nodes | Worst ratio |
+|---|---|---|
+| light | **1** | 3.91:1 — `#5a5a5a` on `#7ed4ad` |
+| dark | **6** | 1.91:1 — `#e8e5dc` on `#5eb88f` |
 
-Append to `KIRO_SESSION_EVIDENCE.md`: the date, CLI version, model and mode, `/usage` before and
-after, which files Kiro wrote, what failed on the way, and the final command results. Keep raw
-transcripts and credentials out of the repository.
+A wider reviewer sweep over three demos, three views and both schemes found **19** nodes of that
+rule, **every one of them on the stage view with a row selected**. First screen, reports and editor
+are clean in both schemes.
 
-## Known failures you are not fixing today
+The cause is `.action-item.selected` in `src/styles.css` (~line 342) setting a background and no
+foreground — the same class of bug K2 already fixed everywhere else with role tokens. And the same
+rule paints a **rejected** step green, so the failing step reads as the passing one.
 
-The daily run's first harness execution on 2026-11-10 found these. They are **real, observed
-numbers**, not estimates. None of them is K1, so leave them alone this session — they are listed so
-you do not think the harness is broken when it goes red.
+## The queue after that
 
-| Observed | Owner |
-|---|---|
-| Reports table overflows a 390 px viewport by **73 px** (`table.report-table`); stage, editor and the first screen do not overflow | K6 (reports), newly found |
-| `color-contrast` — **3** nodes on the first screen, **5** stage, **6** reports, **18** editor | K2 |
-| `landmark-one-main` **1** node and `region` **2** nodes, first screen only — the loaded views do have a `main` | K2 |
-| `label-content-name-mismatch` — **4** nodes on every loaded view, on the timeline's `role="treeitem"` cue headers and action rows, where the `aria-label` does not contain the visible text | K2, newly found |
+Order from [`kiro-session-howto.md`](kiro-session-howto.md), with today's insertion:
 
-## Next in the queue
+**K8 → K2 (reopened) → K11 → K10 → K3 → K7 → K6 CSV → K12 → K9**
 
-**K2 — accessibility**, now with the counts above rather than the earlier partial figure of three
-violations. Note two things when you reach it:
+K2's reopened part jumps ahead of K11 because it is a live WCAG AA failure on the main view, it is
+roughly one token pair, and until it lands the submission cannot honestly claim a clean
+accessibility sweep. Every item has a written brief in [`kiro-briefs/`](kiro-briefs/) except **K12**,
+which is deliberately unwritten — what to try there depends on what you learn in the first two
+sessions.
 
-- The first screen has no `main` landmark at all, because `<main className="app-main">` in
-  `src/App.tsx` only renders once a scenario is loaded. The empty state and the storage-error alert
-  therefore sit outside any landmark. Fixing the empty state alone will not clear `region`.
-- `label-content-name-mismatch` is a genuine screen-reader defect, not a lint nit: in
-  `src/ui/Timeline.tsx` the `aria-label` on a cue header reads `Cue: <title>. N actions. Click to
-  expand`, which does not contain the visible text as a substring in the right form. The accessible
-  name must contain the visible label.
-- When K2 is done, empty the arrays in `tests/e2e/axe-baseline.json` by running
-  `npm run test:e2e -- --record`, then confirm `npm run test:e2e -- --strict` passes. Do not
-  hand-edit that file.
+Two of these are smaller than they look, and one is bigger:
 
-## The rest of the queue
+- **[K11](kiro-briefs/K11.md)** is not new scope. `.kiro/specs/ghostlight/tasks.md` section 2.6
+  already specifies `tests/pbt/*.test.ts` with fast-check and names the properties. It was never
+  implemented. Kiro wrote the spec; Kiro should close it.
+- **[K10](kiro-briefs/K10.md)** is bigger than it looked. The ghost-versus-solid visual language
+  **does not render at all**: `StageView.tsx` emits `required | planned | match | mismatch | other`
+  while the stylesheet defines `.ghost` and `.solid`, which match nothing. Three of the five types
+  fall back to a plain white box. Documents in this repository that say "ghost versus solid already
+  exists" are true of the CSS and false of the screen.
+- **[K3](kiro-briefs/K3.md)** should be re-read against that finding before you start it.
 
-Every remaining item now has a written brief with measured evidence and its own paste block, in
-[`ops/kiro-briefs/`](kiro-briefs/). Run order: **K1 (this file) → [K2](kiro-briefs/K2.md) →
-[K4](kiro-briefs/K4.md) → [K5](kiro-briefs/K5.md) → [K3](kiro-briefs/K3.md) →
-[K6](kiro-briefs/K6.md) → [K7](kiro-briefs/K7.md) → [K8](kiro-briefs/K8.md) →
-[K9](kiro-briefs/K9.md)**, which is also the order the demo script needs.
+## Every session, without exception
 
-Reading the code on 2026-11-10 made three of them smaller than they looked: the causal trace is
-already printed and only needs to become navigable (K4), ghost-versus-solid already exists and only
-needs a list equivalent (K3), and the print path already exists so K6 is the 390 px overflow plus
-CSV. Each brief says so at the top, so no credits go on rebuilding what is there.
+**Before:** `git checkout main && git pull --ff-only`, then `npm ci && npm run check` to confirm you
+start from green at 235 tests. Check native `/usage` and **write the number down** — note which
+pool it moves, the `kiroween-2026` bonus or the separate Kiro Free allowance.
+
+**After:** `npm run lint && npm run typecheck && npm test && npm run build`, then
+`npm run test:e2e -- --strict` if the machine has a browser. Then append to
+`KIRO_SESSION_EVIDENCE.md`: date, CLI version, model and mode, `/usage` before and after, which
+files Kiro wrote, **what failed on the way**, and the final command results. The failures are the
+most convincing part of that file — do not tidy them out. Finally, fill the matching `TO FILL` block
+in `docs/kiro-writeup.md` while it is fresh.
+
+**Never:** weaken a test, a lint rule or a type check to get green. Never edit anything under
+`tests/e2e/` — it is reviewer-owned, and it is the thing measuring you. If you think a scan is
+wrong, say so in the session notes.
