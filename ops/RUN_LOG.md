@@ -123,3 +123,33 @@ historical and must be re-checked in the next Kiro session, not assumed.
 - Blocked on the owner, unchanged: repository private, Pages not enabled, no video, no user
   sessions, no executed competitor comparison, and **no Kiro session has run since 2026-11-01** —
   every K-item is still waiting.
+
+## 2026-11-10 — run 4 (interactive, owner-directed): the Kiro queue
+
+The owner asked for "the Kiro part". Kiro cannot be driven from this container — the CLI is not
+installed here and the Builder ID login lives on the owner's machine — and under the provenance rule
+the reviewer does not author `src/`. So this run did the part that is the reviewer's: it read the
+code and turned every remaining K-item into a brief with measured evidence.
+
+- Added `ops/kiro-briefs/` with K2, K3, K4, K5, K6, K7, K8, K9 and a README giving the run order,
+  each with a block to paste straight into Kiro, acceptance checks and a "must not change" list.
+- **Reading the source corrected three items that had been scoped from assumption:**
+  - **K4 is small.** The causal trace is already computed *and already printed* —
+    `src/ui/StageView.tsx` around line 112 renders "Cause: Earlier action a1 in cue cue-1". It is
+    inert text using raw ids; the work is making it navigable, not building causality.
+  - **K3 is small.** Ghost versus solid already exists with word labels, `REQUIRED:` and `BEFORE:`,
+    typed `'required' | 'planned' | 'match' | 'mismatch'`. The missing piece is only the plain list
+    equivalent that defaults under `prefers-reduced-motion`.
+  - **K6 is half done.** `window.print()` and an `@media print` block already exist. CSV export does
+    not exist anywhere in `src/`. So K6 is the 390 px overflow plus CSV, not "build the reports".
+- **K2 now names three causes rather than 33 nodes:** the empty-state branch of `src/App.tsx`
+  renders outside `<main>`, so the first screen has no landmark; contrast is a token problem on
+  `.small` and `--text-mid`/`--text-light`, not 32 separate selectors; and the two
+  `label-content-name-mismatch` strings are a singular/plural slip ("1 action" versus "N actions")
+  and an `aria-label` that omits the visible `ID: … • code` line, both in `src/ui/Timeline.tsx`.
+- `docs/SUBMISSION_ROADMAP.md` section B rewritten with the corrected scope and links; the Step 4
+  contract now says to refresh an existing brief rather than write one from scratch.
+- No application source was touched. `npm run check` green (222/222), `npm run test:e2e` 14 passed
+  with the one ledgered failure, exit 0.
+- Still blocked on the owner, unchanged: repository private, Pages not enabled, no video, no user
+  sessions, no competitor comparison, and **no Kiro session since 2026-11-01**.

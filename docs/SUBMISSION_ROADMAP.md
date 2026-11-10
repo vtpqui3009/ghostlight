@@ -81,19 +81,25 @@ The harness scans four screens under `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` 
 
 ## B. Kiro work — briefs prepared for you, you run them in Kiro
 
-Ordered. The daily run keeps `ops/kiro-brief.md` pointed at the first unfinished one.
+Every item has a written brief in [`ops/kiro-briefs/`](../ops/kiro-briefs/), with measured evidence
+and a block to paste straight into Kiro. `ops/kiro-brief.md` always points at the first unfinished
+one. Run order: **K1 → K2 → K4 → K5 → K3 → K6 → K7 → K8 → K9**, which is also the order the demo
+script needs.
 
-| ID | Task | Why it matters |
+Three of these were scoped wrongly before the code was read on 2026-11-10, and are smaller than
+they looked. That is recorded here so the credits are not spent rebuilding what exists.
+
+| ID | Task | State and why it matters |
 |---|---|---|
-| K1 | **Import race repair** — latest-state import validation; scene and draft unchanged on rejection; regression test | Reproduced product defect; blocks full UI acceptance. Full brief: `docs/handoff/ACTIONFORM_CHECKPOINT.md` |
-| K2 | **Accessibility fixes**: the three axe violations, one `main` landmark, all content inside landmarks, contrast to WCAG AA | Design is 20% of judging, and the project promises keyboard/contrast/reduced-motion equivalents |
-| K3 | **Stage view**: required *ghost* versus modelled *solid* with physical IDs and words, not colour alone; a list/table equivalent for reduced motion, small screens and print | The category fit and the central demo beat both rest on this |
-| K4 | **Findings and causal navigation**: each finding opens its failed condition and jumps to the earlier action that caused it | Requirement 4; "open the cause" is the 1:00–1:45 beat of the video |
-| K5 | **Guided fix**: from a finding, insert the missing move or handoff and re-run so the verdict visibly changes | The "fix it and re-run" beat of the video; strongest single demo moment |
-| K6 | **Reports**: preset, per-runner and reset, with CSV and a print stylesheet | Requirement 5; the printed sheet is what a crew actually carries |
-| K7 | **Empty and error states**, and a prominent "planned state, not live tracking" banner | Honesty requirement 7, and the first screen a judge sees |
-| K8 | **Automatic hook triggering verified** in a native Kiro session | Recorded as NOT VERIFIED in `KIRO_SESSION_EVIDENCE.md`; a manual invocation is not evidence of a trigger |
-| K9 | **Dependency modernisation**: `vitest` ≤4.0.0-beta.19 and `tinypool` ≤2.1.1 carry critical advisories, `vite` ≤6.4.3 a high one | All dev-only — `npm audit --omit=dev` is clean — but a public repository shows them. Open since 2026-10-31, when npm reported the selected ESLint version unsupported. A vite and vitest major jump can break the Kiro-authored tests, so it is Kiro's, not a reviewer bump. |
+| K1 | **Import race repair** — latest-state import validation; scene and draft unchanged on rejection; regression test | Reproduced product defect; blocks full UI acceptance. Brief: [`ops/kiro-brief.md`](../ops/kiro-brief.md), evidence in `docs/handoff/ACTIONFORM_CHECKPOINT.md` |
+| K2 | **Accessibility** — 33 violations over four screens | Three causes, not 33: the empty state renders outside `<main>`; contrast is a token problem on `.small` and `--text-mid`/`--text-light`; two `aria-label` strings in `Timeline.tsx` contradict their visible text. [`K2.md`](../ops/kiro-briefs/K2.md) |
+| K4 | **Make the cause navigable** | **Smaller than it looked.** The cause is already computed *and already printed* in `StageView.tsx` — "Earlier action a1 in cue cue-1". It is just inert and uses raw ids. [`K4.md`](../ops/kiro-briefs/K4.md) |
+| K5 | **Guided fix** — offer the one unambiguous edit, apply it, replay | The "fix it and re-run" beat; strongest demo moment. Deliberately narrow: holder-only and zone-only mismatches, nothing else. [`K5.md`](../ops/kiro-briefs/K5.md) |
+| K3 | **List equivalent and reduced motion** | **Smaller than it looked.** Ghost versus solid already exists with word labels (`REQUIRED:` / `BEFORE:`). What is missing is the plain list carrying the same facts, defaulting on `prefers-reduced-motion`. [`K3.md`](../ops/kiro-briefs/K3.md) |
+| K6 | **Reports: 390 px overflow and CSV** | **Print already exists** (`window.print()` plus an `@media print` block); CSV does not exist at all. The reports table spills 73 px at 390 px — the one entry in `known-failures.json`. [`K6.md`](../ops/kiro-briefs/K6.md) |
+| K7 | **Empty state and first screen** | The honesty subtitle is already there and smoke-tested; the empty state itself is seven bare buttons under "No Scene Loaded". Do K2 first — it rewrites the same region. [`K7.md`](../ops/kiro-briefs/K7.md) |
+| K8 | **Automatic hook triggering verified** in a native Kiro session | Recorded as NOT VERIFIED since 2026-10-31; a manual invocation is not evidence of a trigger. Cheap, and it is exactly what Technological Implementation asks about. [`K8.md`](../ops/kiro-briefs/K8.md) |
+| K9 | **Dependency advisories** — `vitest` ≤4.0.0-beta.19 and `tinypool` ≤2.1.1 critical, `vite` ≤6.4.3 high | All dev-only — `npm audit --omit=dev` is clean — but a public repository shows them. Last, because a major bump can break the 222 Kiro-authored tests. [`K9.md`](../ops/kiro-briefs/K9.md) |
 
 ## C. Automated daily run (Claude) — no application source
 

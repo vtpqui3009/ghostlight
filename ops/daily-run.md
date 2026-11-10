@@ -66,11 +66,13 @@ not to patch `src/` yourself.
 turns out to be more than a day's work, split it in the roadmap and complete the first part. Do not
 start a second item to fill time; a smaller honest run is better than a sprawling one.
 
-**Step 4 — write `ops/kiro-brief.md`.** Replace it with a brief for the first unfinished K-item,
-written so the owner can paste it straight into Kiro. It must state: the goal in one sentence, the
-exact files Kiro may touch, the acceptance checks, what must *not* change, and a reminder to record
-`/usage` and what Kiro wrote into `KIRO_SESSION_EVIDENCE.md`. If Kiro produced work since the last
-run, review it first and fold concrete findings into the brief.
+**Step 4 — keep the Kiro brief current.** A written brief already exists for every K-item in
+`ops/kiro-briefs/`. Point `ops/kiro-brief.md` at the first unfinished one and refresh it with
+today's real numbers, rather than writing one from scratch; if the code has moved under it, correct
+the brief instead of leaving it stale. Each brief states the goal in one sentence, the
+measured evidence, the acceptance checks, what must *not* change, and a reminder to record `/usage`
+and what Kiro wrote into `KIRO_SESSION_EVIDENCE.md`. If Kiro produced work since the last run,
+review it first and fold concrete findings into the brief.
 
 **Step 5 — update the records.** Set the real statuses in `docs/SUBMISSION_ROADMAP.md`, refresh its
 state table with the numbers from Step 2, and append one entry to `ops/RUN_LOG.md`: date, days left,

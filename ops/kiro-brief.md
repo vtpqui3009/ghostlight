@@ -111,5 +111,15 @@ violations. Note two things when you reach it:
   `npm run test:e2e -- --record`, then confirm `npm run test:e2e -- --strict` passes. Do not
   hand-edit that file.
 
-Then **K3** ghost-versus-solid stage view with a list equivalent. See
-`docs/SUBMISSION_ROADMAP.md` section B.
+## The rest of the queue
+
+Every remaining item now has a written brief with measured evidence and its own paste block, in
+[`ops/kiro-briefs/`](kiro-briefs/). Run order: **K1 (this file) → [K2](kiro-briefs/K2.md) →
+[K4](kiro-briefs/K4.md) → [K5](kiro-briefs/K5.md) → [K3](kiro-briefs/K3.md) →
+[K6](kiro-briefs/K6.md) → [K7](kiro-briefs/K7.md) → [K8](kiro-briefs/K8.md) →
+[K9](kiro-briefs/K9.md)**, which is also the order the demo script needs.
+
+Reading the code on 2026-11-10 made three of them smaller than they looked: the causal trace is
+already printed and only needs to become navigable (K4), ghost-versus-solid already exists and only
+needs a list equivalent (K3), and the print path already exists so K6 is the 390 px overflow plus
+CSV. Each brief says so at the top, so no credits go on rebuilding what is there.
