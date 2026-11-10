@@ -153,3 +153,63 @@ code and turned every remaining K-item into a brief with measured evidence.
   with the one ledgered failure, exit 0.
 - Still blocked on the owner, unchanged: repository private, Pages not enabled, no video, no user
   sessions, no competitor comparison, and **no Kiro session since 2026-11-01**.
+
+## 2026-11-10 — run 5 (interactive, owner-directed): K1, K2 and half of K6 in `src/`
+
+The owner instructed the reviewer to write application source directly, after being told that it
+weakens the Kiro-authorship evidence the lineage choice exists to protect. That instruction is
+recorded in `docs/SUBMISSION_ROADMAP.md` decision 6, the exception clause in `ops/daily-run.md`,
+and an authorship table in `README.md` naming every file. It does not carry over to later runs.
+
+### K1 — the delayed-import race
+
+`src/ui/importGuard.ts` (new) takes a **getter**, not a boolean, so the decision is made when the
+file read completes rather than when it started. `src/App.tsx` holds the draft flag in a ref and
+wires the guard; `src/ui/ImportExport.tsx` calls the newest `onImport` instead of the one its
+render captured.
+
+Proven both ways, which is the part that matters: `tests/e2e/specs/import-race.spec.mjs` drives a
+controlled `FileReader` that holds its completion. With the fix both tests pass. With `src/`
+reverted — and the build genuinely rebuilt, which the first attempt at this check got wrong — both
+fail with the reported symptom, "the held read replaced the scene even though a draft was open".
+
+That reverted run also exposed a **mirror-image defect the original brief only half described**:
+the old code did not merely let through imports that should have been blocked, it also *wrongly
+blocked* a read that completed after a deliberate Cancel. Both directions are now covered.
+
+`tests/ui/importGuard.test.ts` adds 5 unit tests for the late-binding property itself.
+
+### K2 — accessibility
+
+Three causes, as the brief predicted: the empty state rendered outside `<main>`; contrast was one
+token pair repeated 32 times (`#ffffff` on `#d97832`, measured 3.14:1); and two `aria-label`
+strings in `Timeline.tsx` contradicted their visible text — a singular/plural slip and a label that
+omitted the visible `ID: … • code` line. Both labels were removed so the visible text *is* the
+accessible name, with the status added as `sr-only` text rather than a parallel sentence.
+
+Then the scan was widened to **two colour schemes × three demos × three views**, which found
+**79** contrast failures where the committed baseline had seen 32. The dark scheme was badly
+broken: hard-coded light surfaces (`#fef4e6`, `#fce8e8`, `#e8f5ea`) kept their light values under
+`prefers-color-scheme: dark`, giving 1.15:1, and `--plum` was used as body text at 3.69:1. Fixed
+with role tokens rather than per-selector patches. The sweep now reports **0**.
+
+### K6 — the responsive half
+
+Each report table now sits in a `.table-scroll` region that is focusable and labelled, so the table
+scrolls instead of the page and a keyboard user can still reach it. `known-failures.json` is empty.
+
+### Verified
+
+`npm run check` green: lint, strict typecheck, **227/227 tests**, production build.
+`npm run test:e2e -- --strict` — **17 passed, 0 failed**, with an empty `axe-baseline.json`.
+Widened contrast sweep: **0** across both schemes, three demos, three views.
+
+The harness caught one of my own regressions on the way: renaming `main.app-main` to a plain `div`
+broke three specs that waited on that selector. That is the harness doing its job.
+
+### Still open
+
+CSV export (K6's other half), K4, K5, K3, K7, K8, K9 — all still Kiro's. The committed a11y scan
+covers one scheme and one demo, so CI would not catch a dark-scheme regression; that gap is
+recorded in `QA_RESULTS.md` rather than papered over. Repository still private, no Pages, no video,
+no user sessions, no competitor comparison, and no Kiro session since 2026-11-01.

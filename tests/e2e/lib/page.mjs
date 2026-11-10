@@ -52,6 +52,6 @@ export async function firstScreen(browser, baseUrl, viewport = DEFAULT_VIEWPORT)
 export async function loadedScene(browser, baseUrl, demoLabel, viewport = DEFAULT_VIEWPORT) {
   const handle = await firstScreen(browser, baseUrl, viewport);
   await handle.page.getByRole('button', { name: demoLabel, exact: true }).click();
-  await handle.page.waitForSelector('main.app-main');
+  await handle.page.waitForSelector('.app-main');
   return handle;
 }

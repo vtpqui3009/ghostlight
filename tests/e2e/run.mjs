@@ -113,6 +113,7 @@ async function main() {
     // Specs register themselves on import.
     await import('./specs/smoke.spec.mjs');
     await import('./specs/responsive.spec.mjs');
+    await import('./specs/import-race.spec.mjs');
     const a11y = await import('./specs/accessibility.spec.mjs');
 
     result = await runAll({ browser, baseUrl: server.baseUrl, strict, record, repoRoot, here });

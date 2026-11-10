@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Scenario, RunResult, Frame } from './domain/types';
 import { runScenario } from './domain/engine';
 import { loadScene, saveScene } from './persistence/store';
 import { DEMO_SCENARIOS, emptyScenario } from './fixtures/demos';
 import { parseScenarioJson } from './domain/schema';
+import { makeImportGuard } from './ui/importGuard';
 import { Timeline } from './ui/Timeline';
 import { StageView } from './ui/StageView';
 import { Editor } from './ui/Editor';
@@ -21,8 +22,16 @@ export function App() {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'unsaved' | 'saving' | 'error'>('saved');
   const [loadError, setLoadError] = useState<string | null>(null);
   const [corruptData, setCorruptData] = useState<string | null>(null);
-  const [editorHasDraft, setEditorHasDraft] = useState(false);
   const announceRef = useRef<HTMLDivElement>(null);
+
+  // A ref, not state: nothing renders from this, and the import guard has to read the
+  // value at the moment a file read completes rather than the value captured in the
+  // render that started it. See src/ui/importGuard.ts.
+  const editorHasDraftRef = useRef(false);
+  const handleDraftChange = useCallback((hasDraft: boolean) => {
+    editorHasDraftRef.current = hasDraft;
+  }, []);
+  const importGuard = useRef(makeImportGuard(() => editorHasDraftRef.current)).current;
 
   // Load scene on mount
   useEffect(() => {
@@ -82,8 +91,9 @@ export function App() {
   };
 
   const handleImport = (json: string) => {
-    if (editorHasDraft) {
-      return { success: false as const, errors: ['Save or Cancel the current action draft before importing another scene.'] };
+    const guard = importGuard();
+    if (guard.blocked) {
+      return { success: false as const, errors: guard.errors };
     }
     const parseResult = parseScenarioJson(json);
     if (parseResult.success) {
@@ -150,10 +160,13 @@ export function App() {
             {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Save'}
           </button>
           {scenario && <ImportExport onImport={handleImport} onExport={handleExport} />}
-          {saveStatus === 'error' && <span style={{ color: 'var(--error)', fontSize: '0.875rem' }}>Save failed</span>}
+          {saveStatus === 'error' && <span style={{ color: 'var(--error-text)', fontSize: '0.875rem' }}>Save failed</span>}
         </div>
       </header>
 
+      {/* One landmark, always present: the empty state and the storage alert used to
+          render outside it, so the first screen a reader meets had no main at all. */}
+      <main>
       {loadError && (
         <div className="alert alert-error" style={{ margin: '1rem' }}>
           <strong>Storage Error:</strong> {loadError}
@@ -190,7 +203,7 @@ export function App() {
       )}
 
       {scenario && runResult && (
-        <main className="app-main">
+        <div className="app-main">
           <aside className="timeline-panel">
             <div className="card">
               <h2 className="panel-header">Timeline</h2>
@@ -223,12 +236,13 @@ export function App() {
                 scenario={scenario}
                 onUpdate={handleScenarioUpdate}
                 runResult={runResult}
-                onDraftChange={setEditorHasDraft}
+                onDraftChange={handleDraftChange}
               />
             </div>
           </div>
-        </main>
+        </div>
       )}
+      </main>
     </div>
   );
 }

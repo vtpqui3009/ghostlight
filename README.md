@@ -47,10 +47,28 @@ This matters for the competition, so it is stated plainly rather than implied.
 | Part | Author |
 |---|---|
 | `.kiro/specs`, `.kiro/steering`, `.kiro/hooks` | Kiro |
-| `src/**` — engine, parser, reports, editing, persistence, UI | Kiro |
-| `tests/domain/**`, `tests/ui/**`, `tests/persistence/**` — 222 tests | Kiro |
+| `src/**` — engine, parser, reports, editing, persistence, UI | Kiro, except the files listed below |
+| `tests/domain/**`, `tests/ui/actionFormHelpers.test.ts`, `tests/persistence/**` — 222 tests | Kiro |
 | `tests/e2e/**`, `.github/workflows/**` — verification harness and CI | reviewer (Claude), not Kiro |
 | `docs/**`, `ops/**`, the research documents, this file | reviewer and the project owner |
+
+On 2026-11-10 the project owner asked the reviewer to make the following changes in
+`src/` directly, rather than through Kiro. They are listed here rather than left to be
+inferred from the git history:
+
+| File | Change | Author |
+|---|---|---|
+| `src/ui/importGuard.ts` (new) | the import guard, as a getter so it reads current state | reviewer |
+| `src/App.tsx` | wires that guard, adds the single `main` landmark, status text token | reviewer |
+| `src/ui/ImportExport.tsx` | calls the newest `onImport` instead of a captured one | reviewer |
+| `src/ui/Timeline.tsx` | removed two `aria-label`s that contradicted the visible text | reviewer |
+| `src/ui/Reports.tsx` | focusable scroll regions around the tables, colour tokens | reviewer |
+| `src/ui/Editor.tsx` | colour tokens only | reviewer |
+| `src/styles.css` | the WCAG AA colour token pass, both schemes | reviewer |
+| `tests/ui/importGuard.test.ts` (new) | regression test for the import race | reviewer |
+
+Everything else under `src/` — the engine, the parser, the edit layer, persistence, the
+action editor and the stage view — is Kiro's, as is every test outside that list.
 
 [`KIRO_SESSION_EVIDENCE.md`](KIRO_SESSION_EVIDENCE.md) records the actual native Kiro sessions:
 which model and mode, what Kiro wrote, which checks failed on the way, and what was fixed. It is an

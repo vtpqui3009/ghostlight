@@ -19,13 +19,44 @@
   --error: #c24444;
   --warning: #d9a532;
   --success: #5ea86c;
-  --uncertain: #8b7fa8;
+  --uncertain: #6b5f8a;
   --text-dark: #2d2d2d;
   --text-mid: #5a5a5a;
   --text-light: #888;
   --border: #d4cbb7;
   --border-dark: #b8af9d;
   --focus-outline: #d97832;
+
+  /* Button fill is its own token, not --pumpkin: white on #d97832 measures 3.14:1
+     and WCAG AA wants 4.5:1 for text this size. --pumpkin stays as the decorative
+     accent (focus ring, borders, headings) where it is never a text background. */
+  --button-bg: #b45f22;
+  --button-bg-hover: #96491a;
+  --button-fg: #ffffff;
+
+  /* The vivid status colours above are for fills and borders. As text on parchment
+     they fail AA -- --success measured 2.64:1 against #f9f5eb. These are the text
+     variants, checked against both --parchment and the darker --parchment-dark. */
+  --success-text: #27653a;
+  --warning-text: #6f5008;
+  --error-text: #a33434;
+  --uncertain-text: #6b5f8a;
+
+  /* Tinted surfaces. These used to be hard-coded light hexes, which stayed light in
+     the dark scheme and put pale text on a pale background at 1.15:1. */
+  --surface-error: #fce8e8;
+  --surface-warning: #fef4e6;
+  --surface-success: #e8f5ea;
+
+  /* Roles whose colour depends on what sits on top of them. --plum is a brand
+     colour; which of these it can safely be is not the same in both schemes. */
+  --header-bg: #4a2c4e;
+  --header-fg: #f9f5eb;
+  --heading-text: #4a2c4e;
+  --secondary-bg: #4a2c4e;
+  --secondary-bg-hover: #6b4d6f;
+  --secondary-fg: #ffffff;
+  --badge-fg: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -48,6 +79,28 @@
     --text-light: #8a877e;
     --border: #4a453d;
     --border-dark: #5f5a52;
+
+    /* Dark scheme lightens the orange, so the button takes dark text instead. */
+    --button-bg: #e89858;
+    --button-bg-hover: #f0b080;
+    --button-fg: #1a1a1a;
+
+    --success-text: #7ec98a;
+    --warning-text: #e8b858;
+    --error-text: #e98080;
+    --uncertain-text: #a699ad;
+
+    --surface-error: #3a2222;
+    --surface-warning: #3a2f1c;
+    --surface-success: #1e3326;
+
+    --header-bg: #3a2f3e;
+    --header-fg: #f3efe6;
+    --heading-text: #c9b8d1;
+    --secondary-bg: #b3a3bb;
+    --secondary-bg-hover: #c9b8d1;
+    --secondary-fg: #1a1a1a;
+    --badge-fg: #1a1a1a;
   }
 }
 
@@ -78,8 +131,8 @@ body {
 
 /* Header */
 .app-header {
-  background: var(--plum);
-  color: var(--parchment);
+  background: var(--header-bg);
+  color: var(--header-fg);
   padding: 1rem 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
@@ -153,14 +206,14 @@ button {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  background: var(--pumpkin);
-  color: white;
+  background: var(--button-bg);
+  color: var(--button-fg);
   font-weight: 500;
   transition: background 0.2s ease;
 }
 
 button:hover:not(:disabled) {
-  background: var(--pumpkin-light);
+  background: var(--button-bg-hover);
 }
 
 button:focus-visible {
@@ -174,11 +227,12 @@ button:disabled {
 }
 
 button.secondary {
-  background: var(--plum);
+  background: var(--secondary-bg);
+  color: var(--secondary-fg);
 }
 
 button.secondary:hover:not(:disabled) {
-  background: var(--plum-light);
+  background: var(--secondary-bg-hover);
 }
 
 button.small {
@@ -208,7 +262,7 @@ button.icon-btn {
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
-  color: var(--plum);
+  color: var(--heading-text);
   border-bottom: 2px solid var(--border);
   padding-bottom: 0.5rem;
 }
@@ -300,17 +354,17 @@ button.icon-btn {
 
 .action-status.applied {
   background: var(--success);
-  border-color: var(--success);
+  border-color: var(--success-text);
 }
 
 .action-status.rejected {
   background: var(--error);
-  border-color: var(--error);
+  border-color: var(--error-text);
 }
 
 .action-status.uncertain {
   background: var(--uncertain);
-  border-color: var(--uncertain);
+  border-color: var(--uncertain-text);
 }
 
 .action-label {
@@ -358,7 +412,7 @@ button.icon-btn {
 .zone-title {
   font-weight: 600;
   margin-bottom: 0.75rem;
-  color: var(--plum);
+  color: var(--heading-text);
   border-bottom: 1px solid var(--border);
   padding-bottom: 0.375rem;
 }
@@ -426,7 +480,7 @@ button.icon-btn {
 .form-fieldset legend {
   font-weight: 600;
   padding: 0 0.5rem;
-  color: var(--plum);
+  color: var(--heading-text);
 }
 
 .checkbox-group {
@@ -450,7 +504,7 @@ button.icon-btn {
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--plum);
+  color: var(--heading-text);
 }
 
 .form-actions {
@@ -539,7 +593,7 @@ textarea {
 }
 
 .field-error {
-  color: var(--error);
+  color: var(--error-text);
   font-size: 0.8125rem;
   margin-top: 0.25rem;
   font-weight: 500;
@@ -554,21 +608,21 @@ textarea {
 }
 
 .alert-error {
-  background: #fce8e8;
-  color: var(--error);
-  border-color: var(--error);
+  background: var(--surface-error);
+  color: var(--error-text);
+  border-color: var(--error-text);
 }
 
 .alert-warning {
-  background: #fef4e6;
-  color: var(--warning);
-  border-color: var(--warning);
+  background: var(--surface-warning);
+  color: var(--warning-text);
+  border-color: var(--warning-text);
 }
 
 .alert-success {
-  background: #e8f5ea;
-  color: var(--success);
-  border-color: var(--success);
+  background: var(--surface-success);
+  color: var(--success-text);
+  border-color: var(--success-text);
 }
 
 .alert-info {
@@ -607,12 +661,12 @@ textarea {
 
 .issue-badge.error {
   background: var(--error);
-  color: white;
+  color: var(--badge-fg);
 }
 
 .issue-badge.uncertain {
   background: var(--uncertain);
-  color: white;
+  color: var(--badge-fg);
 }
 
 .issue-detail {
@@ -671,7 +725,7 @@ textarea {
 .modal-header h2 {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.5rem;
-  color: var(--plum);
+  color: var(--heading-text);
 }
 
 .modal-body {
@@ -705,10 +759,17 @@ textarea {
   margin-bottom: 2rem;
 }
 
+/* A report table is wider than a phone. Scroll the table rather than the page, and
+   make the scroller focusable so it can be reached without a mouse. */
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
 .report-title {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.25rem;
-  color: var(--plum);
+  color: var(--heading-text);
   margin-bottom: 1rem;
   border-bottom: 2px solid var(--border);
   padding-bottom: 0.5rem;
@@ -734,7 +795,7 @@ textarea {
 }
 
 .report-table tr.warning-row {
-  background: #fef4e6;
+  background: var(--surface-warning);
 }
 
 /* Print Styles */

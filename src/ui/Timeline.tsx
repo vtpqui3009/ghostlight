@@ -51,7 +51,6 @@ export function Timeline({ scenario, runResult, selectedFrameIndex, onSelectFram
               onKeyDown={(e) => handleKeyDown(e, cue.id)}
               tabIndex={0}
               role="button"
-              aria-label={`Cue: ${cue.title}. ${cueFrames.length} actions. Click to ${isExpanded ? 'collapse' : 'expand'}`}
             >
               <span className="cue-expand-icon" aria-hidden="true">
                 {isExpanded ? '▼' : '▶'}
@@ -79,10 +78,13 @@ export function Timeline({ scenario, runResult, selectedFrameIndex, onSelectFram
                       onKeyDown={(e) => handleActionKeyDown(e, frame.index)}
                       tabIndex={0}
                       role="treeitem"
-                      aria-label={`Action ${frame.action.kind} on ${prop?.name || frame.action.propId}. Status: ${status}`}
                       aria-selected={isSelected}
                     >
-                      <div className={`action-status ${status}`} aria-label={status}></div>
+                      {/* The accessible name is built from the visible text, plus this
+                          status word, which is otherwise carried only by colour. An
+                          aria-label here would contradict what is on screen. */}
+                      <span className="sr-only">{status}. </span>
+                      <div className={`action-status ${status}`} aria-hidden="true"></div>
                       <div className="action-label">
                         <div className="action-primary">
                           {frame.action.kind} {prop?.name || frame.action.propId}

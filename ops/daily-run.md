@@ -23,7 +23,11 @@ application author.
   verification harness — `tests/e2e/**`, `playwright.config.*`, `.github/workflows/**` — provided
   each such file records in a comment or in `QA_RESULTS.md` that it is reviewer-authored, not Kiro's.
 - A one-character fix in `src/` is still application source. Put it in the Kiro brief instead.
-- The only exception is an explicit instruction from the owner in that run's own prompt.
+- The only exception is an explicit instruction from the owner in that run's own prompt. This
+  happened once, on 2026-11-10: the owner directed the reviewer to implement K1, K2 and the
+  responsive half of K6 in `src/` after being told what that costs in Kiro evidence. It was
+  recorded in the README's authorship table and in `ops/RUN_LOG.md`, not left to the git history.
+  **It does not carry over.** A later run needs its own instruction; absent one, `src/` is Kiro's.
 
 The project chose the Kiro lineage precisely so that "meaningful Kiro use" is true. Writing app code
 here would quietly destroy the thing being protected.

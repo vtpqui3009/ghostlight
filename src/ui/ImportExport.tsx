@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ImportExportProps {
   onImport: (json: string) => { success: true } | { success: false; errors: string[] };
@@ -8,6 +8,14 @@ interface ImportExportProps {
 export function ImportExport({ onImport, onExport }: ImportExportProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
+
+  // reader.onload fires long after the read was started, with whatever `onImport` the
+  // render that started it had closed over. Keep the newest one so a completion is
+  // always judged against current state, never against a snapshot.
+  const onImportRef = useRef(onImport);
+  useEffect(() => {
+    onImportRef.current = onImport;
+  }, [onImport]);
 
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -20,7 +28,7 @@ export function ImportExport({ onImport, onExport }: ImportExportProps) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const json = event.target?.result as string;
-      const result = onImport(json);
+      const result = onImportRef.current(json);
       if (!result.success) {
         setImportError(result.errors.join('; '));
         setTimeout(() => setImportError(null), 8000);

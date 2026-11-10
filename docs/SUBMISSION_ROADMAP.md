@@ -34,7 +34,13 @@ memory of the rules.
    already queued as Kiro items K2–K6.
 5. **Hosting: GitHub Pages** via Actions. The workflow is prepared in the repository; enabling Pages
    is the owner's action.
-6. **Kiro budget changed.** The owner reports ~4,000 credits available on 2026-11-10. The earlier
+6. **2026-11-10, later the same day: the owner directed the reviewer to write `src/` directly**,
+   after being told that doing so weakens the "meaningful Kiro use" evidence that decision 2 and
+   decision 3 exist to protect. K1, K2 and the responsive half of K6 were implemented by the
+   reviewer under that instruction. Exactly which files is recorded in the README's authorship
+   table, not left to the git history. The remaining K-items are still Kiro's unless the owner says
+   otherwise.
+7. **Kiro budget changed.** The owner reports ~4,000 credits available on 2026-11-10. The earlier
    free-only 50-credit ceiling and the 5-credit reserve pause no longer govern. Still check native
    `/usage` at the start of each Kiro session and record the observation; do not invent numbers.
 
@@ -91,12 +97,12 @@ they looked. That is recorded here so the credits are not spent rebuilding what 
 
 | ID | Task | State and why it matters |
 |---|---|---|
-| K1 | **Import race repair** — latest-state import validation; scene and draft unchanged on rejection; regression test | Reproduced product defect; blocks full UI acceptance. Brief: [`ops/kiro-brief.md`](../ops/kiro-brief.md), evidence in `docs/handoff/ACTIONFORM_CHECKPOINT.md` |
-| K2 | **Accessibility** — 33 violations over four screens | Three causes, not 33: the empty state renders outside `<main>`; contrast is a token problem on `.small` and `--text-mid`/`--text-light`; two `aria-label` strings in `Timeline.tsx` contradict their visible text. [`K2.md`](../ops/kiro-briefs/K2.md) |
+| K1 | **Import race repair** | **DONE 2026-11-10 — by the reviewer, not Kiro.** `src/ui/importGuard.ts` takes a getter so the decision is made when the read completes. Proven both ways: with the fix the controlled delayed-read test passes; with `src/` reverted it fails with the reported symptom. A second, mirror-image bug surfaced — the old code also *wrongly blocked* an import that completed after a deliberate Cancel; both directions are now covered. |
+| K2 | **Accessibility** | **DONE 2026-11-10 — by the reviewer, not Kiro.** `npm run test:e2e -- --strict` passes and `axe-baseline.json` is empty. The scan was then widened to two colour schemes, three demos and three views, which found **79** contrast failures where the baseline had seen 32: the dark scheme was badly broken by hard-coded light surfaces and by `--plum` used as text. Now **0**. Fixed with role tokens (`--button-*`, `--surface-*`, `--header-*`, `--heading-text`, `--secondary-*`, `--badge-fg`, `--*-text`) rather than per-selector patches. |
 | K4 | **Make the cause navigable** | **Smaller than it looked.** The cause is already computed *and already printed* in `StageView.tsx` — "Earlier action a1 in cue cue-1". It is just inert and uses raw ids. [`K4.md`](../ops/kiro-briefs/K4.md) |
 | K5 | **Guided fix** — offer the one unambiguous edit, apply it, replay | The "fix it and re-run" beat; strongest demo moment. Deliberately narrow: holder-only and zone-only mismatches, nothing else. [`K5.md`](../ops/kiro-briefs/K5.md) |
 | K3 | **List equivalent and reduced motion** | **Smaller than it looked.** Ghost versus solid already exists with word labels (`REQUIRED:` / `BEFORE:`). What is missing is the plain list carrying the same facts, defaulting on `prefers-reduced-motion`. [`K3.md`](../ops/kiro-briefs/K3.md) |
-| K6 | **Reports: 390 px overflow and CSV** | **Print already exists** (`window.print()` plus an `@media print` block); CSV does not exist at all. The reports table spills 73 px at 390 px — the one entry in `known-failures.json`. [`K6.md`](../ops/kiro-briefs/K6.md) |
+| K6 | **Reports: 390 px overflow and CSV** | **Half done 2026-11-10 — by the reviewer.** The 73 px overflow is fixed: each table sits in a focusable, labelled scroll region, so `known-failures.json` is now empty. **CSV export is still open and still Kiro's.** [`K6.md`](../ops/kiro-briefs/K6.md) |
 | K7 | **Empty state and first screen** | The honesty subtitle is already there and smoke-tested; the empty state itself is seven bare buttons under "No Scene Loaded". Do K2 first — it rewrites the same region. [`K7.md`](../ops/kiro-briefs/K7.md) |
 | K8 | **Automatic hook triggering verified** in a native Kiro session | Recorded as NOT VERIFIED since 2026-10-31; a manual invocation is not evidence of a trigger. Cheap, and it is exactly what Technological Implementation asks about. [`K8.md`](../ops/kiro-briefs/K8.md) |
 | K9 | **Dependency advisories** — `vitest` ≤4.0.0-beta.19 and `tinypool` ≤2.1.1 critical, `vite` ≤6.4.3 high | All dev-only — `npm audit --omit=dev` is clean — but a public repository shows them. Last, because a major bump can break the 222 Kiro-authored tests. [`K9.md`](../ops/kiro-briefs/K9.md) |

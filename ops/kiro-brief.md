@@ -1,5 +1,17 @@
 # Kiro brief — current task
 
+**K1 is done.** It was implemented on 2026-11-10 by the reviewer, not by Kiro, at the owner's
+explicit direction — see the authorship table in `README.md`. K2 and the responsive half of K6 went
+the same way. The brief below is kept for the record of what the defect was and how it was proven.
+
+**The next unfinished item is [K4 — make the cause navigable](kiro-briefs/K4.md).** It is small:
+the causal trace is already computed and already printed, it is just inert. After that: K5, K3, the
+CSV half of K6, K7, K8, K9.
+
+---
+
+# Kiro brief — current task
+
 Refreshed by the daily run. Paste the block below into a native Kiro session. One brief at a time;
 the daily run replaces this file when the task is accepted.
 

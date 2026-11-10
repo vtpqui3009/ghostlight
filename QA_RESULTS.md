@@ -4,7 +4,7 @@ What has been executed against `main`, with the real numbers. Anything not liste
 These are correctness checks on the implementation; **none of them is evidence that the tool is
 useful to a stage manager.**
 
-Last updated 2026-11-10. The `tests/e2e/` harness and this file are reviewer-authored; the
+Last updated 2026-11-10, after K1, K2 and the responsive half of K6 landed. The `tests/e2e/` harness and this file are reviewer-authored; the
 application and its domain, UI and persistence tests are Kiro's. See `ops/daily-run.md` for the
 provenance rule and `KIRO_SESSION_EVIDENCE.md` for what Kiro actually did.
 
@@ -24,10 +24,11 @@ CI runs exactly these on every push and pull request: `.github/workflows/ci.yml`
 |---|---|---|
 | Lint | `npm run lint` | clean |
 | Types | `npm run typecheck` (`tsc -b`, strict) | clean |
-| Unit and acceptance tests | `npm test` | **222 passed, 0 failed** — 31 engine, 134 domain acceptance, 13 persistence, 44 action-form helper |
+| Unit and acceptance tests | `npm test` | **227 passed, 0 failed** — 31 engine, 134 domain acceptance, 13 persistence, 44 action-form helper, 5 import guard |
 | Production build | `npm run build` | built, 46 modules |
 | Project-page build | `npx vite build --base=/ghostlight/` | emits `/ghostlight/assets/…` |
-| End-to-end and accessibility | `npm run test:e2e` | **14 passed, 1 known failure**, exit 0 |
+| End-to-end and accessibility | `npm run test:e2e` | **17 passed, 0 failed** |
+| Same, with every known failure fatal | `npm run test:e2e -- --strict` | **17 passed, 0 failed** |
 | Runtime dependencies | `npm audit --omit=dev` | **0 vulnerabilities** |
 | All dependencies | `npm audit` | 12 (9 moderate, 1 high, 2 critical) — all dev-only, see below |
 
@@ -45,32 +46,36 @@ Fifteen tests over three specs, driven against the production build in `dist/`, 
 - **Accessibility**: axe-core 4.14.0 over four screens under `wcag2a`, `wcag2aa`, `wcag21a`,
   `wcag21aa` and `best-practice`.
 
-### Accessibility debt, as measured
+### Accessibility, as measured
 
-| Screen | Violations |
-|---|---|
-| First screen | `color-contrast` ×3, `landmark-one-main` ×1, `region` ×2 |
-| Stage view | `color-contrast` ×5, `label-content-name-mismatch` ×4 |
-| Reports view | `color-contrast` ×6, `label-content-name-mismatch` ×4 |
-| Editor view | `color-contrast` ×18, `label-content-name-mismatch` ×4 |
+`tests/e2e/axe-baseline.json` and `tests/e2e/known-failures.json` are both **empty**, and
+`--strict` passes, so there is no recorded accessibility debt and no ledgered failing test.
 
-All of it is open and owned by **Kiro item K2**. The counts in `tests/e2e/axe-baseline.json` are
-written by `--record` straight from the scan, never typed in by hand. The baseline is a ledger, not
-a silencer: a rule that is not baselined fails the run, a baselined rule that gains nodes fails the
-run, and `--strict` fails on anything at all.
+The baseline previously held 33 violations over four screens. While clearing them the scan was
+widened to **two colour schemes × three demo scenes × three views**, which found **79** contrast
+failures rather than 32: the dark scheme put pale text on hard-coded light surfaces at 1.15:1, and
+used `--plum` as text at 3.69:1. That sweep now reports **0**.
 
-`label-content-name-mismatch` is on the timeline's `role="treeitem"` cue headers and action rows:
-the accessible name does not contain the visible text, so a speech-input user cannot say what they
-see.
+Colour is handled with role tokens — `--button-bg/-fg`, `--surface-error/-warning/-success`,
+`--header-bg/-fg`, `--heading-text`, `--secondary-bg/-fg`, `--badge-fg` and `--success-text`,
+`--warning-text`, `--error-text`, `--uncertain-text` — so a contrast fix happens once per role
+rather than once per selector. The vivid status colours remain for fills and borders, where they
+are not carrying text.
+
+**The committed harness still scans one scheme, one demo, four screens.** The wider sweep was a
+one-off script and is not in the repository, so CI would not catch a dark-scheme regression. That
+gap is real and is not claimed otherwise.
 
 ## Known failures and debt
 
 | Item | Owner | Where |
 |---|---|---|
-| Reports table overflows 390 px by 73 px | Kiro K6 | `tests/e2e/known-failures.json` |
-| 33 accessibility violations across four screens | Kiro K2 | `tests/e2e/axe-baseline.json` |
-| Delayed `FileReader` import race — a read completing after a draft opens replaces the scene | Kiro K1 | `docs/handoff/ACTIONFORM_CHECKPOINT.md` |
+| CSV export for the reports does not exist | Kiro K6 | `ops/kiro-briefs/K6.md` |
 | Dev dependencies carry 2 critical and 1 high advisory — `vitest` ≤4.0.0-beta.19, `tinypool` ≤2.1.1, `vite` ≤6.4.3 | Kiro K9 | this file |
+| The committed a11y scan covers one colour scheme and one demo | reviewer | this file |
+
+Closed on 2026-11-10, by the reviewer rather than by Kiro (see the README's authorship table): the
+delayed `FileReader` import race, the 33 accessibility violations, and the Reports 390 px overflow.
 
 Nothing ships to the browser from the advisory set: `npm audit --omit=dev` is clean, and all four
 packages are build and test tooling. Dependency modernisation has been open since 2026-10-31, when

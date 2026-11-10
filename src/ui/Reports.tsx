@@ -20,6 +20,7 @@ export function Reports({ scenario, runResult }: ReportsProps) {
         <p style={{ marginBottom: '1rem', fontSize: '0.9375rem', color: 'var(--text-mid)' }}>
           Where each prop starts before the show.
         </p>
+        <div className="table-scroll" tabIndex={0} role="region" aria-label="Preset report table">
         <table className="report-table">
           <thead>
             <tr>
@@ -44,6 +45,7 @@ export function Reports({ scenario, runResult }: ReportsProps) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div className="report-section">
@@ -53,7 +55,8 @@ export function Reports({ scenario, runResult }: ReportsProps) {
         </p>
         {runner.map(cue => (
           <div key={cue.cueId} style={{ marginBottom: '2rem' }}>
-            <h4 style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--plum)' }}>{cue.cueTitle}</h4>
+            <h4 style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--heading-text)' }}>{cue.cueTitle}</h4>
+            <div className="table-scroll" tabIndex={0} role="region" aria-label={`Runner report for ${cue.cueTitle}`}>
             <table className="report-table">
               <thead>
                 <tr>
@@ -94,7 +97,7 @@ export function Reports({ scenario, runResult }: ReportsProps) {
                             </div>
                           </div>
                         ) : (
-                          <span style={{ color: 'var(--success)', fontWeight: 500 }}>✓ Applied</span>
+                          <span style={{ color: 'var(--success-text)', fontWeight: 500 }}>✓ Applied</span>
                         )}
                       </td>
                     </tr>
@@ -102,6 +105,7 @@ export function Reports({ scenario, runResult }: ReportsProps) {
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         ))}
       </div>
@@ -111,6 +115,7 @@ export function Reports({ scenario, runResult }: ReportsProps) {
         <p style={{ marginBottom: '1rem', fontSize: '0.9375rem', color: 'var(--text-mid)' }}>
           Instructions to reset props after the show, based on initial and final positions.
         </p>
+        <div className="table-scroll" tabIndex={0} role="region" aria-label="Reset report table">
         <table className="report-table">
           <thead>
             <tr>
@@ -133,6 +138,7 @@ export function Reports({ scenario, runResult }: ReportsProps) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--parchment-dark)', borderRadius: '4px' }}>

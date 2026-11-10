@@ -52,7 +52,7 @@ describe('smoke — the app boots and renders', () => {
     try {
       await page.getByRole('button', { name: 'Valid Control', exact: true }).click();
 
-      await page.waitForSelector('main.app-main');
+      await page.waitForSelector('.app-main');
       await page.waitForSelector('.timeline[role="tree"]');
 
       const cues = await page.locator('.cue-item').count();
@@ -69,7 +69,7 @@ describe('smoke — the app boots and renders', () => {
     const { page, pageErrors, close } = await newPage(browser, baseUrl);
     try {
       await page.getByRole('button', { name: 'Missing Handoff', exact: true }).click();
-      await page.waitForSelector('main.app-main');
+      await page.waitForSelector('.app-main');
 
       // Stage is the default view.
       const stageHeading = await page.locator('.panel-header').filter({ hasText: 'Stage View' }).first();

@@ -318,13 +318,13 @@ export function Editor({ scenario, onUpdate, runResult, onDraftChange }: EditorP
             const hasIssues = cueFrames.some(f => f.issues.length > 0);
             
             return (
-              <div key={cue.id} style={{ padding: '0.75rem', border: '1px solid var(--border)', borderRadius: '4px', marginBottom: '0.75rem', background: hasIssues ? '#fef4e6' : 'transparent' }}>
+              <div key={cue.id} style={{ padding: '0.75rem', border: '1px solid var(--border)', borderRadius: '4px', marginBottom: '0.75rem', background: hasIssues ? 'var(--surface-warning)' : 'transparent' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
                   <div>
                     <strong>{cue.title}</strong>
                     <div style={{ fontSize: '0.875rem', color: 'var(--text-mid)' }}>
                       ID: {cue.id} • {cue.actions.length} actions
-                      {hasIssues && <span style={{ color: 'var(--error)', marginLeft: '0.5rem' }}>⚠ Has issues</span>}
+                      {hasIssues && <span style={{ color: 'var(--error-text)', marginLeft: '0.5rem' }}>⚠ Has issues</span>}
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.25rem' }}>
@@ -370,7 +370,7 @@ export function Editor({ scenario, onUpdate, runResult, onDraftChange }: EditorP
                           <div style={{ fontSize: '0.875rem', flex: 1 }}>
                             <strong>{action.kind}</strong> {prop?.name || action.propId} ({action.propId})
                             {frame && frame.issues.length > 0 && (
-                              <div style={{ color: 'var(--error)', marginTop: '0.25rem' }}>
+                              <div style={{ color: 'var(--error-text)', marginTop: '0.25rem' }}>
                                 ⚠ {frame.issues[0].message}
                               </div>
                             )}
