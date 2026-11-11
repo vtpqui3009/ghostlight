@@ -499,3 +499,35 @@ stage managers)**. U4 has the longest lead time of anything left and cannot be c
 
 Also noted, not acted on: `origin/ops/push-probe-20261110` from run 2 is **still on the remote**.
 Deleting a remote branch is the owner's call, so it is flagged rather than removed.
+
+## 2026-11-11 — run 11 (scheduled, automated): a flaky strict scan
+
+Days left: **23** to 2026-12-04 14:00 PST. Step 0: `git push --dry-run origin main` succeeded.
+
+### What ran
+
+`npm ci`, `npm run check`: lint, typecheck and build pass; **235 tests passed**; build 48 modules.
+`npm run test:e2e`: **25 passed, 0 failed**. `--strict`: **23 passed, 2 failed**, the two selected-row
+contrast scans (K2) and nothing else. `npm audit --omit=dev`: 0 vulnerabilities. No Kiro commits
+since run 10; `src/` untouched. All section-C items were already DONE, so no new C-item was started.
+
+### Finding: the strict scan was non-deterministic — reviewer-authored harness bug
+
+The first strict run today reported 24 passed / 1 failed ("baselined violation is fixed") and a dark
+count of 4 or 6 on later runs, against an unchanged build. Cause: `.action-item` has
+`transition: background 0.2s`, and `selectFailingAction` scanned immediately after the click, so axe
+read a half-blended background. Fix, in `tests/e2e/lib/page.mjs` (reviewer-authored): wait for
+`document.getAnimations()` to finish before returning. Verified: 5 consecutive `--strict` runs all
+gave 23 passed / 2 failed with exactly 1 light and 6 dark nodes. Without the fix the counts varied
+across 4 runs. This means the light-scheme "fixed" reading seen earlier today was an artefact, not a K2 fix.
+
+### Brief and records
+
+`ops/kiro-brief.md` still points at K8 and is dated today; nothing in it needed changing. Roadmap
+state table re-dated; its figures are unchanged.
+
+### Blocked, and on whom
+
+Unchanged, all the owner's: private repository, no Pages/public URL, no video, no user sessions, no
+competitor comparison, and still no Kiro session (K8 is the next one). U1 and U4 remain the
+long-lead items. `origin/ops/push-probe-20261110` is still on the remote; deleting it is the owner's call.

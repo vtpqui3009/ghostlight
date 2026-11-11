@@ -1,13 +1,13 @@
 # Kiro brief — current task
 
-Refreshed by the daily run on **2026-11-10**, against numbers it measured the same day. One brief
+Refreshed by the daily run on **2026-11-11** (numbers re-measured that day; unchanged from 2026-11-10 — no Kiro commits in between). One brief
 at a time; the full queue is in [`kiro-briefs/`](kiro-briefs/).
 
 **Start with [`kiro-session-howto.md`](kiro-session-howto.md)** — install, sign-in, what to record.
 
 ## Where the project actually stands, verified today
 
-From a clean `npm ci` on 2026-11-10:
+From a clean `npm ci` on 2026-11-11:
 
 | Check | Result |
 |---|---|

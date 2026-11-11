@@ -44,7 +44,7 @@ memory of the rules.
    free-only 50-credit ceiling and the 5-credit reserve pause no longer govern. Still check native
    `/usage` at the start of each Kiro session and record the observation; do not invent numbers.
 
-## Verified state of `main` — 2026-11-10 (latest automated run)
+## Verified state of `main` — 2026-11-11 (latest automated run; numbers identical to 2026-11-10)
 
 Re-verified from a clean `npm ci`. Every number below was observed today, not estimated or carried
 forward.

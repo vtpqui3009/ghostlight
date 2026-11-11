@@ -74,6 +74,9 @@ export async function selectFailingAction(page) {
     if (cls && /\brejected\b/.test(cls)) {
       await row.click();
       await page.locator('.action-item.selected').first().waitFor({ state: 'visible' });
+      // The row has a 0.2s background transition; scanning mid-flight gives axe a half-blended
+      // colour and a different contrast count on every run. Wait for animations to finish.
+      await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {}))));
       return row;
     }
   }
