@@ -32,6 +32,21 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      # Fail loudly rather than publish a dead page. If the repository name came
+      # through empty the base would be "//", and "//assets/index.js" is a
+      # protocol-relative URL to a host called "assets" — the build still
+      # succeeds and the deployed page is blank. Verified 2026-11-12 with
+      # `node tests/e2e/verify-pages-build.mjs --base=//`, which reproduces it as
+      # ERR_NAME_NOT_RESOLVED. Checked here because this workflow is dispatched by
+      # hand on the day it matters.
+      - name: Check the project path resolved
+        run: |
+          name="${{ github.event.repository.name }}"
+          if [ -z "$name" ]; then
+            echo "::error::Repository name resolved empty; the Pages base path would be '//'." >&2
+            exit 1
+          fi
+          echo "Pages base path: /$name/"
       # A project page is served from /<repo>/, so the bundle needs that base.
       # Passed on the command line rather than edited into vite.config.ts, which
       # keeps deployment plumbing out of the application source Kiro owns.

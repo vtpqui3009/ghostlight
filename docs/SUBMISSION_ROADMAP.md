@@ -44,7 +44,7 @@ memory of the rules.
    free-only 50-credit ceiling and the 5-credit reserve pause no longer govern. Still check native
    `/usage` at the start of each Kiro session and record the observation; do not invent numbers.
 
-## Verified state of `main` — 2026-11-11 (latest automated run; numbers identical to 2026-11-10)
+## Verified state of `main` — 2026-11-12 (latest automated run)
 
 Re-verified from a clean `npm ci`. Every number below was observed today, not estimated or carried
 forward.
@@ -59,6 +59,7 @@ forward.
 | axe-core, selected failing row | **`color-contrast` 1 node light, 6 nodes dark** — newly found, see below |
 | 390 px horizontal overflow | **clean on all four views**, both schemes |
 | `known-failures.json` | **empty** |
+| Pages project-page build, loaded in a browser | **11 checks passed** — `node tests/e2e/verify-pages-build.mjs`; boots and loads a scene from `/ghostlight/`, 0 console errors, 0 failed requests |
 | Dev-only advisories | 12 (9 moderate, 1 high, 2 critical); `npm audit --omit=dev` clean — K9 |
 | Repository visibility | **private** |
 | Public URL, video, user validation, competitor comparison | none |
@@ -147,7 +148,7 @@ evidence is worth having.
 | ID | Task | Done when |
 |---|---|---|
 | U1 | Make the repository **public** | Public on **GitHub** (GitLab and Bitbucket are rejected). The licence must be "detectable and visible at the top of the repository page (in the About section)" — after going public, **look at the About sidebar and confirm GitHub shows "MIT License"**; a `LICENSE` file that GitHub fails to detect does not satisfy this. `.kiro/` present and not in `.gitignore` — the rules say ignoring it "could disqualify your submission". |
-| U2 | Enable **GitHub Pages** (Settings → Pages → Build from GitHub Actions) after the deploy workflow lands | The published URL loads the app and is written into `docs/submission.md` |
+| U2 | Enable **GitHub Pages** (Settings → Pages → Build from GitHub Actions) after the deploy workflow lands | The published URL loads the app and is written into `docs/submission.md`. The bundle the workflow uploads is **pre-verified** as of 2026-11-12 — see C15 — so if the published page is blank, suspect Pages configuration rather than the build. Note Pages on a **private** repository needs a paid plan, so U1 comes first. |
 | U3 | Record and upload the **demo video**, public on YouTube, under three minutes | Link in `docs/submission.md`; follows `docs/demo-script.md`; says on screen that demo scenes are synthetic |
 | U4 | **User validation**: two experienced stage managers / ASMs, one anonymised real run sheet, consent recorded | Notes in `docs/user-research/`; quotes recorded verbatim, counter-evidence included. If it does not happen, the submission says so plainly instead of implying it did. |
 | U5 | **Competitor comparison executed** against CueCall, DigiScript, Standby with the same five scenarios | `docs/competitor-comparison.md` filled from actual runs, with what could not be accessed stated. Use only access you are entitled to. |
@@ -201,6 +202,7 @@ they looked. That is recorded here so the credits are not spent rebuilding what 
 | C11 | Finish `docs/KIROWEEN_REQUIREMENTS.md` by reading the Devpost tabs directly | **DONE 2026-11-10** — all six tabs read directly once the proxy picked up the `ghostlight` environment. `WebFetch` still fails on this host because it resolves DNS itself; `curl` through the session proxy works, which is how the pages were fetched. |
 | C12 | Draft the **"how Kiro was used" write-up**, a required submission field | **DONE 2026-11-10** — `docs/kiro-writeup.md`, answering Devpost's published question list in order, with `TO FILL` blocks for everything that has not happened and a "what Kiro got wrong" section. Original note — the site lists exactly what it wants covered (IDE/CLI/Web/Crew, custom agents, hooks, spec-driven development, steering, MCP, PBT, powers). `KIRO_SESSION_EVIDENCE.md` already answers several honestly. Leave placeholders for what has not happened rather than filling them in. |
 | C13 | Draft the **blog post** and the **social post** | **DONE 2026-11-10** — `docs/blog-post.md`. The blog post is a full draft to rewrite in your own words; the social post is deliberately **not** drafted, only its constraints and raw material, because that prize is judged on "original thoughts vs AI writing". Original note — the blog prize has 100 winners and pays 2,000 bonus Kiro credits, so it is the cheapest prize on the board. The social post is judged on "original thoughts vs AI writing": draft a skeleton and facts, and let the owner write it in their own voice. |
+| C15 | **Verify the Pages project-page build in a browser** before publication day | **DONE 2026-11-12** — `pages.yml` builds with `--base="/<repo>/"` and nothing had ever loaded the result; the workflow is `workflow_dispatch`-only, so its first real run would have been the owner's U2 moment. `tests/e2e/verify-pages-build.mjs` runs that build and serves it as Pages does — nothing outside the prefix, and a 404 is a 404, with **no `index.html` fallback**, which the main harness's server does have and which would have masked a wrong base. **11 checks pass**: correct asset paths, 200, the app mounts, the demo scene renders, 0 console errors, 0 failed requests, 0 requests escaping the prefix. Confirmed to have teeth — at `--base=//` it fails 5 and exits non-zero, which is the empty-repository-name case where **the vite build still succeeds** and the page loads blank. `pages.yml` gained a step that fails loudly on that rather than publishing a dead page. **Added beyond the original section C**, like C14, and for the same reason: an unexercised deploy path is not evidence. |
 | C14 | **Close the harness's scheme-and-selection blind spot** so the accessibility claim is reproducible | **DONE 2026-11-10** — the four original axe scans ran the light scheme only and never selected a timeline row, which hid 19 real `color-contrast` nodes. `tests/e2e/lib/page.mjs` gained a `colorScheme` argument and a `selectFailingAction` helper; `tests/e2e/specs/accessibility.spec.mjs` went from 4 scans to **9** — a selected failing row in both schemes, plus dark-scheme runs of the first screen, reports and editor. A bootstrap bug was fixed on the way: `--record` asserted a baseline entry existed before it could record one, so a newly added screen could never be recorded. The debt is recorded in `axe-baseline.json` from a real scan and owned by the reopened K2. **This item was added beyond the original section C**, during Step 2 of the run contract: the harness exists to make these claims reproducible and it was reporting green over a live AA failure. |
 
 ## D. Already done

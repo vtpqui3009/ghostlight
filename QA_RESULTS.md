@@ -4,7 +4,8 @@ What has been executed against `main`, with the real numbers. Anything not liste
 These are correctness checks on the implementation; **none of them is evidence that the tool is
 useful to a stage manager.**
 
-Last updated 2026-11-10, after the scheme-and-selection harness gap was closed and K2 was partly reopened. The `tests/e2e/` harness and this file are reviewer-authored; the
+Last updated **2026-11-12**, after the GitHub Pages project-page build was loaded in a browser for
+the first time. The `tests/e2e/` harness and this file are reviewer-authored; the
 application and its domain, UI and persistence tests are Kiro's. See `ops/daily-run.md` for the
 provenance rule and `KIRO_SESSION_EVIDENCE.md` for what Kiro actually did.
 
@@ -14,19 +15,20 @@ provenance rule and `KIRO_SESSION_EVIDENCE.md` for what Kiro actually did.
 npm ci
 npm run check      # lint, strict typecheck, unit tests, production build
 npm run build && npm run test:e2e
+node tests/e2e/verify-pages-build.mjs   # the Pages bundle, served from /ghostlight/
 ```
 
 CI runs exactly these on every push and pull request: `.github/workflows/ci.yml`.
 
-## Automated — 2026-11-10, from a clean `npm ci`
+## Automated — 2026-11-12, from a clean `npm ci`
 
 | Check | Command | Result |
 |---|---|---|
 | Lint | `npm run lint` | clean |
 | Types | `npm run typecheck` (`tsc -b`, strict) | clean |
 | Unit and acceptance tests | `npm test` | **235 passed, 0 failed** — 31 engine, 134 domain acceptance, 13 persistence, 44 action-form helper, 5 import guard, 8 guided fix |
-| Production build | `npm run build` | built, 46 modules |
-| Project-page build | `npx vite build --base=/ghostlight/` | emits `/ghostlight/assets/…` |
+| Production build | `npm run build` | built, **48 modules** |
+| Project-page build | `node tests/e2e/verify-pages-build.mjs` | **11 checks passed** — emits `/ghostlight/assets/…`, and the bundle boots and loads a scene when served from that path |
 | End-to-end and accessibility | `npm run test:e2e` | **25 passed, 0 failed** — green on written-down debt |
 | Same, with every known failure fatal | `npm run test:e2e -- --strict` | **23 passed, 2 failed** — the selected-row contrast, and nothing else |
 | Runtime dependencies | `npm audit --omit=dev` | **0 vulnerabilities** |
@@ -34,17 +36,19 @@ CI runs exactly these on every push and pull request: `.github/workflows/ci.yml`
 
 ## Browser checks — Chromium, via `tests/e2e/`
 
-Fifteen tests over three specs, driven against the production build in `dist/`, not a dev server.
+**25 tests over five specs**, driven against the production build in `dist/`, not a dev server.
 
 - **Smoke**: the build boots with no console or uncaught page errors; the honesty subtitle is on the
   first screen; the empty state offers all six demo scenes; a demo loads and the timeline renders
   its cues; stage, reports and editor all render; selecting a failing action keeps the app alive and
   reports a verdict.
-- **Responsive, 390 px**: no horizontal overflow on the first screen, stage or editor. **Reports
-  overflows by 73 px** — `table.report-table`. This is the one known failure, written down in
-  `tests/e2e/known-failures.json` and owned by Kiro item K6.
-- **Accessibility**: axe-core 4.14.0 over four screens under `wcag2a`, `wcag2aa`, `wcag21a`,
-  `wcag21aa` and `best-practice`.
+- **Responsive, 390 px**: no horizontal overflow on the first screen, stage, reports or editor.
+  The Reports table's 73 px overflow was **fixed on 2026-11-10** — each table now sits in a
+  focusable, labelled scroll region — so `known-failures.json` is empty.
+- **Accessibility**: axe-core 4.14.0 over **9 scans** under `wcag2a`, `wcag2aa`, `wcag21a`,
+  `wcag21aa` and `best-practice` — four screens in light, a selected failing row in both schemes,
+  and dark-scheme runs of the first screen, reports and editor.
+- **Pages project-page build**: `node tests/e2e/verify-pages-build.mjs` — see below.
 
 ### Accessibility, as measured
 
@@ -107,6 +111,35 @@ The ghost-versus-solid distinction therefore survives only in the word labels (`
 `BEFORE:`, `MATCH:`, `MISMATCH:`) — which is why no test caught it, and why documents saying "ghost
 versus solid already exists" are true of the stylesheet and false of the screen. It is `src/`, so it
 is Kiro's: owned by **K10**, with K3's premise corrected to match.
+
+### The Pages deploy, verified in a browser — 2026-11-12
+
+`.github/workflows/pages.yml` builds with `--base="/<repo>/"`, because a GitHub Pages project page
+is served from `/<repo>/` rather than from the server root. That the build *emits* those paths had
+been recorded before. What had never happened is anyone **loading the result**, and the workflow is
+`workflow_dispatch`-only by design — so its first real execution would have been on publication
+day, which is the owner's U2 moment and a bad time to find a bug.
+
+`node tests/e2e/verify-pages-build.mjs` now runs that exact build and serves it the way Pages
+does: nothing outside `/ghostlight/` exists, and a missing file is a 404 with **no `index.html`
+fallback**. That second point matters — the main harness's static server *does* fall back to
+`index.html`, which is correct for what it tests and would have masked a wrong base path here.
+
+All **11 checks pass**: the build succeeds, every local asset reference starts with `/ghostlight/`,
+`GET /ghostlight/` returns 200, the app mounts and renders its heading, the "Missing Handoff" demo
+loads and renders `.app-main`, and there are **0 console errors, 0 uncaught errors, 0 failed or
+4xx/5xx requests, and 0 requests escaping the project path** (6 requests, all under the prefix).
+
+**The check was confirmed to have teeth.** Run as `--base=//`, which is what an empty repository
+name would produce, it fails 5 of the 11 and exits non-zero: `//assets/index.js` is a
+protocol-relative URL to a host called `assets`, so Chromium reports `ERR_NAME_NOT_RESOLVED` and
+the page renders blank. **The vite build still succeeds in that case** — only the browser catches
+it. `pages.yml` therefore gained a step that fails the job loudly if the repository name resolves
+empty, rather than publishing a dead page.
+
+This does **not** mean the deploy is proven end to end. Not checked: Pages being enabled, the
+`actions/deploy-pages` step itself, the published URL, HTTPS, or anything about GitHub's own
+serving. It means the artefact the workflow uploads is a working bundle at the right path.
 
 ## Known failures and debt
 

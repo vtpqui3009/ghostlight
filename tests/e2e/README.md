@@ -3,9 +3,9 @@
 **Provenance: reviewer-authored.** Everything under `tests/e2e/`, plus the `test:e2e` script and
 the `**/*.mjs` block in `eslint.config.js`, was written by the automated daily run (Claude) acting
 as orchestrator and reviewer — **not** by Kiro. Kiro authors `src/**` and the domain, UI and
-persistence tests. See [`ops/daily-run.md`](../../ops/daily-run.md) for the provenance rule and
-`ops/RUN_LOG.md` for what has actually been observed. (`QA_RESULTS.md` is roadmap item C4 and does
-not exist yet; until it does, the run log is the record.)
+persistence tests. See [`ops/daily-run.md`](../../ops/daily-run.md) for the provenance rule,
+[`QA_RESULTS.md`](../../QA_RESULTS.md) for the measured results, and `ops/RUN_LOG.md` for what has
+actually been observed on each run.
 
 This harness exists so that the browser evidence in `ops/RUN_LOG.md` is **reproducible from the
 repository** instead of resting on a screenshot somebody took once.
@@ -26,6 +26,30 @@ Flags:
 | `--strict` | Fail on **any** accessibility violation or ledgered test failure, baselined or not. Use this once Kiro items K2 and K6 have landed. |
 | `--record` | Rewrite `axe-baseline.json` from this run's scan. Never hand-edit the counts; re-record them. |
 | `--headed` | Run with a visible browser, for local debugging. |
+
+## `verify-pages-build.mjs` — a separate check, on purpose
+
+```bash
+node tests/e2e/verify-pages-build.mjs              # the default base, /ghostlight/
+node tests/e2e/verify-pages-build.mjs --base=/x/   # some other project path
+node tests/e2e/verify-pages-build.mjs --keep       # leave the build for inspection
+```
+
+This verifies what `.github/workflows/pages.yml` publishes: a bundle built with
+`--base="/<repo>/"`, because a GitHub Pages project page is served from `/<repo>/`, not from the
+server root.
+
+It is deliberately **not** part of `npm run test:e2e`, for two reasons. It does its own `vite
+build` into a temp directory, so it would otherwise clobber the root-based `dist/` every other spec
+runs against. And the main harness's static server **falls back to `index.html` for unknown
+paths** — right for testing client-side behaviour, wrong here, because a bundle requesting
+`/assets/index.js` under a project page would be handed `index.html` and could look like a pass.
+So this script serves the build the way Pages actually does: nothing outside the prefix exists, and
+a miss is a 404.
+
+It exits non-zero on failure and has been confirmed to fail on the case it exists to catch — run it
+with `--base=//`, an empty repository name, and the vite build still succeeds while the page loads
+blank with `ERR_NAME_NOT_RESOLVED`.
 
 ### Playwright
 

@@ -531,3 +531,104 @@ state table re-dated; its figures are unchanged.
 Unchanged, all the owner's: private repository, no Pages/public URL, no video, no user sessions, no
 competitor comparison, and still no Kiro session (K8 is the next one). U1 and U4 remain the
 long-lead items. `origin/ops/push-probe-20261110` is still on the remote; deleting it is the owner's call.
+
+## 2026-11-12 — run 12 (scheduled, automated): the deploy path, loaded for the first time
+
+Days left: **22** to 2026-12-04 14:00 PST. Step 0: `git fetch`, `git pull --ff-only`, then
+`git push --dry-run origin main` → `Everything up-to-date`, exit 0. Write access proven, no probe
+branch created.
+
+### What ran
+
+`npm ci`, then `npm run check`: lint, strict typecheck and build pass — production build **48
+modules**; **235 tests passed** (31 engine, 134 acceptance, 13 persistence, 44 action-form, 8
+guided-fix, 5 import-guard). `npm run test:e2e`: **25 passed, 0 failed**. `--strict`: **23 passed,
+2 failed**, the two selected-row contrast scans (K2) and nothing else. `npm audit --omit=dev`: **0
+vulnerabilities**. Every figure identical to run 11.
+
+**The strict suite is now stable.** Run 11 fixed its non-determinism by waiting on
+`document.getAnimations()`; six consecutive `--strict` runs today all gave 23/2 with the same 1
+light and 6 dark nodes. That fix holds.
+
+**CI on `main` is green** — checked through the Actions API, not assumed: run 15 on c39ca9d,
+conclusion `success`. All 15 runs to date are CI; `pages.yml` has **never executed**.
+
+No Kiro commits since run 10, and **no Kiro session since 2026-11-01**. `src/` and `.kiro/`
+untouched by me, as the provenance rule requires. Section C had no TODO left, so this run reviewed,
+re-verified, and closed a gap in my own lane.
+
+### Finding — the deploy path had never been loaded, and it was one character from silent failure
+
+`.github/workflows/pages.yml` builds with `--base="/${{ github.event.repository.name }}/"`, because
+a Pages project page is served from `/<repo>/`. That the build *emits* those paths was already in
+`QA_RESULTS.md`. What had never happened is anyone **loading the result in a browser** — and the
+workflow is `workflow_dispatch`-only by design, so **its first real execution would have been on
+publication day**, which is the owner's U2 moment.
+
+Two things made this worth a run rather than a glance:
+
+1. **The main harness could not have caught it.** `tests/e2e/lib/server.mjs` falls back to
+   `index.html` for any unknown path — correct for testing client-side behaviour, and here it would
+   hand a 404'd `/assets/index.js` the HTML document and let a wrong base path look like a pass.
+2. **A wrong base is silent.** If the repository name resolved empty the base would be `//`, and
+   `//assets/index.js` is a protocol-relative URL to a host called `assets`. **The vite build still
+   succeeds.** Only a browser sees it.
+
+So, as roadmap **C15**, `tests/e2e/verify-pages-build.mjs` (reviewer-authored, header says so): it
+runs the workflow's exact build into a temp directory — leaving `dist/` alone for the other specs —
+and serves it the way Pages does, with nothing outside the prefix and a 404 that stays a 404.
+
+**Result: 11 of 11 checks pass.** Build succeeds; both local asset references start with
+`/ghostlight/`; no protocol-relative URL; `GET /ghostlight/` → 200; the app mounts and renders
+`"Ghostlight"`; the "Missing Handoff" demo loads and renders `.app-main`; **0 console errors, 0
+uncaught errors, 0 failed or 4xx/5xx requests, 0 requests escaping the prefix** (6 requests, all
+under `/ghostlight/`).
+
+**I verified the check has teeth rather than assuming it.** At `--base=//` it fails 5 of 11 and
+exits 1: `ERR_NAME_NOT_RESOLVED` on both assets, `#root h1` never appears, blank page. That is the
+negative control, and it is the reason `pages.yml` gained a step that fails the job loudly if the
+repository name resolves empty instead of publishing a dead page.
+
+**What this does not prove**, and the records say so: Pages being enabled, `actions/deploy-pages`
+itself, the published URL, or HTTPS. It proves the uploaded artefact is a working bundle at the
+right path. If the published page is blank, suspect configuration, not the build.
+
+A bug of my own, found and fixed on the way: when the app failed to boot, the scene check reported
+`FAIL … — .app-main rendered`, because the detail string read the wrong variable. A harness that
+prints a false reason under a correct verdict is the kind of thing this project exists not to do.
+
+### Also corrected — `QA_RESULTS.md` had drifted
+
+Found while recording today's numbers, all in my lane:
+
+- The browser section still said **"Fifteen tests over three specs"**; it is **25 over five**, and
+  the accessibility line still said four screens rather than **9 scans**.
+- The production build was recorded at **46 modules**; it is **48**.
+- Worst of the three: the 390 px section still called the Reports table's **73 px overflow** "the
+  one known failure, written down in `known-failures.json`" — it was **fixed on 2026-11-10** and
+  that file is empty, which the same document said two paragraphs later. A reader would have hit a
+  flat contradiction.
+
+Also cleared a stale parenthetical in `tests/e2e/README.md` claiming `QA_RESULTS.md` "does not
+exist yet".
+
+### Brief and records
+
+`ops/kiro-brief.md` still points at **K8** and its numbers are still correct; re-dated to today,
+with an explicit note that no Kiro session has run in between, plus the green CI line. Roadmap state
+table re-dated and given the Pages row; **C15** recorded, and **U2** now notes the bundle is
+pre-verified and that Pages on a private repository needs a paid plan, so U1 comes first.
+
+Queue unchanged: **K8 → K2 (reopened) → K11 → K10 → K3 → K7 → K6 CSV → K12 → K9**.
+
+### Blocked, and on whom
+
+Unchanged, and all the owner's: repository **private**, no Pages, no public URL, no video, no user
+sessions, no competitor comparison, and **still no Kiro session** — K8 is ten minutes and closes a
+line that has read NOT VERIFIED since 2026-10-31. Potential Impact is 20% of the score and remains
+at zero evidence.
+
+**Week 1 of the roadmap's schedule ends 2026-11-16 and none of its owner items have started.** U1
+(public) and U4 (two stage managers) are the long-lead items; U4 cannot be compressed later, and
+nothing in my lane can substitute for it. `origin/ops/push-probe-20261110` is still on the remote;
+deleting it remains the owner's call.
