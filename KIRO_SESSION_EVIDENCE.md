@@ -286,3 +286,47 @@ reviewer.
   **275/275** tests, build); `test:e2e -- --strict` 25 passed, 0 failed; 26 out-of-repo browser checks passed.
 - What this does NOT show: that `npm run dev` was exercised by hand; the remaining moderate advisories
   are not fixed (the fix would be a typescript-eslint major).
+
+## 2026-11-13 (second session) — Halloween pass, local MCP server (K12), write-up, submission packet (Kiro CLI 3.3.0)
+
+- Surface: Kiro CLI 3.3.0 on Windows PowerShell, Node v24.18.0. Model and mode not shown to the agent;
+  not recorded. `/usage` before and after: **NOT RUN** (a slash command; not reachable from the agent's tools).
+- Files written: `src/styles.css` (haunted-theatre layer; unused infinite `.spinner` removed),
+  `tools/mcp/{handlers.ts,server.ts,md.d.ts,build.mjs}`, `.kiro/mcp/{ghostlight-mcp.mjs,mcp.settings.json}`,
+  `tests/mcp/{handlers,protocol}.test.ts`, `tsconfig.json` (include `tools`), `eslint.config.js` (ignore the
+  generated bundle only; no rule changed), `package.json`/lockfile (exact pins: `@modelcontextprotocol/sdk`
+  1.32.2, `zod` 4.6.7, `esbuild` 0.28.2; dev only), `.kiro/steering/tech.md`, README, and the docs
+  (`kiro-writeup.md`, `submission.md`, `submission-packet.md`, `demo-script.md`, roadmap, brief).
+
+### What failed or was blocked
+
+1. **A permission rule blocked writing `.kiro/settings/mcp.json`** ("deny fs_write" on `.kiro/settings/`).
+   I did not route around it (no PowerShell write, no `kiro-cli mcp add`). The launch config is committed as
+   `.kiro/mcp/mcp.settings.json` and the owner must copy it. **Consequence: no live Kiro-agent call of the MCP
+   server was possible this session. NOT VERIFIED.**
+2. The first design cut for the interface used `background-attachment: fixed`, which left a visible seam in
+   full-page screenshots; removed.
+3. The bundle is 1.67 MB (SDK and zod are inlined). Accepted, documented in the README, excluded from lint.
+4. `npm audit` is unchanged at 7 moderate (lint chain); the new dev dependencies added none.
+
+### Results
+
+- **Interface:** light and dark, 390 px, reduced-motion and print checked by an out-of-repo Playwright
+  script (deleted afterwards): axe (wcag2a/aa/21a/21aa/best-practice) clean on the first screen, stage diagram,
+  stage list, reports and editor in both schemes; 0 infinite animations; 0 running animations under reduced
+  motion; no horizontal overflow at 390 px on any view; print drops the dark layer. **24/24.** I looked at the
+  screenshots (first screen light/dark/mobile, stage, reports) before accepting them.
+- **MCP:** 22 tests (20 handler tests with hand-calculated oracles, 1 protocol test over the committed bundle
+  with raw JSON-RPC, 1 byte-for-byte staleness test). Three deliberate bugs in the handlers (cause dropped,
+  rejected counted as applied, fix marked applied) were each caught, then reverted. A script then called the
+  bundle over stdio for all six bundled demos: every verdict matched the demo's own description. **It caught
+  nothing wrong.** This was a script calling the server, not a Kiro agent.
+- Commands: `npm run lint` 0, `npm run typecheck` 0, `npm test` **297/297**, `npm run build` 0,
+  `npm run build:mcp` reproducible, `test:e2e -- --strict` **25 passed, 0 failed** (baseline empty).
+
+### What this does NOT show
+
+That a Kiro agent can launch and call the MCP server (config not yet in `.kiro/settings/`, and `node`
+resolution by Kiro on this machine is untested; inside this tool's shell `cmd` could not find `node`);
+that the hook fires interactively; real-user validation; a colour-blind or screen-reader review; Kiro's
+`/usage`; and anything about the live GitHub Pages site until it has been redeployed after the next push.

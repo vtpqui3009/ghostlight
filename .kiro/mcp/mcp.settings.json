@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "ghostlight": {
+      "command": "node",
+      "args": [".kiro/mcp/ghostlight-mcp.mjs"],
+      "disabled": false,
+      "autoApprove": ["check_scenario", "explain_issue", "reports", "list_demos", "get_demo"]
+    }
+  }
+}

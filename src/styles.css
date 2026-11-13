@@ -1083,21 +1083,6 @@ textarea {
   border-width: 0;
 }
 
-/* Loading Spinner */
-.spinner {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid var(--border);
-  border-top-color: var(--pumpkin);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 /* Responsive */
 @media (max-width: 640px) {
   .app-header {
@@ -1138,4 +1123,279 @@ button.link-button {
 button.link-button:hover:not(:disabled) {
   background: none;
   text-decoration-thickness: 2px;
+}
+
+/* ==========================================================================
+   The haunted theatre (K10, Kiro, 2026-11-13).
+
+   One idea carries the whole look: Ghostlight is the single lamp a theatre leaves burning
+   on an empty stage, and the ghost is where a prop SHOULD be. So the room is dark, the
+   cards are lit by that lamp, the stage has a curtain, a valance and footlights, and the
+   ghost is a dashed outline. Everything here is decoration around text that already sits
+   on a solid surface, never on a gradient, and none of it carries meaning on its own: the
+   word labels, glyphs and verdicts are unchanged.
+
+   Rules this layer keeps:
+   - gradients and box-shadows only: no image assets, no external fonts, no network;
+   - nothing loops. The only motion is one 1.4 s fade of the header's lamp on load, and the
+     0.6 s ghost-materialise above; both are removed by prefers-reduced-motion;
+   - light and dark schemes are set separately, and print drops the whole layer.
+   ========================================================================== */
+:root {
+  --haunt-bg: #1b1020;
+  --haunt-bg-2: #2b1733;
+  --candle: #f2b84b;
+  --candle-glow: rgba(242, 184, 75, 0.35);
+  --curtain: #6b1d36;
+  --web-line: rgba(74, 44, 78, 0.28);
+  --web-line-header: rgba(249, 245, 235, 0.22);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --haunt-bg: #0b070d;
+    --haunt-bg-2: #190e1d;
+    --candle: #e8b858;
+    --candle-glow: rgba(232, 184, 88, 0.3);
+    --curtain: #5a1830;
+    --web-line: rgba(201, 184, 209, 0.2);
+  }
+}
+
+/* The dark house, with a pool of candle light from above and a cold wash from the corner. */
+body {
+  background-color: var(--haunt-bg);
+  background-image:
+    radial-gradient(ellipse 60% 40% at 50% -5%, rgba(242, 184, 75, 0.14), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(126, 212, 173, 0.07), transparent 70%);
+}
+
+/* Header: the lamp, a cobweb in the corner, and a candle-coloured edge. */
+.app-header {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--haunt-bg-2);
+  border-bottom: 3px solid var(--candle);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+}
+
+.app-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+.app-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 28rem 9rem at 3rem 0, var(--candle-glow), transparent 70%);
+  animation: lamp-up 1.4s ease-out 1 both;
+}
+
+.app-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 7rem;
+  height: 7rem;
+  z-index: 0;
+  pointer-events: none;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  background:
+    repeating-radial-gradient(circle at 100% 0, transparent 0 0.9rem, var(--web-line-header) 0.9rem calc(0.9rem + 1px)),
+    repeating-conic-gradient(from 90deg at 100% 0, transparent 0 11deg, var(--web-line-header) 11deg 12deg);
+}
+
+.app-header h1 {
+  text-shadow: 0 0 18px var(--candle-glow);
+}
+
+@keyframes lamp-up {
+  from { opacity: 0.2; }
+  to { opacity: 1; }
+}
+
+/* Cards are lit by the lamp: a candle-coloured hairline, a deep shadow, a cobweb corner. */
+.card {
+  position: relative;
+  border-color: var(--border-dark);
+  box-shadow: 0 0 0 1px rgba(242, 184, 75, 0.22), 0 10px 26px rgba(0, 0, 0, 0.5);
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  pointer-events: none;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  background:
+    repeating-radial-gradient(circle at 100% 0, transparent 0 0.5rem, var(--web-line) 0.5rem calc(0.5rem + 1px)),
+    repeating-conic-gradient(from 90deg at 100% 0, transparent 0 14deg, var(--web-line) 14deg 15deg);
+}
+
+.panel-header::before {
+  content: "\2726\00a0";
+  content: "\2726\00a0" / "";
+  color: var(--candle);
+  text-shadow: 0 0 1px var(--plum);
+}
+
+/* Buttons catch the light on hover. A filter, so it never fights a button's own shadow. */
+button {
+  transition: background 0.2s ease, filter 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  filter: drop-shadow(0 0 6px var(--candle-glow));
+}
+
+/* Timeline: each cue is a candle-lit entry, and the status disc is unchanged. */
+.cue-header {
+  border-left: 4px solid var(--candle);
+}
+
+.cue-item {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Alerts glow faintly in their own colour, like a ghost light on the page. */
+.alert-error {
+  box-shadow: 0 0 16px -4px var(--mismatch-glow);
+}
+
+.alert-warning {
+  box-shadow: 0 0 16px -4px rgba(217, 165, 50, 0.45);
+}
+
+/* The stage: a scalloped valance across the top, the spotlight, footlights below. */
+.stage-zones {
+  padding-top: 1.75rem;
+  background:
+    radial-gradient(circle at 12px 0, var(--curtain) 11px, transparent 12px) 0 0 / 24px 14px repeat-x,
+    linear-gradient(var(--curtain) 0 5px, transparent 5px),
+    radial-gradient(ellipse 70% 90% at 50% 0%, var(--stage-spot), transparent 70%),
+    var(--stage-bg);
+  box-shadow: 0 10px 22px -8px var(--candle-glow);
+}
+
+/* Zones are arched like the windows of an old theatre. */
+.zone-card {
+  border-radius: 1.75rem 1.75rem 6px 6px;
+  padding-top: 1.25rem;
+}
+
+/* Reports and tables keep a plain, readable ruling. */
+.report-title {
+  border-bottom: 3px double var(--border-dark);
+}
+
+.report-table th {
+  border-bottom: 2px solid var(--border-dark);
+}
+
+/* The first screen: a small proscenium. Side drapes and a scalloped valance frame the
+   text, and a candle-coloured sill sits underneath. The text itself rests on parchment. */
+.first-screen {
+  position: relative;
+  background: var(--parchment);
+  width: calc(100% - 1.5rem);
+  margin: 1.5rem auto;
+  padding: 3.25rem 2.5rem 2.5rem;
+  border-radius: 4px;
+  box-shadow:
+    inset 16px 0 0 var(--curtain),
+    inset -16px 0 0 var(--curtain),
+    inset 0 -6px 0 var(--candle),
+    0 0 0 1px rgba(242, 184, 75, 0.3),
+    0 18px 44px rgba(0, 0, 0, 0.6);
+}
+
+.first-screen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1.75rem;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 14px 0, var(--curtain) 13px, transparent 14px) 0 0 / 28px 26px repeat-x,
+    linear-gradient(var(--curtain) 0 10px, transparent 10px);
+}
+
+.first-screen h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.5rem;
+}
+
+/* The ghost light: the featured first move is the lamp burning on the stage. */
+.demo-choice.featured {
+  box-shadow: 0 0 26px 2px var(--candle-glow);
+}
+
+.first-move h3::before {
+  content: "\25D0\00a0";
+  content: "\25D0\00a0" / "";
+  color: var(--candle);
+  text-shadow: 0 0 1px var(--plum);
+}
+
+@media (max-width: 640px) {
+  .first-screen {
+    padding: 3rem 1.5rem 1.75rem;
+    box-shadow:
+      inset 10px 0 0 var(--curtain),
+      inset -10px 0 0 var(--curtain),
+      inset 0 -6px 0 var(--candle),
+      0 12px 30px rgba(0, 0, 0, 0.6);
+  }
+
+  .app-header::after {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-header::before { animation: none; }
+  button { transition: none; }
+}
+
+/* Print drops the whole layer: plain paper, plain ink. */
+@media print {
+  body {
+    background: white;
+    background-image: none;
+  }
+
+  .app-header {
+    background: none;
+    color: black;
+    border-bottom: 2px solid black;
+    box-shadow: none;
+  }
+
+  .app-header::before,
+  .app-header::after,
+  .card::after,
+  .first-screen::before,
+  .app-header h1::before {
+    display: none;
+  }
+
+  .card {
+    box-shadow: none;
+  }
+
+  .stage-zones {
+    background: none;
+    box-shadow: none;
+    border-bottom: 2px solid black;
+  }
 }

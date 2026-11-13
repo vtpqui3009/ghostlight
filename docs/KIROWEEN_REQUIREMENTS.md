@@ -170,3 +170,45 @@ Each line checked against the repository as it stands, not from memory.
    scored on Presentation: problem, audience, the product working end to end. Reclaim that time.
 3. **User validation is the highest-value hour available.** It is the only thing that moves
    Potential Impact, it is 20%, and it is currently zero.
+
+---
+
+# Re-read 2026-11-13 (owner pasted the Overview, Rules, Resources and Updates tabs)
+
+The live site still returns HTTP 403 to automated fetches, so this comes from text the owner pasted.
+The Official Rules on the Rules tab remain the deciding source.
+
+## What changed or is new compared with 2026-11-10
+
+- **Nothing changes the category, deadline or criteria.** Deadline is still 2026-12-04 14:00 PT.
+- Dates now known: judging 2026-12-16 to 2027-01-29, winners about 2027-02-03.
+- The project **must stay freely accessible through the end of judging**, so the repository must stay
+  public and the Pages URL must keep working until late January 2027. Judges may score from the
+  description, images and video alone, so the screenshots and the video carry real weight.
+- Rules ask entrants to **declare existing code, libraries and starter templates**, and to run
+  "consistently on the platform indicated". Now declared in `README.md`.
+- Submissions must be in English (or have an English translation). Write-up, description and
+  video narration should be English.
+- Project must not have been developed with financial support or incentives from the Sponsor. The
+  4,000 Kiro credits are the Sponsor's own programme and the rules allow them.
+- Updates tab: Indonesia added as eligible; a Build Session recording was posted; an apology for slow
+  credit approvals. None affect this project (credits already redeemed).
+- Social Blitz is judged on "original thoughts vs AI writing"; the Blog prize needs a public post that
+  says it is for Kiroween 2026. Both must be written by the owner.
+
+## Conformance as of 2026-11-13
+
+| Requirement | State |
+|---|---|
+| New project inside 2026-10-30 to 2026-12-04 | pass (first commit 2026-10-31) |
+| Public GitHub repo, licence shown in About | **pass** (public, MIT detected) |
+| `/.kiro` tracked and not ignored | pass |
+| Working app URL | **pass**: https://vtpqui3009.github.io/ghostlight/ |
+| Third-party code declared | pass (README) |
+| Text description | not yet written (`docs/submission.md`) |
+| Demo video under 3:00, public on YouTube | **not done** (owner) |
+| Written Kiro-usage answers | drafted in `docs/kiro-writeup.md` from the evidence file; two statements (hook trigger, live MCP use) are deliberately marked NOT VERIFIED until the owner checks them |
+| Bonus claims | Blog and Social Blitz open to the owner; Ghost of Kiroween Past is out (not registered in 2025); Student and Startup unknown |
+
+Weakest scoring areas, unchanged: Potential Impact (no user evidence) and the variety of Kiro tools
+(CLI only; one hook with an unverified trigger; no custom agent, MCP or powers).

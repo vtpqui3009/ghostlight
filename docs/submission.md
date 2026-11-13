@@ -9,13 +9,13 @@ Fill the `TO FILL` items before submitting. **No edits are possible after 2026-1
 | Project name | Ghostlight |
 | Tagline | Catch the prop plan that cannot work, before the curtain rises. |
 | Category | **Costume Contest** (one category only) |
-| Public GitHub repo | <https://github.com/vtpqui3009/ghostlight> — `TO FILL: must be public, with MIT visible in the About sidebar` |
-| Working app URL | `TO FILL` — GitHub Pages, after U1 and U2 |
+| Public GitHub repo | <https://github.com/vtpqui3009/ghostlight> — public on 2026-11-13, GitHub detects MIT |
+| Working app URL | <https://vtpqui3009.github.io/ghostlight/> — GitHub Pages, HTTP 200 on 2026-11-13 |
 | Judge login needed? | No. The app is local-first; nothing to sign into. |
 | Demo video | `TO FILL` — public YouTube, under 3:00, per `docs/demo-script.md` |
 | How Kiro was used | `docs/kiro-writeup.md` |
 | Team | One person. |
-| Built with | TypeScript, React, Vite, Vitest, Playwright, axe-core — and Kiro. |
+| Built with | TypeScript, React, Vite, Vitest, fast-check, Playwright, axe-core, the Model Context Protocol SDK — and Kiro CLI. |
 
 ### Bonus prizes to tick
 
@@ -73,10 +73,18 @@ DigiScript and Standby already do, and what is genuinely left over.
 
 ### The interface
 
-Ghostlight shows the **required** position as a ghost and the **planned** position as a solid, with
-physical ids and words rather than colour alone, because this gets read in a dark room by someone
-who is already busy. There is a plain list equivalent for reduced motion, narrow screens and print,
-and the crew sheets — preset, who-does-what, reset — print on paper.
+Ghostlight is a haunted theatre, and the haunting does a job. The room is dark and the one lamp
+burning is the "ghost light" a theatre leaves on an empty stage. The ghost is where a prop *should*
+be, drawn as a dashed outline; the solid block is where the plan *actually* has it; a mismatch gets a
+heavier outline and a note in words saying where the other half is. The stage has a curtain, a
+valance and footlights, and the zones are arched like old theatre windows. Nothing depends on colour
+alone: every state also has a glyph and a word label (REQUIRED, BEFORE, MATCH, MISMATCH), because this
+gets read in a dark room by someone who is already busy. There are no jump scares and no sound, and
+the only motion is a short one-time fade that is removed when the browser asks for reduced motion.
+
+There is a plain list equivalent of the stage (the default under reduced motion), a keyboard path
+through every control, light and dark colour schemes, and the crew sheets (preset, who-does-what,
+reset) print on paper or download as CSV.
 
 ### What it is not
 
@@ -89,7 +97,13 @@ contradicts the idea. If the sessions do not happen, say that plainly instead.
 
 ### Built honestly
 
-- 227 tests, strict TypeScript, and a committed end-to-end and accessibility harness so the claims
-  are reproducible from the repository rather than resting on a screenshot.
-- `--strict` accessibility passes, and `QA_RESULTS.md` lists what the checks do **not** cover.
-- The parts of `src/` not written by Kiro are named in the README's authorship table.
+- 297 tests (engine and acceptance, 15 property-based tests with a reference-model oracle, UI logic,
+  and a local MCP server tested over stdio), strict TypeScript, and a committed end-to-end and
+  accessibility harness. `--strict` axe-core passes in light and dark, and `QA_RESULTS.md` lists what
+  the checks do **not** cover.
+- Kiro CLI wrote the specification, the engine and most of the interface. The parts of `src/` it did
+  not write are named in the README's authorship table.
+- The write-up in `docs/kiro-writeup.md` includes what did not work: a hook whose trigger was never
+  observed, a property suite that found no engine bug, and an animation that hung the test harness.
+- Free to use and open source (MIT); the app runs entirely in the browser with no account, backend
+  or paid service.

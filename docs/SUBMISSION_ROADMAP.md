@@ -12,6 +12,27 @@ The event's own requirements, and how far each one is met, live in
 [docs/KIROWEEN_REQUIREMENTS.md](KIROWEEN_REQUIREMENTS.md). Check against that file, not against
 memory of the rules.
 
+## Status 2026-11-13 — Kiro session (supersedes the K-item states below)
+
+Done through Kiro CLI 3.3.0 (evidence in `KIRO_SESSION_EVIDENCE.md`, including failures):
+**K2 (reopened part), K3, K6 (CSV), K7, K9, K10, K11, K12.** K8 is closed as *not observed*.
+
+| Item | Result |
+|---|---|
+| K2 / K10 | Selected row no longer green on a failing step; ghost and solid render; full haunted-theatre layer, light and dark, finite animations only. Strict e2e **25/25**, axe baseline empty. |
+| K3 | Diagram/List toggle over one shared derivation; list is the default under reduced motion. |
+| K6 | CSV per report, formula-injection guarded, honesty line first, no network. |
+| K7 | First screen explains the tool, its limits and one first move. |
+| K8 | Hook did **not** fire in three non-interactive sessions, not even `SessionStart`. Interactive check still NOT VERIFIED (owner, ~2 min). |
+| K9 | vite 7.3.8 + vitest 4.1.12: critical and high advisories gone, 7 moderate remain (lint chain). |
+| K11 | 15 property tests, all pass first run, 8 injected bugs all caught, no real engine bug found. |
+| K12 | One local, read-only MCP server with the real engine. Tested over stdio. **Live use by a Kiro agent NOT VERIFIED:** the launch config must be copied to `.kiro/settings/mcp.json` (a permission rule blocked the session from writing there). Custom agents, powers, Crew, IDE, Web: not used, reasons in the write-up. |
+
+Repository is **public** and the app is **live** at <https://vtpqui3009.github.io/ghostlight/>
+(U1 and U2 done 2026-11-13). Still open and owner-only: demo video (U3), interviews (U4),
+competitor comparison (U5), blog and social posts (U10), Devpost submission (U6). The copy-paste
+packet is [`submission-packet.md`](submission-packet.md).
+
 ## Decisions of 2026-11-10
 
 1. **`main` is the Kiro lineage.** `main` was fast-forwarded to `codex/ghostlight-domain-draft-20261031`
