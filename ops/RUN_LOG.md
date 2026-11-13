@@ -632,3 +632,33 @@ at zero evidence.
 (public) and U4 (two stage managers) are the long-lead items; U4 cannot be compressed later, and
 nothing in my lane can substitute for it. `origin/ops/push-probe-20261110` is still on the remote;
 deleting it remains the owner's call.
+
+## 2026-11-13 — schedule stopped, work handed to Kiro (interactive, owner-directed)
+
+The owner asked for the code to be merged, the schedule stopped, and everything remaining noted so
+the rest can be delegated to Kiro.
+
+- **Schedule stopped.** `trig_012WDrc1gUfyZWx4aLW8uidw` is **disabled**, not deleted, so it can be
+  re-enabled. The 2026-11-13 child session (`session_01MHgzFB4DigPJGf7WJk3A8A`) had already finished
+  and was idle, so no cloud session is writing to the repository.
+- **Merge.** `main` already carried every reviewer commit. Branch contents were compared rather than
+  trusted by ancestry: `codex/ghostlight-claudekit-review-20261031` shows "unmerged" only because its
+  one commit was cherry-picked; the file it adds is byte-identical in `main`. The other two `codex/*`
+  branches and `ops/push-probe-20261110` are fully contained.
+- **`claude/read-repo-continue-lwbi83` was deliberately not merged.** A trial merge today conflicts
+  in **10 files**, including the Kiro-authored `src/domain/engine.ts`,
+  `.kiro/specs/ghostlight/design.md` and `.kiro/specs/ghostlight/tasks.md`. It is a second,
+  independent implementation of the same app. Merging it would wreck the tree and erase the Kiro
+  provenance the project is built on, which is the reason the Kiro lineage was chosen as `main` on
+  2026-11-10. This is a decision, not an omission, and it is recorded in the handoff.
+- **Verified from a clean `npm ci`:** `npm run check` green — lint, strict typecheck, **235 tests**,
+  production build **48 modules**. `npm run test:e2e -- --strict` — **23 passed, 2 failed**, both the
+  selected-row contrast: 1 node in the light scheme, 6 in the dark. That is the reopened K2 and is
+  the first thing a Kiro session should fix after K8.
+- **Written:** `docs/HANDOFF_TO_KIRO.md` — the single list of what remains, with the Kiro queue in
+  order, the owner-only items, every `TO FILL` placeholder, the cautions, and the branch status. The
+  run contract now carries a STOPPED banner; the README and roadmap point at the handoff.
+- **Could not do:** delete `origin/ops/push-probe-20261110`. This session's GitHub grant allows
+  creating and updating refs but not deleting them. The owner must remove it.
+
+Nothing in `src/` was touched.

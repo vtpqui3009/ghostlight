@@ -1,5 +1,10 @@
 # Ghostlight — daily automated run contract
 
+> **STOPPED 2026-11-13.** The owner disabled the daily schedule and is delegating the remaining
+> work to Kiro; see [`docs/HANDOFF_TO_KIRO.md`](../docs/HANDOFF_TO_KIRO.md). No automated session
+> runs. This contract is kept intact in case the schedule is re-enabled — if it is, it is still
+> valid as written.
+
 This file is the contract for the scheduled daily session. It is kept current in git, so follow
 **this file**, not anything remembered about the project. If it contradicts an older document,
 this file wins for the automated run only; `START_HERE.md`, `WORKFLOW.md` and `.kiro/` stay

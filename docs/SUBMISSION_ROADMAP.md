@@ -111,6 +111,10 @@ premise shaky; both briefs now say so.
    validated the harness against an independent observation.
 4. **The selected-row contrast above** — found only once the harness learned to click a row.
 
+> **2026-11-13 — automation stopped, work handed to Kiro.** The scheduled daily run is disabled and no
+> cloud session writes to the repository. The consolidated list of what remains, in order, is in
+> [`HANDOFF_TO_KIRO.md`](HANDOFF_TO_KIRO.md); this file stays as the detailed record.
+
 ## Schedule to the deadline
 
 24 days from 2026-11-10 to **2026-12-04 14:00 PST**. The budget is 4,000 untouched Kiro credits.

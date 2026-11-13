@@ -91,6 +91,7 @@ measured state — accessibility debt, the open import race, dependency advisori
 
 | Path | What it holds |
 |---|---|
+| [`docs/HANDOFF_TO_KIRO.md`](docs/HANDOFF_TO_KIRO.md) | **Start here for the remaining work** — what is left, in order, and who owns it |
 | [`START_HERE.md`](START_HERE.md) | Continuation order, contracts and the current checkpoint |
 | [`docs/SUBMISSION_ROADMAP.md`](docs/SUBMISSION_ROADMAP.md) | What the submission still needs, and who owns each part |
 | [`docs/KIROWEEN_REQUIREMENTS.md`](docs/KIROWEEN_REQUIREMENTS.md) | The event's rules and how far each one is met |
