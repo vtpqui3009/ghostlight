@@ -57,6 +57,23 @@
   --secondary-bg-hover: #6b4d6f;
   --secondary-fg: #ffffff;
   --badge-fg: #ffffff;
+
+  /* K10, the haunted stage. The curtain and spotlight are decoration; every cue that
+     carries meaning (ghost versus solid, match versus mismatch) also has a word label
+     and a glyph, so nothing depends on colour or glow alone. Text always sits on a
+     --surface-* or --ghost-surface token, never directly on the curtain. */
+  --stage-bg: #2a1b2e;
+  --stage-spot: rgba(255, 233, 180, 0.28);
+  --stage-footlight: #d9a532;
+  --ghost-surface: #efe7f1;
+  --ghost-border: #4a2c4e;
+  --ghost-glow: rgba(74, 44, 78, 0.45);
+  --mismatch-glow: rgba(163, 52, 52, 0.5);
+  --solid-surface: #4a2c4e;
+  --solid-fg: #ffffff;
+  --neutral-surface: #fffdf7;
+  --selected-surface: #e4dcc6;
+  --selected-bar: #4a2c4e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -101,6 +118,19 @@
     --secondary-bg-hover: #c9b8d1;
     --secondary-fg: #1a1a1a;
     --badge-fg: #1a1a1a;
+
+    --stage-bg: #120d14;
+    --stage-spot: rgba(232, 184, 88, 0.2);
+    --stage-footlight: #e8b858;
+    --ghost-surface: #3a2f3e;
+    --ghost-border: #c9b8d1;
+    --ghost-glow: rgba(201, 184, 209, 0.5);
+    --mismatch-glow: rgba(233, 128, 128, 0.55);
+    --solid-surface: #b3a3bb;
+    --solid-fg: #1a1a1a;
+    --neutral-surface: #2d2622;
+    --selected-surface: #3d342f;
+    --selected-bar: #e8b858;
   }
 }
 
@@ -339,21 +369,49 @@ button.icon-btn {
   outline-offset: -2px;
 }
 
+/* A selected row is marked by a bar, a heavier weight and a neutral surface -- never by a
+   status colour -- so it can sit on top of a failing step without contradicting it. The
+   status classes below (rejected / uncertain) add their own tint and keep the bar. This
+   replaces a mint fill that painted a red failure on green. */
 .action-item.selected {
-  background: var(--mint);
-  font-weight: 500;
+  background: var(--selected-surface);
+  box-shadow: inset 5px 0 0 var(--selected-bar);
+  font-weight: 600;
+}
+
+.action-item.selected.rejected {
+  background: var(--surface-error);
+  box-shadow: inset 5px 0 0 var(--error-text);
+}
+
+.action-item.selected.uncertain {
+  background: var(--surface-warning);
+  box-shadow: inset 5px 0 0 var(--warning-text);
 }
 
 .action-status {
   flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 50%;
   border: 2px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 700;
 }
 
+/* The status also has a glyph, so it is not carried by the colour of the dot alone.
+   Generated content with an empty alt (after the slash) is skipped by screen readers;
+   the same status is already spoken by the row's sr-only word. */
+.action-status.applied::after { content: "\2713"; content: "\2713" / ""; color: var(--badge-fg); }
+.action-status.rejected::after { content: "\2715"; content: "\2715" / ""; color: var(--badge-fg); }
+.action-status.uncertain::after { content: "?"; content: "?" / ""; color: var(--badge-fg); }
+
 .action-status.applied {
-  background: var(--success);
+  background: var(--success-text);
   border-color: var(--success-text);
 }
 
@@ -396,10 +454,36 @@ button.icon-btn {
   min-height: 300px;
 }
 
+/* The stage. A dark curtain with one spotlight and a footlight line. It frames the zone
+   cards; it carries no information, and no text sits directly on it. */
 .stage-zones {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
+  padding: 1.25rem 1rem 1rem;
+  border-radius: 8px;
+  border-bottom: 4px solid var(--stage-footlight);
+  background:
+    radial-gradient(ellipse 70% 90% at 50% 0%, var(--stage-spot), transparent 70%),
+    var(--stage-bg);
+}
+
+.stage-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1.25rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-mid);
+}
+
+.stage-legend .glyph {
+  display: inline-block;
+  min-width: 1.25em;
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-dark);
 }
 
 .zone-card {
@@ -417,36 +501,87 @@ button.icon-btn {
   padding-bottom: 0.375rem;
 }
 
+/* Props. The shape of the outline and a glyph say what each one is; the fill is only
+   reinforcement:
+     required (ghost)  dashed outline, translucent, soft glow, glyph  ◌
+     planned (solid)   solid outline, filled, glyph                   ●
+     match             the ghost, calm dashed outline, still, glyph   ✓
+     mismatch          the ghost, thicker dashed outline, glow, glyph ✕
+   Every one of them also keeps its REQUIRED / BEFORE / MATCH / MISMATCH word label. */
 .prop-glyph {
-  padding: 0.5rem;
+  position: relative;
+  padding: 0.5rem 2rem 0.5rem 0.5rem;
   margin-bottom: 0.5rem;
   border-radius: 4px;
-  border: 2px solid var(--border);
-  background: white;
+  border: 2px solid var(--border-dark);
+  background: var(--neutral-surface);
+  color: var(--text-dark);
 }
 
-.prop-glyph.ghost {
-  border: 2px dashed var(--pumpkin);
-  background: transparent;
-  opacity: 0.8;
+.prop-glyph::after {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
-.prop-glyph.solid {
-  border: 2px solid var(--plum);
-  background: var(--plum-light);
-  color: white;
+.prop-glyph.required {
+  border: 2px dashed var(--ghost-border);
+  background: var(--ghost-surface);
+  box-shadow: 0 0 12px 2px var(--ghost-glow);
+  animation: ghost-materialise 0.6s ease-out 1;
 }
+.prop-glyph.required::after { content: "\25CC"; content: "\25CC" / ""; }
+
+.prop-glyph.planned {
+  border: 2px solid var(--solid-surface);
+  background: var(--solid-surface);
+  color: var(--solid-fg);
+}
+.prop-glyph.planned::after { content: "\25CF"; content: "\25CF" / ""; }
+
+.prop-glyph.other::after { content: "\25CF"; content: "\25CF" / ""; color: var(--text-mid); }
 
 .prop-glyph.match {
-  border: 2px solid var(--success);
-  background: var(--success);
-  color: white;
+  /* The ghost, and the plan agrees with it: still dashed, but calm and still. */
+  border: 2px dashed var(--success-text);
+  background: var(--surface-success);
+  color: var(--success-text);
 }
+.prop-glyph.match::after { content: "\2713"; content: "\2713" / ""; }
 
 .prop-glyph.mismatch {
-  border: 2px solid var(--error);
-  background: var(--error);
-  color: white;
+  /* The ghost, and the plan does not have the prop here: a heavier dashed outline with a
+     red halo, a ghost with nowhere to settle. */
+  border: 4px dashed var(--error-text);
+  background: var(--surface-error);
+  color: var(--error-text);
+  box-shadow: 0 0 12px 2px var(--mismatch-glow);
+  animation: ghost-materialise 0.6s ease-out 1;
+}
+.prop-glyph.mismatch::after { content: "\2715"; content: "\2715" / ""; }
+
+/* The ghost fades in once, when the user selects a step and the glyph appears. It runs a
+   single time and never loops: nothing on the stage moves unless the user acted. Removed
+   entirely under reduced motion, where the dashed outline, the glyph and the
+   REQUIRED / MISMATCH label already say everything. The halo itself is static. */
+@keyframes ghost-materialise {
+  /* Transform only, never opacity or colour, so contrast is identical at every frame. */
+  from { transform: translateY(-4px) scale(0.98); }
+  to { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prop-glyph.required,
+  .prop-glyph.mismatch { animation: none; }
+}
+
+/* A small lamp before the title: the ghost light a theatre leaves burning on an empty stage. */
+.app-header h1::before {
+  content: "\25D0\00a0";
+  content: "\25D0\00a0" / "";
+  color: var(--stage-footlight);
 }
 
 .prop-id {
@@ -464,6 +599,40 @@ button.icon-btn {
   margin-top: 0.25rem;
   font-style: italic;
 }
+
+/* The words that tie a ghost to its solid when they stand in different zones. Inherits
+   the glyph's own foreground, so it is measured against the same surface as the label. */
+.prop-pair-note {
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+  font-weight: 600;
+}
+
+/* Diagram / list choice for the stage (K3). Pressed state is shown by a filled
+   button and by aria-pressed, not by colour alone: the pressed one also gets a bar. */
+.stage-reading-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.stage-reading-toggle button[aria-pressed="true"] {
+  background: var(--secondary-bg);
+  color: var(--secondary-fg);
+  box-shadow: inset 0 -3px 0 var(--stage-footlight);
+}
+
+.stage-verdict {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 5px solid var(--border-dark);
+  background: var(--parchment-dark);
+  color: var(--text-dark);
+}
+
+.stage-verdict.match { border-left-color: var(--success-text); }
+.stage-verdict.mismatch,
+.stage-verdict.not-available { border-left-color: var(--error-text); border-left-style: double; border-left-width: 6px; }
 
 /* Forms and Inputs */
 .form-group {
@@ -648,6 +817,68 @@ textarea {
   margin-bottom: 1.5rem;
 }
 
+/* K7: the first screen. Left-aligned, readable line length, one obvious first move. */
+.first-screen {
+  text-align: left;
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.first-screen .first-screen-lead {
+  font-size: 1.0625rem;
+  color: var(--text-dark);
+  margin-bottom: 0.75rem;
+}
+
+.first-screen .first-screen-limits {
+  margin-bottom: 1.5rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid var(--stage-footlight);
+}
+
+.first-screen h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+  color: var(--heading-text);
+}
+
+.first-screen section {
+  margin-bottom: 1.5rem;
+}
+
+.demo-list {
+  list-style: none;
+  display: grid;
+  gap: 0.625rem;
+}
+
+.demo-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+}
+
+.demo-choice button {
+  flex-shrink: 0;
+  min-width: 11rem;
+}
+
+.demo-choice span {
+  flex: 1 1 14rem;
+  min-width: 0;
+  font-size: 0.9375rem;
+}
+
+.demo-choice.featured {
+  padding: 0.75rem;
+  border: 2px dashed var(--ghost-border);
+  border-radius: 6px;
+  background: var(--ghost-surface);
+  color: var(--text-dark);
+}
+
 /* Issue Display */
 .issue-badge {
   display: inline-flex;
@@ -822,6 +1053,21 @@ textarea {
   button {
     display: none;
   }
+
+  .csv-note {
+    display: none;
+  }
+}
+
+/* K6: CSV downloads, one per report. */
+.csv-note {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: var(--text-mid);
+}
+
+.csv-button {
+  margin-bottom: 0.75rem;
 }
 
 /* Screen Reader Only */

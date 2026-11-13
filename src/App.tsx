@@ -14,6 +14,20 @@ import './styles.css';
 
 type View = 'stage' | 'editor' | 'reports';
 
+// K7 (Kiro, 2026-11-13): the first screen suggests one obvious first move, and says in
+// one sentence what each bundled scene is for. Written from the fixtures' own
+// descriptions in src/fixtures/demos.ts; the scenes themselves are unchanged.
+const FIRST_DEMO_ID = 'missing-handoff';
+const DEMO_BLURBS: Record<string, string> = {
+  'missing-handoff':
+    'A letter is never handed from Actor A to Actor B, so a later carry fails. See the failing step, its cause and a suggested fix.',
+  'valid-control': 'The control: four clean steps. It should report nothing at all.',
+  'consumed-reuse': 'A seal is used up and then needed again. A consumed prop never comes back; only a different instance can replace it.',
+  'duplicate-identity': 'Two props share a display name. They stay separate physical instances, told apart by id.',
+  'reordered-cues': 'Actor B can only collect the key after Actor A puts it down. It passes as shipped; swap cues 2 and 3 in the editor to see why order matters.',
+  'unknown-start': 'Nobody recorded where a ring starts. Ghostlight reports uncertainty instead of guessing.',
+};
+
 export function App() {
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [runResult, setRunResult] = useState<RunResult | null>(null);
@@ -188,17 +202,47 @@ export function App() {
       )}
 
       {!scenario && !loadError && (
-        <div className="empty-state">
+        <div className="empty-state first-screen">
           <h2>No Scene Loaded</h2>
-          <p>Load a demo or start with an empty scene</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
-            {DEMO_SCENARIOS.map(demo => (
-              <button key={demo.id} onClick={() => handleLoadDemo(demo.scenario)} className="secondary">
-                {demo.title}
-              </button>
+          <p className="first-screen-lead">
+            Ghostlight replays a theatre prop plan in cue order and shows where the plan
+            contradicts itself: which physical prop a step requires somewhere it cannot be,
+            and which earlier step caused it.
+          </p>
+          <p className="first-screen-limits">
+            It checks the <strong>planned</strong> state only. It is not live tracking, it never
+            sees the real stage, and the bundled scenes are invented examples.
+          </p>
+
+          <section className="first-move" aria-labelledby="first-move-heading">
+            <h3 id="first-move-heading">Start here</h3>
+            {DEMO_SCENARIOS.filter(d => d.id === FIRST_DEMO_ID).map(demo => (
+              <div key={demo.id} className="demo-choice featured">
+                <button onClick={() => handleLoadDemo(demo.scenario)} aria-describedby={`demo-desc-${demo.id}`}>
+                  {demo.title}
+                </button>
+                <span id={`demo-desc-${demo.id}`}>{DEMO_BLURBS[demo.id]}</span>
+              </div>
             ))}
-            <button onClick={handleStartEmpty}>Empty Scene</button>
-          </div>
+          </section>
+
+          <section aria-labelledby="other-demos-heading">
+            <h3 id="other-demos-heading">Other example scenes</h3>
+            <ul className="demo-list">
+              {DEMO_SCENARIOS.filter(d => d.id !== FIRST_DEMO_ID).map(demo => (
+                <li key={demo.id} className="demo-choice">
+                  <button onClick={() => handleLoadDemo(demo.scenario)} className="secondary" aria-describedby={`demo-desc-${demo.id}`}>
+                    {demo.title}
+                  </button>
+                  <span id={`demo-desc-${demo.id}`}>{DEMO_BLURBS[demo.id]}</span>
+                </li>
+              ))}
+              <li className="demo-choice">
+                <button onClick={handleStartEmpty} className="secondary" aria-describedby="demo-desc-empty">Empty Scene</button>
+                <span id="demo-desc-empty">Start a blank plan and write your own zones, holders, props and cues.</span>
+              </li>
+            </ul>
+          </section>
         </div>
       )}
 

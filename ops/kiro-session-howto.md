@@ -17,8 +17,10 @@ configuration — the specs, steering and hooks already in this repository — *
 them**, so you can switch surfaces without redoing anything.
 
 The submission's Kiro write-up asks "Kiro IDE, CLI, Web, Crew? How did they differ, if you tried
-multiple?" Only the CLI has been used so far, so running at least one task on a second surface is
-worth real points for very little effort.
+multiple?" Only the CLI has been used so far. **K11 (property-based testing) is planned for the IDE**
+because, per <https://kiro.dev/docs/specs/correctness/>, Kiro's native PBT is available in the IDE
+only — so that one task is also the second-surface comparison. Record what was better or worse.
+The ordered plan is in [`kiro-plan.md`](kiro-plan.md).
 
 ### System requirements
 
@@ -123,8 +125,11 @@ acceptance checks and what must not change.
 On 2026-10-31, under CLI 2.37.0, the sessions ran as `kiro-cli chat --v3 --mode spec` for
 specification work and `--v3 --mode default` for implementation, with `--trust-tools=` left
 **empty** so every tool action was reviewed one at a time. **Those flags are from the 2.x line and
-may have changed in 3.x** — check `kiro-cli chat --help` once you are installed. The principle
-carries over regardless: do not grant a whole-tool or whole-folder trust rule.
+may have changed in 3.x** — run `kiro-cli chat --help` once you are installed and use what it
+actually prints. The principle carries over regardless: do not grant a whole-tool or whole-folder
+trust rule. In CLI V3 the supported way to pre-approve a *narrow* set of actions is a custom agent's
+`permissions.rules` (for example allow shell `npm run *` only), documented at
+<https://kiro.dev/docs/custom-agents/>; K12 builds one for this project.
 
 If you open a second surface for a task, note what was better or worse — the write-up asks.
 
@@ -144,10 +149,14 @@ Finally, fill the matching `TO FILL` block in `docs/kiro-writeup.md` while it is
 
 ## Recommended order, and why
 
+The authoritative ordered plan, status table and per-session loop are in
+[`kiro-plan.md`](kiro-plan.md); this table is the short version. K10, K11 and K12 now have briefs in
+`kiro-briefs/`.
+
 | | Item | Why here |
 |---|---|---|
 | 1 | **K8** — verify the hook actually triggers | Cheapest thing on the list, maybe ten minutes. It closes a gap recorded as **NOT VERIFIED** since 2026-10-31, and it is exactly what Technological Implementation asks about. Either outcome goes in the record. |
-| 2 | **K11** — property-based testing | The submission form asks about PBT **by name**. The engine's invariants are already written down in the validation plan, so the specification work is done. |
+| 2 | **K11** — property-based testing | The submission form asks about PBT **by name**. The engine's invariants are already written down in the validation plan, so the specification work is done. **Run this one in the Kiro IDE**: native PBT is IDE-only. |
 | 3 | **K10** — the haunting interface | Costume Contest's own wording. This is the category criterion, not optional polish. Also makes the video read as "creative and memorable". While you are in there: the selected timeline row is painted mint green even when it is the failing step, so a red error sits on a green background. |
 | 4 | **K3** — the list equivalent | A video beat, and the project has promised a readable alternative since the start. |
 | 5 | **K7** — the empty state | The first screen a judge sees. Cheap. |

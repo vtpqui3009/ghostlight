@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { runScenario } from '../domain/engine';
 import { applyFix, isGuidedFix, suggestFix } from '../domain/guidedFix';
 import type { Action, Scenario, Frame, RunResult } from '../domain/types';
+import { deriveStageModel, verdictSentence, type StageEntry, type StageEntryType } from './stageModel';
+import { initialStageReading, rememberStageReading, type StageReading } from './stageReading';
 
 interface StageViewProps {
   scenario: Scenario;
@@ -27,6 +29,11 @@ function describeAction(action: Action, scenario: Scenario): string {
 
 export function StageView({ scenario, selectedFrame, onSelectFrame, runResult, onUpdate }: StageViewProps) {
   const [fixError, setFixError] = useState<string | null>(null);
+  const [reading, setReading] = useState<StageReading>(initialStageReading);
+  const chooseReading = (next: StageReading) => {
+    setReading(next);
+    rememberStageReading(next);
+  };
   if (!selectedFrame) {
     return (
       <div className="card">
@@ -38,83 +45,16 @@ export function StageView({ scenario, selectedFrame, onSelectFrame, runResult, o
     );
   }
 
-  const { action, before, issues } = selectedFrame;
-  const prop = scenario.props.find(p => p.id === action.propId);
-  const requiredSource = action.requiredSource;
-  const plannedState = before[action.propId];
+  const { action, issues } = selectedFrame;
+  const model = deriveStageModel(scenario, selectedFrame);
+  const plannedState = model.subject.before;
 
-  // Group props by zone for display
-  type PropDisplay = {
-    propId: string;
-    propName: string;
-    type: 'required' | 'planned' | 'match' | 'mismatch' | 'other';
-    holderId: string | null;
-    label: string;
-  };
-
-  const zoneProps = new Map<string, PropDisplay[]>();
-
-  // Add current action's required position
-  if (requiredSource && requiredSource.zoneId) {
-    const zone = requiredSource.zoneId;
-    if (!zoneProps.has(zone)) zoneProps.set(zone, []);
-    
-    const display: PropDisplay = {
-      propId: action.propId,
-      propName: prop?.name || action.propId,
-      type: 'required',
-      holderId: requiredSource.holderId,
-      label: `REQUIRED: ${prop?.name || action.propId} (${action.propId})`,
-    };
-
-    // Check if it matches planned
-    if (plannedState.status === 'available') {
-      const match = plannedState.zoneId === requiredSource.zoneId && plannedState.holderId === requiredSource.holderId;
-      display.type = match ? 'match' : 'mismatch';
-      display.label = match 
-        ? `MATCH: ${prop?.name || action.propId} (${action.propId})` 
-        : `MISMATCH: ${prop?.name || action.propId} (${action.propId})`;
-    }
-
-    zoneProps.get(zone)!.push(display);
+  // Group the shared entries by zone for the diagram. The list reads the same entries.
+  const zoneProps = new Map<string, StageEntry[]>();
+  for (const entry of model.entries) {
+    if (!zoneProps.has(entry.zoneId)) zoneProps.set(entry.zoneId, []);
+    zoneProps.get(entry.zoneId)!.push(entry);
   }
-
-  // Add planned position if different from required
-  if (plannedState.status === 'available') {
-    const zone = plannedState.zoneId;
-    const alreadyShown = requiredSource 
-      && requiredSource.zoneId === zone 
-      && requiredSource.holderId === plannedState.holderId;
-    
-    if (!alreadyShown) {
-      if (!zoneProps.has(zone)) zoneProps.set(zone, []);
-      zoneProps.get(zone)!.push({
-        propId: action.propId,
-        propName: prop?.name || action.propId,
-        type: 'planned',
-        holderId: plannedState.holderId,
-        label: `BEFORE: ${prop?.name || action.propId} (${action.propId})`,
-      });
-    }
-  }
-
-  // Add other props in their before positions
-  Object.entries(before).forEach(([id, state]) => {
-    if (id === action.propId) return;
-    if (state.status !== 'available') return;
-    
-    const zone = state.zoneId;
-    if (!zoneProps.has(zone)) zoneProps.set(zone, []);
-    
-    const p = scenario.props.find(pr => pr.id === id);
-    zoneProps.get(zone)!.push({
-      propId: id,
-      propName: p?.name || id,
-      type: 'other',
-      holderId: state.holderId,
-      label: `${p?.name || id} (${id})`,
-    });
-  });
 
   const issue = issues.length > 0 ? issues[0] : null;
 
@@ -203,6 +143,36 @@ export function StageView({ scenario, selectedFrame, onSelectFrame, runResult, o
         </div>
       )}
 
+      <div className="stage-reading-toggle" role="group" aria-label="How to show the stage">
+        <button
+          type="button"
+          className="small"
+          aria-pressed={reading === 'diagram'}
+          onClick={() => chooseReading('diagram')}
+        >
+          Diagram
+        </button>
+        <button
+          type="button"
+          className="small"
+          aria-pressed={reading === 'list'}
+          onClick={() => chooseReading('list')}
+        >
+          List
+        </button>
+      </div>
+
+      {reading === 'list' ? (
+        <StageList model={model} />
+      ) : (
+      <>
+      <ul className="stage-legend" aria-label="How to read the stage">
+        <li><span className="glyph" aria-hidden="true">{'\u25CC'}</span> Dashed outline: the ghost, where the plan requires the prop to be</li>
+        <li><span className="glyph" aria-hidden="true">{'\u25CF'}</span> Solid fill: where the plan actually has the prop</li>
+        <li><span className="glyph" aria-hidden="true">{'\u2713'}</span> Match: the ghost and the solid agree (calm, still)</li>
+        <li><span className="glyph" aria-hidden="true">{'\u2715'}</span> Mismatch: they disagree (thicker outline)</li>
+      </ul>
+
       <div className="stage-zones">
         {scenario.zones.map(zone => {
           const props = zoneProps.get(zone.id) || [];
@@ -215,28 +185,80 @@ export function StageView({ scenario, selectedFrame, onSelectFrame, runResult, o
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-mid)', fontStyle: 'italic' }}>Empty</p>
               )}
               
-              {props.map((p, idx) => {
-                const holderName = p.holderId ? scenario.holders.find(h => h.id === p.holderId)?.name || p.holderId : 'resting';
-                
-                return (
+              {props.map((p, idx) => (
                   <div key={`${p.propId}-${idx}`} className={`prop-glyph ${p.type}`}>
                     <div className="prop-id">{p.label}</div>
                     <div className="prop-position">
-                      Zone: {zone.name} / {holderName}
+                      Zone: {p.zoneName} / {p.holderName}
                     </div>
+                    {p.pairNote && <div className="prop-pair-note">{p.pairNote}</div>}
                   </div>
-                );
-              })}
+              ))}
             </div>
           );
         })}
       </div>
+      </>
+      )}
 
       {plannedState.status !== 'available' && (
         <div className="alert alert-warning" style={{ marginTop: '1rem' }}>
           <strong>Non-available state:</strong> {action.propId} is currently <strong>{plannedState.status}</strong>.
         </div>
       )}
+    </div>
+  );
+}
+
+/** What each entry is, in words, for the list reading. */
+const ROLE_TEXT: Record<StageEntryType, string> = {
+  required: 'Required here for this step (ghost)',
+  match: 'Required here, and the plan has it here (match)',
+  mismatch: 'Required here, but the plan does not have it here (mismatch)',
+  planned: 'Where the plan has it before this step (solid)',
+  other: 'Another instance, before this step',
+};
+
+/**
+ * The list reading of the stage. Reads the same StageModel as the diagram, so it can
+ * never disagree with it. It stands alone: the verdict sentence names the instance,
+ * the required position and the planned position, without needing the picture.
+ */
+function StageList({ model }: { model: ReturnType<typeof deriveStageModel> }) {
+  return (
+    <div className="stage-list">
+      <p className={`stage-verdict ${model.subject.verdict}`}>
+        <strong>{verdictSentence(model.subject)}</strong>
+      </p>
+      <div className="table-scroll" tabIndex={0} role="region" aria-label="Stage as a list">
+        <table className="report-table">
+          <caption className="sr-only">Every available instance before this step, and what the step requires</caption>
+          <thead>
+            <tr>
+              <th scope="col">Instance</th>
+              <th scope="col">Role</th>
+              <th scope="col">Zone</th>
+              <th scope="col">Holder</th>
+            </tr>
+          </thead>
+          <tbody>
+            {model.entries.length === 0 && (
+              <tr><td colSpan={4}>No instance is available before this step.</td></tr>
+            )}
+            {model.entries.map((e, idx) => (
+              <tr key={`${e.propId}-${e.type}-${idx}`}>
+                <td>{e.label}</td>
+                <td>
+                  {ROLE_TEXT[e.type]}
+                  {e.pairNote && <div className="prop-pair-note">{e.pairNote}</div>}
+                </td>
+                <td>{e.zoneName}</td>
+                <td>{e.holderName}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

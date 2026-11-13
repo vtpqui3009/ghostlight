@@ -3,13 +3,14 @@
   "hooks": [
     {
       "name": "domain-typecheck",
+      "description": "Report-only typecheck after the agent edits a file under src/domain. Node script, no bash dependency (K8, 2026-11-10).",
       "trigger": "PostFileSave",
-      "matcher": "(^|/)src/domain/.*\\.tsx?$",
+      "matcher": "(^|[/\\\\])src[/\\\\]domain[/\\\\].*\\.tsx?$",
       "action": {
         "type": "command",
-        "command": "bash .kiro/hooks/typecheck-domain.sh"
+        "command": "node .kiro/hooks/typecheck-domain.mjs"
       },
-      "timeout": 30
+      "timeout": 60
     }
   ]
 }

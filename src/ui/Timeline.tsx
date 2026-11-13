@@ -73,7 +73,7 @@ export function Timeline({ scenario, runResult, selectedFrameIndex, onSelectFram
                   return (
                     <li
                       key={frame.index}
-                      className={`action-item ${isSelected ? 'selected' : ''}`}
+                      className={`action-item ${isSelected ? 'selected' : ''} ${status}`}
                       onClick={() => onSelectFrame(frame.index)}
                       onKeyDown={(e) => handleActionKeyDown(e, frame.index)}
                       tabIndex={0}

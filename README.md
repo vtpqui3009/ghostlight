@@ -17,7 +17,7 @@ Built for [Kiroween 2026](https://kiroween.devpost.com/), Costume Contest.
 ```bash
 npm ci
 npm run dev        # http://127.0.0.1:5173
-npm run check      # lint, strict typecheck, 222 unit tests, production build
+npm run check      # lint, strict typecheck, 275 unit tests, production build
 ```
 
 Everything stays in the browser: scenes are saved locally and exported by hand as JSON. Nothing is
@@ -73,13 +73,25 @@ inferred from the git history:
 Everything else under `src/` — the engine, the parser, the edit layer, persistence, the
 action editor and the stage view — is Kiro's, as is every test outside that list.
 
+Kiro CLI 3.3.0 sessions on 2026-11-13 (K3, K6 CSV half, K7, K10, K2 reopened) added or changed these
+files; the full account, including what failed, is in `KIRO_SESSION_EVIDENCE.md`:
+
+| File | Change | Author |
+|---|---|---|
+| `src/ui/stageModel.ts`, `src/ui/stageReading.ts` (new) | one derivation shared by the diagram and the list; diagram/list choice | Kiro |
+| `src/ui/StageView.tsx` | renders from the shared model; diagram/list toggle; legend; pair notes | Kiro (on top of the reviewer's cause/fix panel) |
+| `src/ui/reportCsv.ts` (new), `src/ui/Reports.tsx` | CSV export, one file per report | Kiro |
+| `src/App.tsx` | the first screen: purpose, limits, one first move, a sentence per demo | Kiro |
+| `src/styles.css` | haunted-stage visual language, ghost/solid wiring, selected-row tokens | Kiro (on top of the reviewer's token pass) |
+| `tests/ui/stageModel.test.ts`, `tests/ui/reportCsv.test.ts`, `tests/domain/properties.test.ts` (new) | 25 + 15 tests | Kiro |
+
 [`KIRO_SESSION_EVIDENCE.md`](KIRO_SESSION_EVIDENCE.md) records the actual native Kiro sessions:
 which model and mode, what Kiro wrote, which checks failed on the way, and what was fixed. It is an
 honest record, including the parts that are still NOT VERIFIED.
 
 ## State of the work
 
-`npm run check` is green: lint, strict TypeScript, **222 passing tests**, production build. The
+`npm run check` is green: lint, strict TypeScript, **275 passing tests**, production build. The
 end-to-end and accessibility harness runs 15 tests over the production build; one is a written-down
 known failure.
 

@@ -78,3 +78,211 @@ With the writer stopped, Codex independently ran `npm run check && git diff --ch
 Before the authorized private WIP push, a bounded scan of all 32 candidate project files found no credential assignments, AWS access-key patterns, private-key blocks, device approval URLs, private runtime/database/archive files or symlinks. Native raw transcripts and authentication state remain outside the repo; ClaudeKit materialization never yielded licensed source bytes here. This is a bounded scan and provenance review, not a guarantee that every possible secret pattern has been detected.
 
 The initial unstaged `git diff --check` did not include new untracked source files. After staging, `git diff --cached --check` caught trailing whitespace in the Kiro test file and an extra EOF blank line in `ids.ts`. Codex applied only mechanical trailing-whitespace/EOF normalization to those two files, with no logic or assertion changes; Kiro remains the application/test author. The staged diff was then checked again before committing.
+
+## 2026-11-10 — K8, does the PostFileSave hook fire by itself? (Kiro CLI 3.1.0)
+
+- Surface and version: Kiro CLI **3.1.0** on Windows PowerShell, Node v24.18.0, npm 11.16.0 (via
+  `npm.cmd`; `npm.ps1` is blocked by the machine's execution policy). Model and mode: not shown to
+  the agent in this session; not recorded.
+- `/usage` before and after: **NOT RUN.** `/usage` is a chat slash command and was not reachable
+  from the agent's tools in this session. The owner should record the number from the account page
+  or a chat window; nothing is guessed here.
+- Baseline before any change: `npm ci` exit 0 (232 packages; 12 audit findings, 9 moderate, 1 high,
+  2 critical, unchanged from the 2026-11-10 measurement), then `npm run check`: lint exit 0,
+  typecheck exit 0, **235/235 tests**, build exit 0.
+- Diagnosis, observed: `Get-Command bash` returned **nothing** — there is no `bash` on this
+  machine, so the original hook command `bash .kiro/hooks/typecheck-domain.sh` cannot run here.
+- Trigger attempts with the **original** hook: the agent appended `// k8-hook-probe` to
+  `src/domain/ids.ts` with the append tool, then reverted with the replace tool. **No hook output
+  appeared** after either call. The control edit to `src/ui/importGuard.ts` also produced none.
+  Because `bash` is absent, "did not fire" and "fired and failed silently" cannot be told apart from
+  inside the session. Outcome: **B — no observable trigger**, cause of non-execution at least
+  partly environmental.
+- Side finding: both edit tools rewrote the line endings of the whole file (`git diff --stat`
+  showed 91 insertions and 91 deletions on `src/domain/ids.ts` for a one-line probe). The files had
+  no other changes, so each was restored with `git checkout -- <file>`; `git diff -- src` is empty.
+  Anyone probing this way on Windows should expect that and check `git diff`.
+- Repair (the Windows environment was the demonstrated cause), applied by the agent:
+  - `.kiro/hooks/typecheck-domain.mjs` (new): Node script, no shell dependency, same typecheck as
+    `npm run typecheck`, report-only (always exit 0), skips truthfully if dependencies are missing.
+  - `.kiro/hooks/domain-typecheck.json`: command `bash .kiro/hooks/typecheck-domain.sh` →
+    `node .kiro/hooks/typecheck-domain.mjs`; matcher `(^|/)src/domain/.*\.tsx?$` →
+    `(^|[/\\])src[/\\]domain[/\\].*\.tsx?$`; timeout 30 → 60. The old `.sh` is left in place,
+    unused.
+  - Matcher checked in Node against eight path forms: it matches `src/domain/ids.ts`,
+    `src\domain\ids.ts` and absolute paths of both styles, and does not match `src/ui/importGuard.ts`,
+    `src/domain/notes.md`, `tests/domain/engine.test.ts` or `xsrc/domain/ids.ts`.
+  - The new script, run **by hand once**, printed `[ghostlight hook] typecheck PASS` and exited 0.
+    That proves the script works; it is **not** evidence of a trigger.
+- Retest after the repair: another probe edit of `src/domain/ids.ts` again produced **no visible
+  hook output**. Hook definitions are loaded when a session starts, so this session may never have
+  loaded the repaired file. The CLI has no `hooks` subcommand (`kiro-cli hooks` is "unrecognized"),
+  and `/hooks` could not be run from here. **Whether the repaired hook fires is therefore NOT
+  VERIFIED.**
+- What the owner still needs to do (about two minutes): start a **new** `kiro-cli chat` session in
+  this folder, run `/hooks` and note whether `domain-typecheck` is listed, then ask the agent to
+  append `// k8-hook-probe` to `src/domain/ids.ts` and look for `[ghostlight hook]` lines; repeat for
+  `src/ui/importGuard.ts` as the control, then `git checkout -- src`. Record the verbatim result here.
+- Final checks after the repair: `npm run lint` exit 0; `git diff -- src` empty.
+- What this does NOT show: that any hook has ever fired automatically. The only positive facts are
+  the missing `bash`, the corrected matcher and a working script.
+
+## 2026-11-10 — K11, property-based testing (Kiro CLI 3.1.0, FALLBACK route, not the IDE)
+
+- Surface: **Kiro CLI 3.1.0, not Kiro IDE.** The brief asked for the IDE's native property-based
+  testing workflow, which per <https://kiro.dev/docs/specs/correctness/> exists in the IDE only. The
+  IDE could not be driven from this CLI session, so this is the brief's stated fallback: Kiro wrote
+  `fast-check` tests by hand. It is real property-based testing, but it is **not Kiro's built-in PBT
+  feature**, and no property here was extracted by that feature. The write-up must say so.
+- `/usage` before and after: **NOT RUN** (slash command not reachable from the agent's tools).
+- Dependency: `fast-check` **4.10.2**, exact (no `^`/`~`), the latest version at the time
+  (`npm view fast-check version`). Added with `--save-dev --save-exact`; it is the only dependency
+  change (`package.json` +1 line; `package-lock.json` +41 lines).
+- File written: `tests/domain/properties.test.ts` (no existing test edited; `src/domain/**`
+  untouched, `git diff -- src` empty).
+- Oracle: a reference model (`refStep`) written from the transition table in
+  `.kiro/specs/ghostlight/design.md`. It never calls `runScenario`. It is itself checked against
+  hand-calculated cases (acceptance A01's four-step chain, an omitted handoff, a consumed reuse, an
+  unknown start, a malformed `place`).
+- Properties (all 300 runs each, seed **20261110**): P1 single custody and state shape (FR3, incl.
+  the id `toString`); P2 consumption terminal (FR5.1); P3 replenish only absent→available, never from
+  consumed (FR5.2); P4 a rejected action changes nothing and reports one issue; P5 determinism; P6
+  purity (deep-frozen input, no mutation, no aliasing between any two snapshots, frame actions are
+  copies); P7 causal integrity (earlier, applied, same prop, most recent); P8 authored actions
+  reproduced verbatim and in order (FR1.2); P9 differential equality with the reference model, frame
+  by frame, including severity and cause; P10 unknown stays uncertain (FR4); P11 props sharing a name
+  never merge and declaration order changes nothing (A04); P12 cue reordering changes consequences
+  but not authored actions or issue ids (A05/A06); plus a generator-coverage test.
+- Result: **15/15 pass** on the first run; no property failed, so **no engine bug was found** and
+  there is no counterexample to record. Full `npm run check`: lint exit 0, typecheck exit 0,
+  **250/250 tests** (235 before, +15), build exit 0.
+- A first-run pass proves little by itself, so the properties were checked for teeth. Eight
+  deliberate bugs were injected into a **temporary copy** of the engine (outside the repository,
+  removed afterwards; the repository's `src/` was never edited): consumed ids replenishable, carryOff
+  allowed within one zone, cause always `initial`, unknown reported as `error`, a rejection that
+  leaks a state change, source match ignoring the holder, consume yielding `absent`, and the engine
+  mutating its caller's input. **All eight were caught**, each by at least one property (P9 caught
+  seven; P2, P3, P4, P6, P7 and P10 each caught at least one). A first mutation script only
+  reported counts in a form that could not be read, so it was re-run with JSON output; M1 also failed
+  to apply the first time because of an unescaped parenthesis in the pattern.
+- Coverage of the generators, measured with the same seed: 300 scenarios, 1476 frames; all six kinds
+  both applied and rejected; 882 shape rejections, 395 state rejections; 350 `initial` causes and
+  only **45** `action` causes; 51 uncertain; 20 consumed reuses. **Only about 13% of frames (199)
+  are applied**, so the deep-chain paths (a cause pointing at an earlier action) are exercised far
+  less than the rejection paths. Raising that would need a smarter generator.
+- Honest answer to the Devpost question "did PBT catch issues unit tests missed?": **no**, not in this
+  run. The properties found nothing new in the engine; the existing 235 example tests and the
+  engine itself held up. What they add is evidence across generated inputs for the invariants, and a
+  differential check that the engine matches an independent reading of the design table.
+- What this does NOT show: that Kiro's native PBT works or what it would have found; any IDE-versus-CLI
+  comparison (the IDE was not used); correctness beyond the model's reading of the design table (if
+  the table and the requirements disagree, this cannot tell).
+
+## 2026-11-13 — K8 closed, K2 reopened, K10, K3, K7, K6 CSV (Kiro CLI 3.3.0, Windows PowerShell)
+
+- Surface and version: **Kiro CLI 3.3.0**, Node v24.18.0, npm 11.16.0. Model and mode: not shown to
+  the agent; not recorded. `/usage` before and after: **NOT RUN** (slash command not reachable from
+  the agent's tools). Nothing is guessed.
+- Starting point: `main` fast-forwarded to `29b4c0f`; the previous session's uncommitted work was
+  stashed and restored (docs conflicts resolved in favour of upstream). Baseline `npm run check`
+  green with **250 tests** (235 + 15 property tests from the 2026-11-10 K11 entry above).
+- **Playwright** was not installed; added with `npm i --no-save playwright@1.63.0` plus
+  `npx playwright install chromium`, so `package.json` and the lockfile are unchanged by it.
+
+### What failed on the way
+
+1. **The strict harness hung forever** (a 15-minute timeout). Cause, found by reading the harness:
+   `selectFailingAction` awaits `getAnimations().finished`, and the locally uncommitted CSS had
+   `animation: ... infinite` on the ghost glyphs, which never finishes. Not a harness bug. The
+   infinite pulse was also a WCAG 2.2.2 problem. Replaced with a single 0.6 s transform-only
+   "materialise" that runs once when a step is selected (no opacity or colour change, so contrast is
+   identical at every frame) and is removed under `prefers-reduced-motion`.
+2. A first K3 type error: `toString: { status: 'absent' }` lost its literal type; fixed with `as const`.
+3. A first K6 test failure was **my oracle, not the code**: the honesty line contains a comma, so
+   RFC 4180 correctly quotes it. Expected value corrected.
+4. A browser check reported 4 running animations under reduced motion. It was sampling within the
+   first instant (the 0.01 ms reduced-motion transitions were still settling). Confirmed with a
+   probe: **0** animations at 100 ms and later under `reduce`; with motion on, exactly two finite
+   ones (a 150 ms transition, the 600 ms one-shot). Check changed to wait 100 ms.
+
+### K8 — does the hook fire by itself? Outcome **B (did not fire), unresolved cause**
+
+- Three fresh `kiro-cli chat --no-interactive --trust-workspace` child sessions each made the agent
+  append `// k8-hook-probe` to `src/domain/ids.ts` with its file-write tool. Each edit was confirmed
+  in `git diff` and reverted. The edit tool's own event stream shows a completed edit.
+- Probe 1: the real hook. `tsconfig.tsbuildinfo` (which `tsc -b` rewrites) did not change, and no
+  `[ghostlight hook]` output appears in the stream-json event stream.
+- Probes 2 and 3: a temporary hook file with `SessionStart`, `UserPromptSubmit`, `PostToolUse` and
+  `PostFileSave` all appending to a marker file. **No marker was written for any of them, not even
+  `SessionStart`** (probe 3 used a PATH-free `echo >> "%TEMP%\..."` command). So the failure is not
+  specific to PostFileSave, the matcher, or `node`/`bash` resolution.
+- Side finding: inside this tool's shell, `cmd` cannot find `where` or `node` even though PATH is
+  correct (cause not determined); hook commands run by `cmd /c` could be affected in a similar
+  environment. Not shown to be the cause here.
+- A hook placed outside a trusted/loaded configuration would also be silent. Docs (updated
+  2026-11-12) say hooks activate at session start, and `--trust-workspace` is meant to load them; I
+  cannot tell from here whether `--no-interactive` runs honour hooks at all. **NOT VERIFIED either
+  way in an interactive session.** The owner can settle it in two minutes: start a normal
+  `kiro-cli chat` in this folder, run `/hooks`, then ask the agent to append the probe line.
+- Temporary probe hook and marker files were deleted; `domain-typecheck.json` is unchanged by this session.
+- What this does NOT show: that the hook never fires interactively.
+
+### K2 reopened and K10 — selected row, ghost and solid
+
+- Files: `src/styles.css`, `src/ui/StageView.tsx`, `src/ui/Timeline.tsx` (status class on the row).
+- The selected row is now marked by a neutral surface and a bar, and a rejected or uncertain row keeps
+  its own verdict tint, so a failing step no longer sits on success-green.
+- The ghost (`required`/`match`/`mismatch`) is dashed and translucent, the solid (`planned`) is
+  filled; every glyph type has an applied rule (the earlier `.ghost`/`.solid` dead rules are gone),
+  each carries a glyph character as well as its word label, and a pair note in words says where the
+  other half is. Dark-scheme tokens set separately.
+- `axe-baseline.json` re-recorded by `npm run test:e2e -- --record`: the two selected-row
+  `color-contrast` entries are empty (not hand-edited).
+
+### K3 — list equivalent · K7 — first screen · K6 — CSV
+
+- K3: `src/ui/stageModel.ts` is the single derivation; the diagram and `StageList` both render it.
+  A Diagram/List toggle (`aria-pressed`) remembers the choice in `sessionStorage`; with no stored
+  choice, `prefers-reduced-motion: reduce` defaults to the list. The cause button is unchanged.
+- K7: `src/App.tsx` empty state says what the tool does and its limits, offers one first move
+  ("Missing Handoff") and a sentence per scene. Scene fixtures and the header subtitle are untouched.
+  The "Reordering Example" sentence says it passes as shipped and must be swapped by hand.
+- K6 (CSV half): `src/ui/reportCsv.ts` pure functions; one file per report; instance id in every row;
+  CSV quoting per RFC 4180; fields starting `=`, `+`, `-`, `@`, tab or CR are prefixed with `'`;
+  honesty line first; UTF-8 BOM. Built in the browser, no network request (verified).
+- Tests added: `tests/ui/stageModel.test.ts` (11, hand-built frames, includes a prop id `toString`)
+  and `tests/ui/reportCsv.test.ts` (14).
+
+### Command results (exit codes observed)
+
+- `npm run lint` 0 · `npm run typecheck` 0 · `npm test` **275/275** · `npm run build` 0.
+- `npm run test:e2e -- --strict`: **25 passed, 0 failed**, baseline empty; plain `test:e2e` and
+  `--record` also green.
+- Out-of-repo browser verification script (not committed; deleted afterwards): **26 checks passed**,
+  covering first screen (light and dark, axe clean, no overflow at 390 px), reduced motion renders
+  the list, the cause button from the list view, choice remembered, no unstyled glyphs, dashed ghost
+  versus solid, three CSV downloads, no network request, axe clean on every new state. Screenshots in
+  `docs/media/`.
+
+### What this does NOT show
+
+That hooks fire interactively; any real stage manager's opinion; Kiro's `/usage`; MCP, custom agents,
+Crew or powers (K12 not done); dependency advisories (K9 not done). Print output was not visually
+inspected. Ghost/solid colours were checked by axe and by eye on two screenshots, not by a colour-blind
+reviewer.
+
+## 2026-11-13 — K9, dependency advisories (Kiro CLI 3.3.0)
+
+- Before: `npm audit` 12 findings (9 moderate, 1 high, 2 critical); `npm audit --omit=dev` 0.
+- Tried first, in a throwaway copy outside the repo: `vite@8.3.8` + `vitest@5.1.0` (npm's suggestion).
+  **Failed**: `ERESOLVE`. Vite 8 needs `@vitejs/plugin-react` 6 and new peer dependencies, and a
+  newer `@types/node`; a toolchain migration, not a bump. Abandoned.
+- Applied instead: exact `vite@7.3.8` and `vitest@4.1.12` (previously `^5.0.0` and `^1.0.0`;
+  `@vitejs/plugin-react` 4.7 supports vite 7). `package.json` and lockfile changed only for these
+  and `fast-check`. CI and Pages already use Node 22, which vite 7 supports.
+- After: `npm audit` **7 moderate, 0 high, 0 critical**; all seven are `minimatch` under the
+  `typescript-eslint` chain (lint tooling, dev only). `npm audit --omit=dev`: 0.
+- Results on the real tree after a clean `npm ci`: `npm run check` exit 0 (lint, typecheck,
+  **275/275** tests, build); `test:e2e -- --strict` 25 passed, 0 failed; 26 out-of-repo browser checks passed.
+- What this does NOT show: that `npm run dev` was exercised by hand; the remaining moderate advisories
+  are not fixed (the fix would be a typescript-eslint major).
