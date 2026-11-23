@@ -23,6 +23,7 @@ comparison between surfaces is claimed.
 | 2026-11-10 | 3.1.0 | Hook diagnosis (K8) and property-based tests (K11). |
 | 2026-11-13 | 3.3.0 | Haunted-theatre interface, list view, first screen, CSV export, dependency advisories, and a local MCP server. |
 | 2026-11-23 | 3.3.0 | Live MCP use check and a fourth hook attempt, both non-interactive, on `claude-haiku-5.5`. |
+| 2026-11-23 | 3.3.0 | "Halloween v2" (moon, bats, fog, tombstones, ghost mascot, jack-o-lantern) from a written brief, on `claude-sonnet-5.5`, plus two repair rounds. |
 
 No whole-tool or whole-folder trust rule was ever granted.
 
@@ -182,6 +183,12 @@ not have changed any output.
   hung for fifteen minutes. The cause was found by reading the harness; infinite animation also fails
   WCAG 2.2.2, so the glow became a static halo plus a single 0.6 s fade, removed entirely under
   reduced motion.
+- **A brief is followed, but not to the letter.** On 2026-11-23 Kiro built the "Halloween v2" layer
+  from a written brief in one pass, but each of its three runs ran one shell command despite being told
+  not to (it reported this itself each time, and the third was blocked by the permission rule). Its first
+  pass also made the phone list view worse, by giving the table a minimum width that hid a column, and
+  painted the bats so dark they were invisible. Screenshots and a new end-to-end test, not the build,
+  found all three problems; Kiro fixed them when given the exact symptom.
 - **A test oracle can be the wrong one.** A CSV test expected an unquoted line, but the honesty
   sentence contains a comma, so RFC 4180 correctly quotes it. The code was right and the expectation
   wrong, and the fix was to the expectation.

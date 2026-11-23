@@ -20,7 +20,20 @@ node tests/e2e/verify-pages-build.mjs   # the Pages bundle, served from /ghostli
 
 CI runs exactly these on every push and pull request: `.github/workflows/ci.yml`.
 
-## Latest run — 2026-11-23, Windows, Node v24.18.0, npm 11.16.0, Playwright 1.63.0, axe-core 4.14.0
+## Latest run — 2026-11-23 (K13 Halloween v2), Windows, Node v24.18.0, Playwright 1.63.0, axe-core 4.14.0
+
+| Check | Command | Result |
+|---|---|---|
+| Lint, types, tests, build | `npm run check` | exit 0, 2 of 2 runs. **297 passed** |
+| End-to-end and accessibility | `npm run test:e2e -- --strict` | exit 0, **32 passed, 0 failed, 3 of 3 runs**. 7 new tests in `halloween.spec.mjs`; empty axe baseline |
+| Pages project-page build | `node tests/e2e/verify-pages-build.mjs` | 11/11; negative control `--base=//` fails 5, exit 1 |
+
+`npm test` first failed with a 5 s timeout in property test P1, and **failed the same way on unchanged
+`main` (2 of 2)**. P1 takes 3 to 10 s under load. `vitest.config.ts` now sets `testTimeout: 30000`; no
+assertion changed. The new Halloween tests were shown to fail when an infinite animation and
+`pointer-events: auto` were injected into the built CSS. Details in `KIRO_SESSION_EVIDENCE.md`.
+
+## Earlier run — 2026-11-23, Windows, Node v24.18.0, npm 11.16.0, Playwright 1.63.0, axe-core 4.14.0
 
 Run in an existing `node_modules` (no fresh `npm ci`). Playwright's Chromium had to be installed first.
 

@@ -75,6 +75,12 @@ documents (`docs/submission.md`, `docs/submission-packet.md`, `docs/kiro-writeup
 nothing in `src/`. The only Kiro CLI work that day was the MCP and hook checks recorded in
 `KIRO_SESSION_EVIDENCE.md`.
 
+On the same day Kiro CLI (model `claude-sonnet-5.5`, file tools only) wrote K13 "Halloween v2" from the
+brief `ops/kiro-briefs/K13.md`: `src/ui/Decor.tsx` (new), the `K13 Halloween v2` section of
+`src/styles.css`, and the decoration mounts in `src/App.tsx` and `src/ui/StageView.tsx`. The reviewing
+assistant wrote the brief, `tests/e2e/specs/halloween.spec.mjs`, the one-line registration in
+`tests/e2e/run.mjs`, and the `testTimeout` in `vitest.config.ts`.
+
 On 2026-11-10 the project owner asked the reviewer to make the following changes in
 `src/` directly, rather than through Kiro. They are listed here rather than left to be
 inferred from the git history:

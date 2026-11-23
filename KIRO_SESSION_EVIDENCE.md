@@ -397,3 +397,50 @@ VERIFIED, and `--trust-workspace` was used, so an untrusted workspace is not the
   and the solid block are visibly different, the curtain, footlights and cobwebs render, and the only
   running animation on load is one finite `lamp-up`. Under reduced motion the List reading is selected by
   default.
+
+## 2026-11-23 (later) — K13 Halloween v2, Kiro CLI 3.3.0
+
+- Surface: `kiro-cli` 3.3.0, Windows PowerShell, Node v24.18.0. Model `claude-sonnet-5.5` (1.30x in
+  `--list-models`). Every run: `kiro-cli chat --no-interactive --trust-workspace --model claude-sonnet-5.5
+  --trust-tools=fs_read,fs_write "<prompt>"`. No `--trust-all-tools`. `/usage`: not readable in
+  non-interactive mode (see the earlier entry), so no credit figure is recorded.
+- Brief: `ops/kiro-briefs/K13.md`, written by the reviewing assistant. Allowed paths: `src/ui/Decor.tsx`
+  (new), `src/styles.css`, `src/App.tsx`, `src/ui/StageView.tsx`. Kiro changed only those (checked with
+  `git diff --stat`).
+
+### Kiro runs
+
+1. **Build (270 s).** Prompt: "Read ops/kiro-briefs/K13.md and implement it exactly. Write only the allowed
+   paths listed there. Do not run shell commands. Keep every animation finite." Kiro wrote `Decor.tsx`
+   (moon, four bats, fog, tombstones and bare trees, `GhostMascot`, `Pumpkin`), a `K13 Halloween v2` section
+   at the end of `styles.css`, mounted `<Decor />` in `App.tsx` with the ghost by the first-screen heading and
+   the pumpkin by "Start here", and put a small pumpkin on the stage. **It disobeyed one instruction:** it
+   ran one read-only `Select-String` shell search, and said so itself.
+2. **Repair after visual review (135 s).** Screenshots showed two defects: (a) the mobile List table had been
+   given `min-width: 28rem`, which clipped the Zone column to "Left St" and hid Holder behind an inner
+   scroll, worse than before; (b) the bats were near-black on a near-black sky and flew behind the header.
+   Kiro removed the min-width and used fixed column widths, and made the bats larger, lit with a moonlit rim
+   and routed one across the moon. It again ran one shell command (an `echo`), and again reported it.
+3. **Repair after a new e2e test (short).** The reviewer's new `halloween.spec.mjs` found that
+   `.haunt-ghost` and `.haunt-pumpkin` computed `pointer-events: auto`, against the brief. Kiro added
+   `pointer-events: none`. It attempted one `echo`, which the permission rule blocked.
+
+### Checks and what they found
+
+- `npm run check`: lint, typecheck, build exit 0; **297 tests pass**. On the way, `npm test` failed with a
+  5 s timeout in property test P1. **The same failure reproduced 2 of 2 times on unchanged `main`**, so it
+  was not caused by K13: P1 runs 300 fast-check cases and took 3 to 10 s depending on machine load. The
+  reviewer raised Vitest's `testTimeout` to 30 s in `vitest.config.ts`; no assertion or run count changed.
+  After that, `npm run check` passed 2 of 2.
+- `npm run test:e2e -- --strict`: **32 passed, 0 failed, 3 runs out of 3.** The 7 new tests are in
+  `tests/e2e/specs/halloween.spec.mjs` (reviewer-authored). axe baseline still empty.
+- The new tests have teeth: with an infinite animation and `pointer-events: auto` injected into the built
+  CSS (not the source), the loop test and the decor test both failed. The run then hung, because axe waits
+  for animations to end, which is the reason infinite animation is banned. The harness was stopped and the
+  bundle rebuilt clean.
+- `node tests/e2e/verify-pages-build.mjs`: 11/11. Negative control `--base=//`: 5 failed, exit 1.
+- Measured in the browser: 11 animations, all finite (moonrise 1x1.6 s, four bat flights 1x3 to 3.4 s, two
+  fog drifts 1x2 s, lamp-up 1x1.4 s, lamp flicker 4x0.9 s, drapes 1x1.4 s, ghost 1x1.2 s); 0 running under
+  reduced motion; no horizontal overflow on any view at 1280 or 390 px in either scheme.
+- Remaining cosmetic flaw: at 390 px the List table header "Holder" breaks as "Holde/r". All four columns
+  are visible and nothing scrolls.
