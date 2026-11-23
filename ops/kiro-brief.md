@@ -3,7 +3,8 @@
 **Status 2026-11-13:** every item in the Kiro queue has been worked in Kiro CLI 3.1.0 / 3.3.0
 sessions: **K2 (reopened part), K3, K6 (CSV), K7, K8, K9, K10, K11, K12.** The records, including what
 failed, are in `KIRO_SESSION_EVIDENCE.md` (entries dated 2026-11-10 and 2026-11-13). `npm run check`
-is green with 297 tests; `npm run test:e2e -- --strict` passes 25/25 with an empty axe baseline.
+is green with 297 tests; `npm run test:e2e -- --strict` passes 32/32 with an empty axe baseline (K13
+Halloween v2 added 7 tests on 2026-11-23).
 
 Nothing is queued for Kiro except the two owner checks below. **Nothing new should land in the last
 week** before the 2026-12-04 deadline.

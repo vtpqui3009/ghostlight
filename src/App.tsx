@@ -10,6 +10,7 @@ import { StageView } from './ui/StageView';
 import { Editor } from './ui/Editor';
 import { ImportExport } from './ui/ImportExport';
 import { Reports } from './ui/Reports';
+import { Decor, GhostMascot, Pumpkin } from './ui/Decor';
 import './styles.css';
 
 type View = 'stage' | 'editor' | 'reports';
@@ -161,6 +162,7 @@ export function App() {
 
   return (
     <div className="app">
+      <Decor />
       <div ref={announceRef} className="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
       
       <header className="app-header">
@@ -203,6 +205,7 @@ export function App() {
 
       {!scenario && !loadError && (
         <div className="empty-state first-screen">
+          <GhostMascot />
           <h2>No Scene Loaded</h2>
           <p className="first-screen-lead">
             Ghostlight replays a theatre prop plan in cue order and shows where the plan
@@ -222,6 +225,7 @@ export function App() {
                   {demo.title}
                 </button>
                 <span id={`demo-desc-${demo.id}`}>{DEMO_BLURBS[demo.id]}</span>
+                <Pumpkin />
               </div>
             ))}
           </section>

@@ -78,8 +78,12 @@ be, drawn as a dashed outline; the solid block is where the plan *actually* has 
 heavier outline and a note in words saying where the other half is. The stage has a curtain, a
 valance and footlights, and the zones are arched like old theatre windows. Nothing depends on colour
 alone: every state also has a glyph and a word label (REQUIRED, BEFORE, MATCH, MISMATCH), because this
-gets read in a dark room by someone who is already busy. There are no jump scares and no sound, and
-the only motion is a short one-time fade that is removed when the browser asks for reduced motion.
+gets read in a dark room by someone who is already busy. The page is always night: a full moon rises,
+a few bats cross the sky once (one of them over the moon), fog drifts in along a row of tombstones,
+the first-screen curtains part, and a small cartoon ghost and a jack-o-lantern greet you beside the
+first move. Every one of those animations plays once, within about four seconds, and then the scene
+holds still. There are no jump scares and no sound, the art never sits under text, and when the
+browser asks for reduced motion nothing moves at all while the art stays in place.
 
 There is a plain list equivalent of the stage (the default under reduced motion), a keyboard path
 through every control, light and dark colour schemes, and the crew sheets (preset, who-does-what,

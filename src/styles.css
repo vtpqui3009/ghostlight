@@ -1399,3 +1399,355 @@ button:hover:not(:disabled) {
     border-bottom: 2px solid black;
   }
 }
+
+/* ==========================================================================
+   K13 Halloween v2 (Kiro, 2026-11-23).
+
+   A night sky behind the whole app: moon, bats, fog and a graveyard row, plus a ghost and
+   two pumpkins. All of it is inline SVG or CSS, aria-hidden, unfocusable and ignored by the
+   pointer. No text sits on any of it; text stays on the existing solid surfaces, and the
+   REQUIRED / BEFORE / MATCH / MISMATCH labels, glyphs and outlines are untouched.
+
+   Motion rule: every animation below has an explicit finite iteration count. Nothing loops.
+   Each element's base style is its FINAL state; the keyframes only describe where it starts
+   from. Reduced motion therefore just removes the animation, and the art stays in place.
+   ========================================================================== */
+
+/* Night in both colour schemes: a deep purple-black sky. Cards stay parchment. */
+body {
+  background-color: #0a0610;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 50% -5%, rgba(242, 184, 75, 0.1), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(126, 212, 173, 0.06), transparent 70%),
+    linear-gradient(180deg, #0a0610 0%, #150b1d 45%, #2a1436 100%);
+  background-attachment: fixed;
+}
+
+/* Content sits above the fixed art. The header outranks main so the import toast, which is
+   fixed inside the header, is never covered by the page below it. */
+.app-header {
+  z-index: 2;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+.haunt-decor {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.haunt-decor * {
+  pointer-events: none;
+}
+
+/* The ghost and the pumpkins sit outside .haunt-decor, so the rules above do not reach them. */
+.haunt-ghost,
+.haunt-pumpkin {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Moon, upper right, with a soft glow. Rises once. */
+.haunt-moon {
+  position: absolute;
+  top: 6.5rem;
+  right: 4vw;
+  width: clamp(9rem, 18vw, 17rem);
+  height: auto;
+  filter: drop-shadow(0 0 28px rgba(255, 240, 190, 0.45));
+  animation: haunt-moonrise 1.6s ease-out 1 both;
+}
+
+@keyframes haunt-moonrise {
+  from { opacity: 0; transform: translateY(3rem); }
+}
+
+/* Bats. They stay in the open sky below the header (top 22vh to 55vh, with at most about
+   2vh of bob). Each base position is where the bat rests if motion is off; with motion it
+   crosses the sky once, from --from to --to (relative to its own left), then fades out.
+   Bat 1 rests on the moon, and its --from / --to put the moon at 60% of the flight, so it
+   crosses in front of it (the moon comes first in the markup, so the bat paints over it).
+   The silhouette is a dark plum with a soft moonlit rim, so it reads against the sky. */
+.haunt-bat {
+  position: absolute;
+  width: 4.5rem;
+  height: auto;
+  opacity: 1;
+  filter: drop-shadow(0 0 3px rgba(242, 230, 200, 0.55));
+  animation: haunt-bat-fly 3s linear 1 both;
+}
+
+.haunt-bat path {
+  fill: #120a16;
+}
+
+.haunt-bat-1 { top: 25vh; left: calc(87vw - 2.25rem); --from: -100vw; --to: 67vw; }
+.haunt-bat-2 { top: 38vh; left: 30%; --from: -45vw; --to: 100vw; animation-delay: 0.3s; animation-duration: 3.2s; }
+.haunt-bat-3 { top: 50vh; left: 70%; --from: -85vw; --to: 60vw; animation-delay: 0.7s; }
+.haunt-bat-4 { top: 31vh; left: 12%; --from: -30vw; --to: 110vw; animation-delay: 1.1s; animation-duration: 3.4s; }
+
+@keyframes haunt-bat-fly {
+  0% { opacity: 0; transform: translate(var(--from), 2vh) rotate(-6deg); }
+  10% { opacity: 1; }
+  40% { transform: translate(calc((var(--to) - var(--from)) * 0.4 + var(--from)), -1.5vh) rotate(5deg); }
+  70% { transform: translate(calc((var(--to) - var(--from)) * 0.7 + var(--from)), 1vh) rotate(-3deg); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--to), 0) rotate(-4deg); }
+}
+
+/* Two soft fog bands near the bottom. Fade in and drift a little, once. */
+.haunt-fog-band {
+  position: absolute;
+  left: -20%;
+  width: 140%;
+  height: 14rem;
+  opacity: 0.7;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(190, 170, 220, 0.3), transparent 70%);
+  transform: translateX(3%);
+  animation: haunt-fog-drift 2s ease-out 1 both;
+}
+
+.haunt-fog-band-1 { bottom: -5rem; }
+
+.haunt-fog-band-2 {
+  bottom: 1rem;
+  height: 10rem;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(150, 200, 190, 0.2), transparent 70%);
+  transform: translateX(-3%);
+  animation-name: haunt-fog-drift-back;
+}
+
+@keyframes haunt-fog-drift {
+  from { opacity: 0; transform: translateX(-4%); }
+}
+
+@keyframes haunt-fog-drift-back {
+  from { opacity: 0; transform: translateX(4%); }
+}
+
+/* Graveyard row along the bottom edge: tombstones and bare trees. Static. */
+.haunt-graves {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: clamp(5rem, 14vw, 12rem);
+  display: block;
+}
+
+/* The first screen. Drapes with folds part once; the ghost materialises once and stays. */
+.first-screen {
+  --drape: 16px;
+  --drape-from: 2.3rem;
+}
+
+.first-screen::after {
+  content: "";
+  position: absolute;
+  inset: 1.5rem 0 6px 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, var(--curtain) 0 5px, rgba(0, 0, 0, 0.3) 5px 8px) left top / var(--drape) 100% no-repeat,
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.3) 0 3px, var(--curtain) 3px 8px) right top / var(--drape) 100% no-repeat;
+  animation: haunt-drapes 1.4s ease-out 1 both;
+}
+
+@keyframes haunt-drapes {
+  from {
+    background-size: var(--drape-from) 100%, var(--drape-from) 100%;
+  }
+}
+
+.first-screen .haunt-ghost {
+  float: right;
+  width: 4.5rem;
+  height: auto;
+  margin: 0 0 0.5rem 1rem;
+  filter: blur(0) drop-shadow(0 0 10px rgba(220, 200, 255, 0.6));
+  animation: haunt-ghost-in 1.2s ease-out 1 both;
+}
+
+@keyframes haunt-ghost-in {
+  from {
+    opacity: 0;
+    filter: blur(8px) drop-shadow(0 0 10px rgba(220, 200, 255, 0.6));
+    transform: translateY(14px);
+  }
+}
+
+/* Pumpkins: a warm glow, never animated. */
+.haunt-pumpkin {
+  display: block;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(255, 150, 40, 0.7));
+}
+
+.demo-choice.featured {
+  position: relative;
+}
+
+.demo-choice.featured .haunt-pumpkin {
+  position: absolute;
+  top: -2.4rem;
+  right: 0.75rem;
+  width: 2.8rem;
+}
+
+.stage-zones {
+  position: relative;
+}
+
+.stage-zones > .haunt-pumpkin {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0;
+  width: 2.2rem;
+}
+
+/* Header title lamp: a low flicker, four times, then steady. Each cycle is 0.9 s with two
+   dips, so at most about 2.2 dips a second, and the dip is 15% of opacity. */
+.app-header h1 {
+  animation: haunt-lamp-flicker 0.9s ease-in-out 4 both;
+}
+
+@keyframes haunt-lamp-flicker {
+  0%, 100% { opacity: 1; }
+  25% { opacity: 0.85; }
+  50% { opacity: 1; }
+  75% { opacity: 0.9; }
+}
+
+/* Selected timeline step: a candle glow that flickers three times, then stays lit. The
+   inset bar is kept (--bar), so a failing step still shows its red or amber bar. The glow
+   is outside the row and never sits behind its text. */
+.action-item.selected,
+.action-item.selected.rejected,
+.action-item.selected.uncertain {
+  box-shadow: inset 5px 0 0 var(--bar), 0 0 8px 1px var(--candle-glow);
+  animation: haunt-candle 0.5s ease-in-out 3 both;
+}
+
+.action-item.selected { --bar: var(--selected-bar); }
+.action-item.selected.rejected { --bar: var(--error-text); }
+.action-item.selected.uncertain { --bar: var(--warning-text); }
+
+@keyframes haunt-candle {
+  0%, 100% { box-shadow: inset 5px 0 0 var(--bar), 0 0 8px 1px var(--candle-glow); }
+  35% { box-shadow: inset 5px 0 0 var(--bar), 0 0 16px 3px rgba(242, 184, 75, 0.55); }
+  70% { box-shadow: inset 5px 0 0 var(--bar), 0 0 5px 0 var(--candle-glow); }
+}
+
+/* Narrow screens: a smaller moon, fewer and smaller bats, lighter fog, smaller graves. */
+@media (max-width: 640px) {
+  .haunt-moon {
+    top: 5.5rem;
+    right: 3vw;
+    width: 7rem;
+  }
+
+  .haunt-bat { width: 3rem; }
+  /* The mobile moon is 7rem wide with its right edge 3vw in, so its centre is 97vw - 3.5rem. */
+  .haunt-bat-1 { top: 22vh; left: calc(97vw - 5rem); }
+  .haunt-bat-2 { top: 36vh; }
+  .haunt-bat-3,
+  .haunt-bat-4 { display: none; }
+
+  .haunt-fog-band {
+    height: 9rem;
+    opacity: 0.45;
+  }
+
+  .haunt-fog-band-2 { height: 6rem; }
+
+  .haunt-graves { height: 5rem; }
+
+  .first-screen {
+    --drape: 10px;
+    --drape-from: 1.3rem;
+  }
+
+  .first-screen .haunt-ghost {
+    width: 3.5rem;
+    margin-left: 0.75rem;
+  }
+
+  .demo-choice.featured .haunt-pumpkin {
+    width: 2.4rem;
+    top: -2.1rem;
+  }
+
+  .stage-zones > .haunt-pumpkin { width: 1.8rem; }
+
+  /* Stage list: all four columns fit inside the screen, so there is no inner horizontal
+     scroll. The table keeps its real table semantics. Fixed layout with set column
+     widths, a smaller font, and wrapping anywhere in a cell so a narrow column such as
+     Zone or Holder breaks a long word instead of being clipped. */
+  .stage-list .report-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 0;
+    font-size: 0.8125rem;
+  }
+
+  .stage-list .report-table th,
+  .stage-list .report-table td {
+    padding: 0.3rem;
+    overflow-wrap: anywhere;
+  }
+
+  .stage-list .report-table th:nth-child(1),
+  .stage-list .report-table td:nth-child(1) { width: 30%; }
+
+  .stage-list .report-table th:nth-child(2),
+  .stage-list .report-table td:nth-child(2) { width: 40%; }
+
+  .stage-list .report-table th:nth-child(3),
+  .stage-list .report-table td:nth-child(3) { width: 15%; }
+
+  .stage-list .report-table th:nth-child(4),
+  .stage-list .report-table td:nth-child(4) { width: 15%; }
+}
+
+/* Reduced motion: no K13 animation at all. Every piece of art stays visible in its final
+   position, and nothing moves. */
+@media (prefers-reduced-motion: reduce) {
+  .haunt-moon,
+  .haunt-bat,
+  .haunt-fog-band,
+  .first-screen::after,
+  .first-screen .haunt-ghost,
+  .app-header h1,
+  .action-item.selected,
+  .action-item.selected.rejected,
+  .action-item.selected.uncertain {
+    animation: none;
+  }
+}
+
+/* Print: no night, no art. */
+@media print {
+  .haunt-decor,
+  .haunt-ghost,
+  .haunt-pumpkin,
+  .first-screen::after {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    background-image: none;
+  }
+
+  .action-item.selected,
+  .action-item.selected.rejected,
+  .action-item.selected.uncertain {
+    box-shadow: inset 5px 0 0 var(--bar);
+  }
+}

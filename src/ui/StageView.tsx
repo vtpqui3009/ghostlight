@@ -4,6 +4,7 @@ import { applyFix, isGuidedFix, suggestFix } from '../domain/guidedFix';
 import type { Action, Scenario, Frame, RunResult } from '../domain/types';
 import { deriveStageModel, verdictSentence, type StageEntry, type StageEntryType } from './stageModel';
 import { initialStageReading, rememberStageReading, type StageReading } from './stageReading';
+import { Pumpkin } from './Decor';
 
 interface StageViewProps {
   scenario: Scenario;
@@ -197,6 +198,7 @@ export function StageView({ scenario, selectedFrame, onSelectFrame, runResult, o
             </div>
           );
         })}
+        <Pumpkin />
       </div>
       </>
       )}
