@@ -116,7 +116,11 @@ try {
   console.log(`  build output: ${outDir}\n`);
 
   // 1. The build the workflow runs, into a temp dir so dist/ is left alone for the main harness.
-  const build = spawnSync('npx', ['vite', 'build', `--base=${base}`, '--outDir', outDir, '--emptyOutDir'],
+  // Run vite through the current Node binary. `spawnSync('npx')` cannot start on Windows
+  // (npx is a .cmd shim, and Node refuses to spawn .cmd files without a shell), which made
+  // this check fail on a Windows machine for a reason unrelated to the app.
+  const viteBin = join(repoRoot, 'node_modules', 'vite', 'bin', 'vite.js');
+  const build = spawnSync(process.execPath, [viteBin, 'build', `--base=${base}`, '--outDir', outDir, '--emptyOutDir'],
     { cwd: repoRoot, encoding: 'utf8' });
   check(build.status === 0, 'vite build with the Pages base path succeeds',
     build.status === 0 ? undefined : (build.stderr || build.stdout || '').trim().split('\n').slice(-3).join(' | '));

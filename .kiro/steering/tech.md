@@ -28,4 +28,10 @@ Authored by **Kiro** (native Kiro CLI, primary writer) on 2026-10-31 during task
 
 - A bounded, deterministic **local command** hook (`PostFileSave` on `src/domain/**`) is authored in `.kiro/hooks/` to surface type errors quickly after a domain-model edit. It is **not yet verified** to trigger in the native CLI — authored JSON alone is not proof; discovery/trigger behavior must be confirmed in the native CLI during T2.
 - The hook script skips truthfully when dependencies are not installed (no `node_modules`): it prints `NOT RUN — dependencies not installed` and exits 0 rather than faking a pass. It becomes useful once `npm install` runs in T2.
-- No agent-prompt hooks are used (they could spend quota in loops). No trust/permission rules or external MCP are added. Hook scripts stay within `.kiro`.
+- No agent-prompt hooks are used (they could spend quota in loops). No trust/permission rules are added. Hook scripts stay within `.kiro`.
+
+## MCP
+
+- Exactly one MCP server exists and it is **local, read-only and project-owned**: `tools/mcp/` bundled to `.kiro/mcp/ghostlight-mcp.mjs` (`npm run build:mcp`; a test fails if the committed bundle is stale). It runs the real `src/domain` engine so an agent can confirm what a fixture does before writing a test around it.
+- It makes no network request, writes no file, reads no environment variable or secret, and every tool is annotated `readOnlyHint`. A suggested fix is described, never applied. No remote MCP server and no credential-bearing MCP is to be added.
+- Launch configuration is `.kiro/mcp/mcp.settings.json`; Kiro reads it from `.kiro/settings/mcp.json`. `autoApprove` lists only the read-only tool names.

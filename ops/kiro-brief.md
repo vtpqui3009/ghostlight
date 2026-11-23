@@ -1,26 +1,29 @@
 # Kiro brief — current task
 
-**Status 2026-11-13:** K8, K2 (reopened part), K3, K6 (CSV), K7, K9, K10 and K11 are done in a Kiro
-CLI 3.3.0 session; see the 2026-11-10 and 2026-11-13 entries in `KIRO_SESSION_EVIDENCE.md`, including
-what failed. `npm run check` green with 275 tests; `npm run test:e2e -- --strict` 25 passed, empty
-axe baseline.
+**Status 2026-11-13:** every item in the Kiro queue has been worked in Kiro CLI 3.1.0 / 3.3.0
+sessions: **K2 (reopened part), K3, K6 (CSV), K7, K8, K9, K10, K11, K12.** The records, including what
+failed, are in `KIRO_SESSION_EVIDENCE.md` (entries dated 2026-11-10 and 2026-11-13). `npm run check`
+is green with 297 tests; `npm run test:e2e -- --strict` passes 25/25 with an empty axe baseline.
 
-**Open items, in order:**
+Nothing is queued for Kiro except the two owner checks below. **Nothing new should land in the last
+week** before the 2026-12-04 deadline.
 
-1. **K8 follow-up (owner, ~2 minutes).** Three non-interactive child sessions saw *no* hook fire,
-   including `SessionStart`. Settle it in an interactive `kiro-cli chat` in this folder: run `/hooks`,
-   then ask the agent to append `// k8-hook-probe` to `src/domain/ids.ts`, record what appears, and
-   `git checkout -- src`. Until then the hook trigger is NOT VERIFIED.
-2. **[K12](kiro-briefs/K12.md) — variety of Kiro tools.** Not started. Choose only what genuinely
-   helps this local-first app and record what each changed; "considered, not used" is an acceptable
-   honest answer for MCP and powers.
-3. **Fill the `TO FILL` blocks** in `docs/kiro-writeup.md` and `docs/submission.md` from the evidence
-   file only.
-4. Owner-only items U1–U6 are in `docs/HANDOFF_TO_KIRO.md`. Nothing new in the last week.
+## Open, and only the owner can close them
+
+1. **K8 hook trigger, optional, ~2 minutes.** Four non-interactive sessions (the last on 2026-11-23)
+   saw no hook fire. In an interactive `kiro-cli chat` in this folder run `/hooks`, then ask the agent to
+   append `// k8-hook-probe` to `src/domain/ids.ts`, record whether `[ghostlight hook]` appears, then
+   `git checkout -- src`. Until then the trigger is NOT VERIFIED and the write-up says so.
+2. **K12 MCP: done 2026-11-23.** A live non-interactive Kiro CLI session called `list_demos`,
+   `get_demo` and `check_scenario` through `.kiro/settings/mcp.json`. An interactive `/mcp` listing was
+   not looked at.
+3. Submission items (video, blog and social post edits and links, Devpost form): see
+   [`docs/submission-packet.md`](../docs/submission-packet.md). Drafts: `docs/blog-post.md`,
+   `docs/social-post.md`.
 
 ## Before every session
 
 `git checkout main; git pull --ff-only; npm ci; npm run check`, note the real test count, and run
 `/usage` (note which pool). Afterwards run the four gates plus `npm run test:e2e -- --strict` (needs
-`npm i --no-save playwright@1.63.0` and `npx playwright install chromium` on a machine without it),
-then append to `KIRO_SESSION_EVIDENCE.md`, including what failed.
+`npm i --no-save playwright@1.63.0` and `npx playwright install chromium` on a machine without it), then
+append to `KIRO_SESSION_EVIDENCE.md`, including what failed.

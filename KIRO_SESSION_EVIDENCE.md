@@ -286,3 +286,114 @@ reviewer.
   **275/275** tests, build); `test:e2e -- --strict` 25 passed, 0 failed; 26 out-of-repo browser checks passed.
 - What this does NOT show: that `npm run dev` was exercised by hand; the remaining moderate advisories
   are not fixed (the fix would be a typescript-eslint major).
+
+## 2026-11-13 (second session) — Halloween pass, local MCP server (K12), write-up, submission packet (Kiro CLI 3.3.0)
+
+- Surface: Kiro CLI 3.3.0 on Windows PowerShell, Node v24.18.0. Model and mode not shown to the agent;
+  not recorded. `/usage` before and after: **NOT RUN** (a slash command; not reachable from the agent's tools).
+- Files written: `src/styles.css` (haunted-theatre layer; unused infinite `.spinner` removed),
+  `tools/mcp/{handlers.ts,server.ts,md.d.ts,build.mjs}`, `.kiro/mcp/{ghostlight-mcp.mjs,mcp.settings.json}`,
+  `tests/mcp/{handlers,protocol}.test.ts`, `tsconfig.json` (include `tools`), `eslint.config.js` (ignore the
+  generated bundle only; no rule changed), `package.json`/lockfile (exact pins: `@modelcontextprotocol/sdk`
+  1.32.2, `zod` 4.6.7, `esbuild` 0.28.2; dev only), `.kiro/steering/tech.md`, README, and the docs
+  (`kiro-writeup.md`, `submission.md`, `submission-packet.md`, `demo-script.md`, roadmap, brief).
+
+### What failed or was blocked
+
+1. **A permission rule blocked writing `.kiro/settings/mcp.json`** ("deny fs_write" on `.kiro/settings/`).
+   I did not route around it (no PowerShell write, no `kiro-cli mcp add`). The launch config is committed as
+   `.kiro/mcp/mcp.settings.json` and the owner must copy it. **Consequence: no live Kiro-agent call of the MCP
+   server was possible this session. NOT VERIFIED.**
+2. The first design cut for the interface used `background-attachment: fixed`, which left a visible seam in
+   full-page screenshots; removed.
+3. The bundle is 1.67 MB (SDK and zod are inlined). Accepted, documented in the README, excluded from lint.
+4. `npm audit` is unchanged at 7 moderate (lint chain); the new dev dependencies added none.
+
+### Results
+
+- **Interface:** light and dark, 390 px, reduced-motion and print checked by an out-of-repo Playwright
+  script (deleted afterwards): axe (wcag2a/aa/21a/21aa/best-practice) clean on the first screen, stage diagram,
+  stage list, reports and editor in both schemes; 0 infinite animations; 0 running animations under reduced
+  motion; no horizontal overflow at 390 px on any view; print drops the dark layer. **24/24.** I looked at the
+  screenshots (first screen light/dark/mobile, stage, reports) before accepting them.
+- **MCP:** 22 tests (20 handler tests with hand-calculated oracles, 1 protocol test over the committed bundle
+  with raw JSON-RPC, 1 byte-for-byte staleness test). Three deliberate bugs in the handlers (cause dropped,
+  rejected counted as applied, fix marked applied) were each caught, then reverted. A script then called the
+  bundle over stdio for all six bundled demos: every verdict matched the demo's own description. **It caught
+  nothing wrong.** This was a script calling the server, not a Kiro agent.
+- Commands: `npm run lint` 0, `npm run typecheck` 0, `npm test` **297/297**, `npm run build` 0,
+  `npm run build:mcp` reproducible, `test:e2e -- --strict` **25 passed, 0 failed** (baseline empty).
+
+### What this does NOT show
+
+That a Kiro agent can launch and call the MCP server (config not yet in `.kiro/settings/`, and `node`
+resolution by Kiro on this machine is untested; inside this tool's shell `cmd` could not find `node`);
+that the hook fires interactively; real-user validation; a colour-blind or screen-reader review; Kiro's
+`/usage`; and anything about the live GitHub Pages site until it has been redeployed after the next push.
+
+## 2026-11-23 — MCP live-use check (K12) and fourth hook attempt (K8), Kiro CLI 3.3.0
+
+- Surface: `kiro-cli` 3.3.0 on Windows PowerShell, Node v24.18.0, npm 11.16.0 (`npm.cmd`; `npm.ps1` is
+  blocked by the execution policy). Logged in with Builder ID. Model `claude-haiku-5.5` (0.06x credits in
+  `--list-models`), chosen for cost. Both sessions ran with `--no-interactive --trust-workspace`.
+- `/usage` before and after: **NOT OBSERVABLE.** `kiro-cli chat --no-interactive "/usage"` was sent to
+  the model, which replied that the command belongs to the Kiro client. No credit figure is claimed.
+- Orchestration and docs were written by a separate assistant session, not by Kiro. Kiro CLI did only the
+  two probes below. No file in `src/` was changed by anyone.
+
+### K12 — did a live Kiro agent call the MCP server? YES, once
+
+1. Copied `.kiro/mcp/mcp.settings.json` to `.kiro/settings/mcp.json` with PowerShell
+   (`New-Item`, `Copy-Item`). Nothing blocked the write this time.
+2. `kiro-cli chat --no-interactive --trust-workspace --trust-tools=@ghostlight --model claude-haiku-5.5`
+   with the prompt "Use the ghostlight MCP server to check the missing-handoff demo ... Do not edit any
+   file."
+3. The tool log shows, in order: `@ghostlight/list_demos`, `@ghostlight/get_demo`,
+   `@ghostlight/check_scenario`. The agent called `get_demo` on its own because `check_scenario` takes
+   scenario JSON, not an id. Verdict reported: `clean: false`, 2 actions, 1 applied, 1 rejected,
+   0 uncertain; `a2` (cue-2, `carryOff`) rejected with `source-mismatch`, cause `a1` in `cue-1`, final
+   state letter-A at zone L held by Actor-A. This matches the hand-calculated oracle for Missing Handoff.
+4. No file was edited by the session (`git status` showed only my own files afterwards).
+
+Limits: one session, one demo, a cheap model, non-interactive mode. The interactive `/mcp` listing was not
+looked at.
+
+### K8 — did the hook fire by itself? NO, not observed
+
+1. `.kiro/hooks/domain-typecheck.json` unchanged (`PostFileSave`, matcher on `src/domain/*.ts`, command
+   `node .kiro/hooks/typecheck-domain.mjs`).
+2. Session prompt: append the line `// k8-hook-probe` to `src/domain/ids.ts`, then report any output that
+   begins `[ghostlight hook]`. The agent used the file-read and replace-in-file tools, the line was added,
+   and the agent reported that nothing beginning `[ghostlight hook]` appeared.
+3. Independent check: `tsc -b` rewrites `tsconfig.tsbuildinfo` when a source file changes. After the edit
+   `ids.ts` had a modification time of 20:27:21 and `tsconfig.tsbuildinfo` was still 20:20:25, from my own
+   `npm run check`. So the hook's typecheck did not run.
+4. `git checkout -- src/domain/ids.ts` restored the file; `git status` was clean for `src/`.
+
+This is the fourth non-interactive attempt with the same result. The interactive case is still NOT
+VERIFIED, and `--trust-workspace` was used, so an untrusted workspace is not the explanation.
+
+### Other things that went wrong or were found today
+
+- `npm run test:e2e` first failed because Playwright's Chromium was not installed on this machine;
+  `npx playwright install chromium` fixed it. Playwright 1.63.0 was already in `node_modules` as an
+  extraneous package, and `package.json` was not touched.
+- `node tests/e2e/verify-pages-build.mjs` **failed on Windows** with "vite build ... failed" because it
+  called `spawnSync('npx')`, and Node 24 will not start a `.cmd` shim without a shell. The app was fine.
+  The script now runs `node_modules/vite/bin/vite.js` through `process.execPath`. After the change it
+  passes 11 of 11, and the negative control (`--base=//`) still fails 5 checks and exits 1.
+- `Set-Content` in Windows PowerShell 5.1 can change a file's encoding, so doc edits were made with the
+  editor tools instead, and a diff was checked after the one time `Set-Content` was used.
+
+### Results
+
+- `npm run check`: lint, typecheck, **297 passed (11 files)**, build (47 modules) all exit 0.
+- `npm run test:e2e -- --strict`: **25 passed, 0 failed** on first run, but across six full runs two failed
+  one test each (details in `QA_RESULTS.md`), so it is **intermittent on this Windows machine**. The last
+  three consecutive runs passed. One failure was `net::ERR_NO_BUFFER_SPACE`; the other (`first screen,
+  dark scheme`) was not captured and its cause is unknown.
+- Screenshots (Chromium, `dist/`, light and dark, 1280 and 390 px, reduced motion emulated) looked at
+  by eye before accepting: no console or page errors, no horizontal overflow on any view, the dashed ghost
+  and the solid block are visibly different, the curtain, footlights and cobwebs render, and the only
+  running animation on load is one finite `lamp-up`. Under reduced motion the List reading is selected by
+  default.

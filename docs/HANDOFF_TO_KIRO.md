@@ -1,5 +1,11 @@
 # Handoff — everything that remains
 
+> **Superseded status, 2026-11-23.** The Kiro queue below (K2 to K12) has since been worked; see
+> [`SUBMISSION_ROADMAP.md`](SUBMISSION_ROADMAP.md) and [`../ops/kiro-brief.md`](../ops/kiro-brief.md)
+> for the current state (297 tests, strict e2e 25/25, repository public, app live). The tables below
+> are the 2026-11-13 handoff as written and are kept as history. What is left for the owner now is the
+> video, editing and publishing the two posts, pasting into Devpost and pressing Submit.
+
 Written 2026-11-13, when the owner stopped the automated daily run and decided to delegate the
 remaining work to Kiro. This is the single place to start. It does not replace the detail in the
 files it links to; it says what is left, in what order, and what to be careful about.
@@ -92,16 +98,16 @@ Dates worth putting in a calendar:
 | 2026-12-01 | Kiro Free allowance resets |
 | **2026-12-04** | **Redeem-by date for the bonus credits** (already redeemed), and the **submission deadline, 14:00 PST** |
 
-## Placeholders that still say `TO FILL`
+## Placeholders that still say `OWNER TO ADD`
 
-Three files carry `TO FILL` markers rather than invented content. Fill them from real events only.
+Updated 2026-11-23. No file carries a `TO FILL` marker any more. What remains blank belongs to the owner.
 
-- [`docs/kiro-writeup.md`](kiro-writeup.md) — **a required submission field**, and where
-  Technological Implementation is actually scored. Missing: IDE/Web/Crew usage, a concrete steering
-  moment, the hook trigger (K8), PBT (K11), MCP, custom agents, powers, and the user sessions.
-- [`docs/submission.md`](submission.md) — app URL, video URL, the comparison paragraph, the user
-  sessions, student/startup answers.
-- [`docs/blog-post.md`](blog-post.md) — the moments that are genuinely yours.
+- [`docs/submission.md`](submission.md) - the demo video URL, and the blog and social post URLs once
+  published.
+- [`docs/blog-post.md`](blog-post.md) - three links at the bottom. The post body is a draft to edit.
+- [`docs/social-post.md`](social-post.md) - a draft to rewrite in the owner's own voice.
+- [`docs/kiro-writeup.md`](kiro-writeup.md) - nothing blank. The hook trigger (K8) is written up as not
+  verified; an interactive check is optional.
 
 After every Kiro session, append to [`KIRO_SESSION_EVIDENCE.md`](../KIRO_SESSION_EVIDENCE.md): date,
 CLI version, model and mode, `/usage` before and after, files Kiro wrote, **what failed on the way**,

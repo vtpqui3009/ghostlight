@@ -4,8 +4,8 @@ What has been executed against `main`, with the real numbers. Anything not liste
 These are correctness checks on the implementation; **none of them is evidence that the tool is
 useful to a stage manager.**
 
-Last updated **2026-11-12**, after the GitHub Pages project-page build was loaded in a browser for
-the first time. The `tests/e2e/` harness and this file are reviewer-authored; the
+Last updated **2026-11-23**: the first section below is the latest run, on Windows. The 2026-11-12
+section after it is kept as the earlier record; where the two differ, the 2026-11-23 numbers win. The `tests/e2e/` harness and this file are reviewer-authored; the
 application and its domain, UI and persistence tests are Kiro's. See `ops/daily-run.md` for the
 provenance rule and `KIRO_SESSION_EVIDENCE.md` for what Kiro actually did.
 
@@ -20,7 +20,44 @@ node tests/e2e/verify-pages-build.mjs   # the Pages bundle, served from /ghostli
 
 CI runs exactly these on every push and pull request: `.github/workflows/ci.yml`.
 
-## Automated — 2026-11-12, from a clean `npm ci`
+## Latest run — 2026-11-23, Windows, Node v24.18.0, npm 11.16.0, Playwright 1.63.0, axe-core 4.14.0
+
+Run in an existing `node_modules` (no fresh `npm ci`). Playwright's Chromium had to be installed first.
+
+| Check | Command | Result |
+|---|---|---|
+| Lint, types, tests, build | `npm run check` | exit 0. **297 passed, 0 failed** in 11 files; production build 47 modules |
+| End-to-end and accessibility | `npm run test:e2e -- --strict` | exit 0. **25 passed, 0 failed**, empty axe baseline, 9 scans across light and dark |
+| Pages project-page build | `node tests/e2e/verify-pages-build.mjs` | **11 checks passed**, exit 0, after a Windows fix to the script (see below) |
+| Same, negative control | `node tests/e2e/verify-pages-build.mjs --base=//` | **5 checks failed**, exit 1, as it should |
+| Runtime dependencies | `npm audit --omit=dev` | 0 vulnerabilities |
+| All dependencies | `npm audit` | 7 moderate, all dev-only (lint chain) |
+
+Two things that were wrong and are now fixed or explained:
+
+- **Intermittent e2e failures on this machine.** Across six full `npm run test:e2e -- --strict` runs, four
+  passed 25/25 and two failed one test each. The two failures were different tests: one was
+  `net::ERR_NO_BUFFER_SPACE` on `page.goto` (a Windows socket-buffer error, not an application error),
+  the other was `first screen, dark scheme`, whose failure detail was not captured, so its cause is
+  **unknown**. The three most recent consecutive runs passed. This is recorded as flaky on Windows, not
+  as proven stable, and not as an application defect.
+- `verify-pages-build.mjs` failed on Windows because it called `spawnSync('npx')`, which Node 24 cannot
+  start without a shell. It now runs vite through `process.execPath`. The app was not at fault.
+- This was the first run of the e2e harness on this machine, so Chromium was installed with
+  `npx playwright install chromium`. `package.json` was not changed.
+
+Visual inspection (screenshots looked at by eye, saved as `docs/media/stage-diagram-dark-mobile.png`
+and `docs/media/stage-reduced-motion-dark.png`; the other screenshots in `docs/media/` date from
+2026-11-13): light and dark at 1280 px and 390 px for the first screen, Missing Handoff with the failing
+step selected (diagram and list), reports, editor, and Valid Control. No console or page errors and no
+horizontal overflow on any view. The ghost is a dashed outline with a MISMATCH label and a cross, the
+solid block is labelled BEFORE, and the curtain, footlights and cobweb corners render. On load the only
+animation is one finite `lamp-up`. With reduced motion emulated, the List reading is selected by default.
+
+What this still does not show: a screen-reader pass, a colour-blind reader, a real phone, Safari or
+Firefox, or any real-user validation.
+
+## Earlier run — 2026-11-12, from a clean `npm ci`
 
 | Check | Command | Result |
 |---|---|---|

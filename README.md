@@ -17,11 +17,26 @@ Built for [Kiroween 2026](https://kiroween.devpost.com/), Costume Contest.
 ```bash
 npm ci
 npm run dev        # http://127.0.0.1:5173
-npm run check      # lint, strict typecheck, 275 unit tests, production build
+npm run check      # lint, strict typecheck, 297 unit tests, production build
 ```
 
 Everything stays in the browser: scenes are saved locally and exported by hand as JSON. Nothing is
 uploaded anywhere.
+
+**Platform and third-party code (declared for the Official Rules).** A static web app that runs in a
+current desktop or mobile browser; no account, backend or paid service. Built new during the
+submission period on open-source libraries used under their own licences: React 18, Vite, TypeScript,
+Vitest, fast-check, ESLint, axe-core and Playwright (test tooling only), plus the Model Context Protocol SDK, zod and esbuild (development tooling for the optional MCP server only). There is no pre-existing
+project code, starter template or third-party data. The scenes are invented by this project.
+
+**Local MCP server for Kiro (optional, development only).** `tools/mcp/` is a read-only
+[Model Context Protocol](https://modelcontextprotocol.io) server that lets an agent ask the *real*
+engine what a scenario does (`check_scenario`, `explain_issue`, `reports`, `list_demos`, `get_demo`,
+and the transition table as a resource). It makes no network request and writes nothing. The built
+file is committed at `.kiro/mcp/ghostlight-mcp.mjs` (about 1.6 MB, generated, so it is excluded from
+lint; a test fails if it goes stale). To use it from Kiro, copy `.kiro/mcp/mcp.settings.json` to
+`.kiro/settings/mcp.json`. Rebuild with `npm run build:mcp`. The running app does not use it.
+A copy of the launch config is already committed at `.kiro/settings/mcp.json`; it needs `node` on the PATH.
 
 ## The model
 
@@ -51,6 +66,14 @@ This matters for the competition, so it is stated plainly rather than implied.
 | `tests/domain/**`, `tests/ui/actionFormHelpers.test.ts`, `tests/persistence/**` — 222 tests | Kiro |
 | `tests/e2e/**`, `.github/workflows/**` — verification harness and CI | reviewer (Claude), not Kiro |
 | `docs/**`, `ops/**`, the research documents, this file | reviewer and the project owner |
+
+On 2026-11-23 a separate assistant session (not Kiro CLI) edited only these paths: the submission
+documents (`docs/submission.md`, `docs/submission-packet.md`, `docs/kiro-writeup.md`,
+`docs/KIROWEEN_REQUIREMENTS.md`, `docs/HANDOFF_TO_KIRO.md`, `docs/SUBMISSION_ROADMAP.md`,
+`ops/kiro-brief.md`), the two drafts `docs/blog-post.md` and `docs/social-post.md`, `QA_RESULTS.md`,
+`KIRO_SESSION_EVIDENCE.md`, and `tests/e2e/verify-pages-build.mjs` (so it runs on Windows). It changed
+nothing in `src/`. The only Kiro CLI work that day was the MCP and hook checks recorded in
+`KIRO_SESSION_EVIDENCE.md`.
 
 On 2026-11-10 the project owner asked the reviewer to make the following changes in
 `src/` directly, rather than through Kiro. They are listed here rather than left to be
@@ -84,6 +107,8 @@ files; the full account, including what failed, is in `KIRO_SESSION_EVIDENCE.md`
 | `src/App.tsx` | the first screen: purpose, limits, one first move, a sentence per demo | Kiro |
 | `src/styles.css` | haunted-stage visual language, ghost/solid wiring, selected-row tokens | Kiro (on top of the reviewer's token pass) |
 | `tests/ui/stageModel.test.ts`, `tests/ui/reportCsv.test.ts`, `tests/domain/properties.test.ts` (new) | 25 + 15 tests | Kiro |
+| `tools/mcp/**`, `.kiro/mcp/**`, `tests/mcp/**` (new) | the local read-only MCP server, its generated bundle and 22 tests | Kiro |
+| `src/styles.css`, `src/App.tsx` | the haunted-theatre layer and first screen (2026-11-13 pass) | Kiro |
 
 [`KIRO_SESSION_EVIDENCE.md`](KIRO_SESSION_EVIDENCE.md) records the actual native Kiro sessions:
 which model and mode, what Kiro wrote, which checks failed on the way, and what was fixed. It is an
@@ -91,7 +116,7 @@ honest record, including the parts that are still NOT VERIFIED.
 
 ## State of the work
 
-`npm run check` is green: lint, strict TypeScript, **275 passing tests**, production build. The
+`npm run check` is green: lint, strict TypeScript, **297 passing tests**, production build. The
 end-to-end and accessibility harness runs 15 tests over the production build; one is a written-down
 known failure.
 
