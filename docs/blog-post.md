@@ -1,108 +1,100 @@
-# Blog post draft — Bonus Blog Prize
+# Blog post — Bonus Blog Prize
 
-**Why bother:** 100 winners, 2,000 bonus Kiro credits each. It must be public, on any third-party
-blog platform, published **during the submission period**, and must say it was written as part of
-the Kiroween 2026 hackathon. Add the URL to the Devpost submission.
+**DRAFT FOR THE OWNER TO EDIT AND PUBLISH.** Nothing here has been posted anywhere. Every event below
+comes from `KIRO_SESSION_EVIDENCE.md`, `docs/kiro-writeup.md` or `QA_RESULTS.md`. Rewrite it in your
+own words before publishing, and cut anything you would not say out loud.
 
-**Read this before publishing.** The draft below is a starting point, not something to paste. Put
-it in your own words and cut anything you would not say out loud — the parts that are specifically
-yours are what make it worth reading. Fill the `TO FILL` items with real numbers from your own
-sessions; do not publish a figure you have not seen.
+**Rules for the prize:** public, on a third-party blog platform (dev.to, Medium, Hashnode and
+similar), published during the submission period (deadline 2026-12-04 14:00 PST), and it must say
+it was written for the Kiroween 2026 hackathon. 100 winners get 2,000 bonus Kiro credits. After
+publishing, paste the URL into the Devpost form. Replace the two `OWNER TO ADD` links at the bottom.
 
 ---
 
-## Draft: "I let Kiro write the spec before it wrote the code, and the spec is what caught the bugs"
+# What I learned building a prop-plan checker with Kiro, including the parts that failed
 
-*Written as part of the Kiroween 2026 hackathon.*
+*Written for the Kiroween 2026 hackathon.*
 
-### The thing I was building
+## The problem
 
 A stage manager's run sheet says who carries which prop, from where, in which cue. It is written by
-hand and changed in rehearsal. When one handoff goes missing from that sheet, nobody finds out
-until an actor reaches for a letter that is not there, in front of an audience.
+hand and changed in rehearsal. When one handoff goes missing from the sheet, nobody finds out until an
+actor reaches for a letter that is not there, in front of an audience.
 
-So I built Ghostlight: you type the cues and the props, and it replays the plan and tells you where
-the plan contradicts itself. A missing handoff. A wax seal that gets broken and then required
-again. Two identical letters that are not actually interchangeable.
+Ghostlight reads that plan back. You type the cues, the physical props and what each step requires.
+It replays the plan in cue order and shows where it contradicts itself: a missing handoff, a wax seal
+that is broken and then required again, two identical letters that are not interchangeable. It is a
+planned-state checker. It never sees a real stage, and it is not a safety system.
 
-### Why I started with the spec
+The interface is a haunted theatre. The "ghost" is a dashed outline showing where the plan says a
+prop *should* be. The solid block is where the plan *actually* has it. When they disagree, the app
+says so in words and names the earlier step that caused it.
 
-This is a correctness tool. If I had vibe-coded it, the tests would have been written against
-whatever the code happened to do, and they would all have passed, and the tool would have been
-confidently wrong. That is the worst possible outcome for something whose entire job is to be right.
+## Why the spec came first
 
-So the first Kiro sessions ran in spec mode and produced no code at all. They produced a table: six
-kinds of action, what each one requires, what counts as an error versus "not enough information",
-and what a cause is allowed to point at.
+This tool's whole job is to be right, so I did not want tests written against whatever the code
+happened to do. The first Kiro sessions produced no application code. They produced a specification:
+six kinds of action, what each one requires, when a mismatch is an error and when it is only "not
+enough information", and what a cause may point at.
 
-Then I had the spec reviewed before implementation — and it came back with holes. Not typos:
-genuine contract gaps. What happens when an instance's starting position was never recorded and a
-later cue needs it? Can a cause point at the initial state as well as at an earlier action? Is the
-identity of an issue allowed to depend on where it sits in the replay? Kiro revised the
-specification on those findings, and only then did I let it write code.
+The spec was reviewed before any code existed, and the review found real holes. For example, a
+`carryOff` that moves a prop within one zone, and a `place` with no holder. Kiro revised the spec
+for those. Only then did I let it write the engine. The result is a 531-line engine with 134
+acceptance tests and 31 engine tests that check the spec's table rather than the implementation.
 
-`TO FILL` — the one spec change that saved you the most time. Say which, and why.
+## Three things that went wrong
 
-### The moment that convinced me
+**A model that would not converge.** The first implementation turn ran on Auto and produced no
+application files after about nine minutes, so I cancelled it. The next session used Haiku 4.5 for its
+low cost. It reached 30 passing tests but could not clear 17 TypeScript and 18 ESLint errors, and kept
+editing the wrong thing. A fresh Sonnet 4.5 session fixed the real strict-mode errors in one pass and
+kept the checks on. I should have stopped the first writer sooner.
 
-Kiro wrote a test that passed and meant nothing. It mutated an object and then compared that object
-against itself. Of course it passed.
+**A test that proved itself right.** One generated test mutated an object and then compared the
+object with itself. It passed and meant nothing. Review caught it. When the fixture was rewritten
+the test failed, and the reason was real: the rejection I thought I was testing was actually a valid
+transfer. My own understanding of my spec was wrong, and only a correct oracle showed me.
 
-I would have written that test too, at midnight. What caught it was not cleverness — it was having
-an independent reviewer whose only job was to check the oracle, separately from the writer whose
-job was to make it green.
+**An animation that hung my own test harness.** The first version of the ghost's glow was an infinite
+CSS animation. The accessibility harness waits for animations to finish, so the whole end-to-end run
+hung for fifteen minutes. Infinite animation also fails WCAG 2.2.2, so the glow became a static halo
+plus one 0.6 second fade, and it is removed when the browser asks for reduced motion.
 
-When Kiro rewrote the fixture, the new test failed. And it failed for a *real* reason: the
-transition I had assumed was a rejection was actually a valid transfer. My understanding of my own
-spec was wrong, and only a test with a correct oracle could show me that.
+## Property-based tests that found nothing
 
-### Things I would tell someone starting now
+I wrote 15 property-based tests with fast-check against a small reference model built from the spec.
+They all passed on the first run, so they found no engine bug. To check that they could fail at all,
+I injected eight deliberate bugs into a temporary copy of the engine, such as a consumed id that could
+be replenished and a rejection that leaked a state change. All eight were caught. That is a smaller
+claim than "PBT found my bugs", and it is the true one.
 
-- **Stop a writer that is not converging.** One session reached 30 passing tests and then spent
-  several turns failing to delete unused parameters. Stopping it and starting a fresh session on a
-  stronger model fixed the real errors in one pass. Persistence is not a virtue here.
-- **Match the model to the task.** Specification and review got the strongest model. Mechanical
-  work did not need it.
-- **Never relax the compiler to get green.** When strict TypeScript complained, the fix was an
-  asserted helper, not a widened type. Every relaxation is a future bug with a certificate.
-- **Separate the writer from the reviewer.** Not two models — two *jobs*. The writer wants it to
-  pass. Something else has to want it to be right.
+## A hook I could not make fire, and an MCP server I could
 
-`TO FILL` — the thing *you* found hardest. That is the part people will actually remember.
+I wrote a `PostFileSave` hook that runs a report-only typecheck after edits under `src/domain`. My
+Windows machine has no `bash`, so Kiro rewrote the script in Node. In four non-interactive sessions I
+never saw it fire. I have not tried an interactive session, so I am not claiming the hook works.
 
-### What I will not claim
+Earlier fixtures had been wrong more than once, so I built a small local, read-only MCP server that
+runs the real engine. On 2026-11-23 I asked a Kiro CLI session to check the Missing Handoff demo
+through it. The tool log shows it calling `list_demos`, `get_demo` and `check_scenario`, and its
+verdict matched what I had worked out by hand: the carry is rejected, and the earlier collect is the
+cause.
 
-No stage manager has used this yet. It checks a plan; it has never seen a real stage. The open
-defects and the accessibility results are in the repository rather than in a footnote, because a
-tool that tells you when your plan is wrong has no business being vague about its own.
+## What I would tell the next person
 
-`TO FILL` — repository link, app link, and the Devpost project link.
+- Stop a writer that is not converging instead of coaxing it.
+- Keep the compiler strict. When errors appeared, the fix was to the code, not to the config.
+- Write your oracle independently of the thing under test.
+- Test the state a user actually lands in. My accessibility scans were clean until the harness
+  learned to click a failing row, and then they found a contrast problem that no earlier scan had seen.
+- Check that the visual language you think you have is on the screen. The ghost-versus-solid styling
+  was in the stylesheet under class names the component never emitted, so most of it did not render.
 
----
+## What I will not claim
 
-# Social post — write this one yourself
+No stage manager has used Ghostlight. I did not run interviews or compare it with other tools, and all
+the scenes and tests are synthetic. Whether it is useful to real stage managers is unknown.
 
-The Social Blitz prize is judged on "**original thoughts vs AI writing**", and five winners are
-picked by the Kiro team. A post that reads as generated will lose. So here are only the
-constraints and the raw material — the sentences have to be yours.
-
-**Constraints**
-
-- Must start with `#KiroweenHackathon26` — literally the first thing in the post.
-- Public, published during the submission period.
-- Add the URL to your Devpost submission.
-- Their prompt: your favourite thing about Kiro and how it changed the way you approach development.
-
-**Raw material you actually have**
-
-- You ran spec mode first and got no code out of it on purpose, for a tool whose job is correctness.
-- An independent review of the spec found real contract gaps before any code existed.
-- Kiro wrote a self-referential test that passed and meant nothing; the rewrite then failed for a
-  real reason and corrected your own understanding of your spec.
-- You stopped a model that was not converging instead of coaxing it, and that was the right call.
-- `TO FILL` — the one moment that genuinely surprised you. One concrete sentence beats five general
-  ones.
-
-**What not to do:** do not list features, do not thank the tool, and do not write "game changer".
-Pick the single thing that changed how you work and say it in your own voice, in two or three
-sentences.
+- Repository: `OWNER TO ADD` (https://github.com/vtpqui3009/ghostlight)
+- Live app: `OWNER TO ADD` (https://vtpqui3009.github.io/ghostlight/)
+- Devpost project: `OWNER TO ADD`

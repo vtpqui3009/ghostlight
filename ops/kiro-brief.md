@@ -10,17 +10,16 @@ week** before the 2026-12-04 deadline.
 
 ## Open, and only the owner can close them
 
-1. **K8 hook trigger, ~2 minutes.** Three non-interactive child sessions saw no hook fire, not even
-   `SessionStart`. In an interactive `kiro-cli chat` in this folder run `/hooks`, then ask the agent to
+1. **K8 hook trigger, optional, ~2 minutes.** Four non-interactive sessions (the last on 2026-11-23)
+   saw no hook fire. In an interactive `kiro-cli chat` in this folder run `/hooks`, then ask the agent to
    append `// k8-hook-probe` to `src/domain/ids.ts`, record whether `[ghostlight hook]` appears, then
-   `git checkout -- src`. Until then the trigger is NOT VERIFIED.
-2. **K12 MCP, ~3 minutes.** A permission rule blocked the Kiro session from writing
-   `.kiro/settings/`, so the launch config is committed as `.kiro/mcp/mcp.settings.json`. Copy it to
-   `.kiro/settings/mcp.json`, start a new `kiro-cli chat`, run `/mcp`, and ask the agent to check the
-   missing-handoff demo through the ghostlight server. Record whether it was listed and called. Until
-   then live use by a Kiro agent is NOT VERIFIED (the server itself is tested over stdio).
-3. Submission items (video, blog, social post, Devpost form): see
-   [`docs/submission-packet.md`](../docs/submission-packet.md).
+   `git checkout -- src`. Until then the trigger is NOT VERIFIED and the write-up says so.
+2. **K12 MCP: done 2026-11-23.** A live non-interactive Kiro CLI session called `list_demos`,
+   `get_demo` and `check_scenario` through `.kiro/settings/mcp.json`. An interactive `/mcp` listing was
+   not looked at.
+3. Submission items (video, blog and social post edits and links, Devpost form): see
+   [`docs/submission-packet.md`](../docs/submission-packet.md). Drafts: `docs/blog-post.md`,
+   `docs/social-post.md`.
 
 ## Before every session
 

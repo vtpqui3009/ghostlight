@@ -23,10 +23,10 @@ Done through Kiro CLI 3.3.0 (evidence in `KIRO_SESSION_EVIDENCE.md`, including f
 | K3 | Diagram/List toggle over one shared derivation; list is the default under reduced motion. |
 | K6 | CSV per report, formula-injection guarded, honesty line first, no network. |
 | K7 | First screen explains the tool, its limits and one first move. |
-| K8 | Hook did **not** fire in three non-interactive sessions, not even `SessionStart`. Interactive check still NOT VERIFIED (owner, ~2 min). |
+| K8 | Hook did **not** fire in four non-interactive sessions (the fourth on 2026-11-23, checked by the `tsconfig.tsbuildinfo` timestamp). Interactive check still NOT VERIFIED and optional. |
 | K9 | vite 7.3.8 + vitest 4.1.12: critical and high advisories gone, 7 moderate remain (lint chain). |
 | K11 | 15 property tests, all pass first run, 8 injected bugs all caught, no real engine bug found. |
-| K12 | One local, read-only MCP server with the real engine. Tested over stdio. **Live use by a Kiro agent NOT VERIFIED:** the launch config must be copied to `.kiro/settings/mcp.json` (a permission rule blocked the session from writing there). Custom agents, powers, Crew, IDE, Web: not used, reasons in the write-up. |
+| K12 | One local, read-only MCP server with the real engine. Tested over stdio. **Live use observed 2026-11-23:** a non-interactive Kiro CLI 3.3.0 session called `list_demos`, `get_demo` and `check_scenario` through `.kiro/settings/mcp.json`. Custom agents, powers, Crew, IDE, Web: not used, reasons in the write-up. |
 
 Repository is **public** and the app is **live** at <https://vtpqui3009.github.io/ghostlight/>
 (U1 and U2 done 2026-11-13). Still open and owner-only: demo video (U3), interviews (U4),

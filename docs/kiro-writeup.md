@@ -22,6 +22,7 @@ comparison between surfaces is claimed.
 | 2026-10-31 to 11-01 | 2.37.0 | Specification, domain engine, parser, editor, UI and 222 tests, one writer at a time, `--trust-tools=` empty so every tool action was reviewed individually. |
 | 2026-11-10 | 3.1.0 | Hook diagnosis (K8) and property-based tests (K11). |
 | 2026-11-13 | 3.3.0 | Haunted-theatre interface, list view, first screen, CSV export, dependency advisories, and a local MCP server. |
+| 2026-11-23 | 3.3.0 | Live MCP use check and a fourth hook attempt, both non-interactive, on `claude-haiku-5.5`. |
 
 No whole-tool or whole-folder trust rule was ever granted.
 
@@ -96,6 +97,12 @@ diagnostic hook file with four triggers (`SessionStart`, `UserPromptSubmit`, `Po
 not loading hooks, but that is a guess: **whether the hook fires in an interactive session is NOT
 VERIFIED.** The temporary hook was deleted. We are not claiming an automation we never saw work.
 
+A fourth attempt on 2026-11-23 (CLI 3.3.0, `--trust-workspace`, the real `domain-typecheck` hook in
+place) had the agent append `// k8-hook-probe` to `src/domain/ids.ts`. The agent saw no
+`[ghostlight hook]` output, and `tsconfig.tsbuildinfo`, which `tsc -b` rewrites, kept its earlier
+timestamp, so the typecheck did not run. The probe line was reverted. Same conclusion: not observed
+in non-interactive mode, and an interactive session has still not been tried.
+
 ## Property-based testing
 
 Written with `fast-check` 4.10.2 (exactly pinned) in `tests/domain/properties.test.ts`. **This was
@@ -143,10 +150,16 @@ Verified:
 - A script called the bundle over stdio for all six bundled demo scenes. Each matched what its own
   description says. **It caught nothing wrong**, and we are not going to pretend otherwise.
 
-**Not verified: Kiro's agent calling the server in a live session.** Kiro reads MCP servers from
-`.kiro/settings/mcp.json`; the launch configuration is committed as `.kiro/mcp/mcp.settings.json` and
-has to be copied there. Until that is done and an agent is seen to call a tool, the server is a
-tested component rather than demonstrated Kiro usage.
+**Verified on 2026-11-23: a live Kiro agent called the server.** Kiro reads MCP servers from
+`.kiro/settings/mcp.json`; the launch configuration is committed as `.kiro/mcp/mcp.settings.json`
+and was copied there. A non-interactive `kiro-cli chat` session (CLI 3.3.0, model
+`claude-haiku-5.5`, `--trust-tools=@ghostlight` so only this server's tools were allowed) was asked to
+check the Missing Handoff demo. The tool log shows it called `@ghostlight/list_demos`, then
+`@ghostlight/get_demo`, then `@ghostlight/check_scenario`. It reported `clean: false`, action `a1`
+applied and action `a2` rejected with `source-mismatch`, caused by `a1`, which matches the
+hand-calculated expectation. It chose to call `get_demo` itself because `check_scenario` takes scenario
+JSON rather than a demo id. Limits: this was one session and one demo, and the interactive `/mcp`
+listing was not looked at.
 
 ## Custom agents, Kiro powers and Kiro Crew
 
@@ -182,7 +195,7 @@ not have changed any output.
 
 - **No stage manager has used this tool.** The tests are synthetic and are not user validation. The
   scenes are invented.
-- The hook trigger and the MCP server's use by a live Kiro agent are not verified (above).
+- The hook trigger is not verified; the MCP server was seen used by a live Kiro agent once (above).
 - The interface was checked with axe-core in light and dark schemes, at 390 px, and with reduced
   motion emulated; it has not been reviewed by a colour-blind reader or tested with a screen reader.
 - `QA_RESULTS.md` lists what the checks do not cover.

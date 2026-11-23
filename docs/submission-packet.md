@@ -53,32 +53,28 @@ What only you can do: **the video, the blog, the social post, and pressing Submi
 
 Long form: the **Description** section of [`docs/submission.md`](submission.md) (problem, what it
 does, what makes it different, the interface, what it is not, built honestly). Paste it below the
-short one. Two paragraphs there are still marked `TO FILL` and are yours: the competitor comparison
-and the user-session notes. **If you did not do them, delete those two paragraphs.** Do not leave a
-`TO FILL` in the form and do not imply a stage manager tried it.
+short one. The two paragraphs that used to be marked `TO FILL` (competitor comparison and user
+sessions) were replaced on 2026-11-23 with a plain statement that no interview or comparison was run
+and there is no real-user validation. Keep that statement. Do not imply a stage manager tried it.
+The only blank left in `docs/submission.md` is the video URL (`OWNER TO ADD`).
 
 ### "How Kiro was used" field
 
 Paste the full text of [`docs/kiro-writeup.md`](kiro-writeup.md). It answers every question the Rules
 list (surfaces, custom agents, hooks, spec-driven development, steering, MCP, property-based testing,
-powers). Two statements in it are deliberately cautious and you should keep them that way unless you
-verify them yourself first:
+powers). One statement in it is deliberately cautious and you should keep it that way unless you
+verify it yourself first:
 
-1. The `PostFileSave` hook was **not observed firing**. If you open an interactive `kiro-cli chat` in
-   the repo folder, run `/hooks`, then ask the agent to append a comment line to `src/domain/ids.ts`
-   and see the typecheck output, update the **Agent hooks** section with what you saw, then
-   `git checkout -- src`.
-2. The MCP server is **tested but not yet seen used by a live Kiro agent**. Copy the launch config
-   (PowerShell, from the repo root):
+1. The `PostFileSave` hook was **not observed firing** (four non-interactive attempts, the last on
+   2026-11-23). If you open an interactive `kiro-cli chat` in the repo folder, run `/hooks`, then ask
+   the agent to append a comment line to `src/domain/ids.ts` and see the typecheck output, update the
+   **Agent hooks** section with what you saw, then `git checkout -- src`. This is optional: an honest
+   "not verified" is already in the write-up.
 
-   ```powershell
-   New-Item -ItemType Directory -Force .kiro/settings | Out-Null
-   Copy-Item .kiro/mcp/mcp.settings.json .kiro/settings/mcp.json
-   ```
-
-   Start a new `kiro-cli chat`, run `/mcp`, and ask the agent to *"use the ghostlight MCP to check the
-   missing-handoff demo"*. If it calls `check_scenario`, update the **MCP** section with that. If
-   `node` is not found by Kiro on your machine, write that down too; it is useful evidence.
+The MCP statement is now backed by an observation. On 2026-11-23 a non-interactive Kiro CLI session
+called `@ghostlight/list_demos`, `get_demo` and `check_scenario` for the Missing Handoff demo, using
+`.kiro/settings/mcp.json` (a copy of `.kiro/mcp/mcp.settings.json`, now committed). Only an
+interactive `/mcp` listing was not looked at.
 
 ### Bonus prizes
 
@@ -87,9 +83,9 @@ verify them yourself first:
 | Best Demo | Automatic, nothing to do |
 | Bonus Blog Prize | Yes if you publish the blog (section 3) and paste the link |
 | Social Blitz | Yes if you publish the post (section 4) and paste the link |
-| Best Ghost of Kiroween Past | **No.** You did not register for Kiroween 2025 |
-| Best Student Project | Only if every member is a student; needs proof |
-| Best Startup Project | Only if you are a founder; needs LinkedIn and a startup site |
+| Best Ghost of Kiroween Past | **Not entered.** You did not register for Kiroween 2025 |
+| Best Student Project | **Not entered** (owner decision) |
+| Best Startup Project | **Not entered** (owner decision) |
 | Best Kiro Crew App | No (Crew not used) |
 
 ---
@@ -118,12 +114,13 @@ After uploading:
 
 ---
 
-## 3. Blog post (Bonus Blog Prize) — OUTLINE ONLY, you write the sentences
+## 3. Blog post (Bonus Blog Prize) — a full draft exists, edit it in your own voice
 
 Rules: public, on a third-party platform (dev.to, Medium, Hashnode and similar), published during the
 submission period, and it must say it was written for **Kiroween 2026**. Winners are chosen from the
-top-scoring posts, so specific and honest beats polished. There is already an older full draft in
-[`docs/blog-post.md`](blog-post.md); rewrite it in your own voice rather than pasting it.
+top-scoring posts, so specific and honest beats polished. A complete draft written on 2026-11-23 from
+the evidence file is in [`docs/blog-post.md`](blog-post.md). It is a draft for you to edit, not to paste
+unchanged. Replace the three `OWNER TO ADD` links at the bottom after publishing.
 
 Real events you can build the story from (all in `KIRO_SESSION_EVIDENCE.md`):
 
@@ -145,9 +142,11 @@ tell the next developer → links. Start the post with the line that says it is 
 
 ---
 
-## 4. Social Blitz post — constraints and raw material, no prose from me
+## 4. Social Blitz post — draft in `docs/social-post.md`; rewrite it in your own voice
 
-This prize is judged on **original thoughts versus AI writing**, so the sentences have to be yours.
+This prize is judged on **original thoughts versus AI writing**. A short draft was written on
+2026-11-23 and is in [`docs/social-post.md`](social-post.md), but it was written by an AI assistant, so
+it may score badly as it stands. Use it as a starting point and put your own thoughts in.
 
 Constraints from the Rules: any social platform; a public post during the submission period; it must
 **begin with `#KiroweenHackathon26`**; share what you liked most about Kiro and how it changed the way
@@ -168,7 +167,7 @@ Raw material (pick one or two, say it your way):
 - [ ] `https://vtpqui3009.github.io/ghostlight/` loads (try it on your phone, too).
 - [ ] `.kiro/` is visible on GitHub (specs, steering, hooks, mcp) and not in `.gitignore`.
 - [ ] Video public, under 3:00, narrated in English.
-- [ ] Description pasted; no `TO FILL` left in anything you paste.
+- [ ] Description pasted; no `OWNER TO ADD` or `TO FILL` left in anything you paste.
 - [ ] Kiro write-up pasted; the hook and MCP lines match what you actually saw.
 - [ ] Blog and social links pasted, if you wrote them.
 - [ ] Category set to **Costume Contest**.

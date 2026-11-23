@@ -99,8 +99,8 @@ Overall **or** one Category prize, not both, plus any number of bonus prizes.
 | **Bonus Blog Prize** | public blog post about Kiro and the project, on any third-party platform, during the submission period, mentioning Kiroween 2026. **100 winners**, 2,000 bonus Kiro credits each | **yes — cheap.** `KIRO_SESSION_EVIDENCE.md` is most of the draft already |
 | **Social Blitz** | public social post starting with `#KiroweenHackathon26`, judged on originality — "original thoughts vs AI writing" | yes, if written by the owner in their own words |
 | Best Ghost of Kiroween Past | confirm registration for Kiroween 2025, verified against records | **only the owner knows** — check |
-| Best Student Project | all members students, with proof | only if applicable |
-| Best Startup Project | founder, LinkedIn + startup site | only if applicable |
+| Best Student Project | all members students, with proof | not entered (owner decision, 2026-11-23) |
+| Best Startup Project | founder, LinkedIn + startup site | not entered (owner decision, 2026-11-23) |
 | Best Kiro Crew App | a separate public repo for a Kiro Crew app | out of scope unless Crew gets used |
 
 ## Kiro credits
@@ -205,10 +205,10 @@ The Official Rules on the Rules tab remain the deciding source.
 | `/.kiro` tracked and not ignored | pass |
 | Working app URL | **pass**: https://vtpqui3009.github.io/ghostlight/ |
 | Third-party code declared | pass (README) |
-| Text description | not yet written (`docs/submission.md`) |
+| Text description | drafted in `docs/submission.md`; no `TO FILL` left, the video URL is `OWNER TO ADD` |
 | Demo video under 3:00, public on YouTube | **not done** (owner) |
-| Written Kiro-usage answers | drafted in `docs/kiro-writeup.md` from the evidence file; two statements (hook trigger, live MCP use) are deliberately marked NOT VERIFIED until the owner checks them |
-| Bonus claims | Blog and Social Blitz open to the owner; Ghost of Kiroween Past is out (not registered in 2025); Student and Startup unknown |
+| Written Kiro-usage answers | drafted in `docs/kiro-writeup.md` from the evidence file; the hook trigger is deliberately marked NOT VERIFIED; live MCP use was observed once on 2026-11-23 (non-interactive session) |
+| Bonus claims | Blog and Social Blitz open to the owner (drafts in `docs/blog-post.md` and `docs/social-post.md`, unpublished); Ghost of Kiroween Past, Student and Startup are not entered |
 
 Weakest scoring areas, unchanged: Potential Impact (no user evidence) and the variety of Kiro tools
 (CLI only; one hook with an unverified trigger; no custom agent, MCP or powers).

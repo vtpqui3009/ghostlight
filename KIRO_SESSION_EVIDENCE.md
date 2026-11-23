@@ -330,3 +330,70 @@ That a Kiro agent can launch and call the MCP server (config not yet in `.kiro/s
 resolution by Kiro on this machine is untested; inside this tool's shell `cmd` could not find `node`);
 that the hook fires interactively; real-user validation; a colour-blind or screen-reader review; Kiro's
 `/usage`; and anything about the live GitHub Pages site until it has been redeployed after the next push.
+
+## 2026-11-23 — MCP live-use check (K12) and fourth hook attempt (K8), Kiro CLI 3.3.0
+
+- Surface: `kiro-cli` 3.3.0 on Windows PowerShell, Node v24.18.0, npm 11.16.0 (`npm.cmd`; `npm.ps1` is
+  blocked by the execution policy). Logged in with Builder ID. Model `claude-haiku-5.5` (0.06x credits in
+  `--list-models`), chosen for cost. Both sessions ran with `--no-interactive --trust-workspace`.
+- `/usage` before and after: **NOT OBSERVABLE.** `kiro-cli chat --no-interactive "/usage"` was sent to
+  the model, which replied that the command belongs to the Kiro client. No credit figure is claimed.
+- Orchestration and docs were written by a separate assistant session, not by Kiro. Kiro CLI did only the
+  two probes below. No file in `src/` was changed by anyone.
+
+### K12 — did a live Kiro agent call the MCP server? YES, once
+
+1. Copied `.kiro/mcp/mcp.settings.json` to `.kiro/settings/mcp.json` with PowerShell
+   (`New-Item`, `Copy-Item`). Nothing blocked the write this time.
+2. `kiro-cli chat --no-interactive --trust-workspace --trust-tools=@ghostlight --model claude-haiku-5.5`
+   with the prompt "Use the ghostlight MCP server to check the missing-handoff demo ... Do not edit any
+   file."
+3. The tool log shows, in order: `@ghostlight/list_demos`, `@ghostlight/get_demo`,
+   `@ghostlight/check_scenario`. The agent called `get_demo` on its own because `check_scenario` takes
+   scenario JSON, not an id. Verdict reported: `clean: false`, 2 actions, 1 applied, 1 rejected,
+   0 uncertain; `a2` (cue-2, `carryOff`) rejected with `source-mismatch`, cause `a1` in `cue-1`, final
+   state letter-A at zone L held by Actor-A. This matches the hand-calculated oracle for Missing Handoff.
+4. No file was edited by the session (`git status` showed only my own files afterwards).
+
+Limits: one session, one demo, a cheap model, non-interactive mode. The interactive `/mcp` listing was not
+looked at.
+
+### K8 — did the hook fire by itself? NO, not observed
+
+1. `.kiro/hooks/domain-typecheck.json` unchanged (`PostFileSave`, matcher on `src/domain/*.ts`, command
+   `node .kiro/hooks/typecheck-domain.mjs`).
+2. Session prompt: append the line `// k8-hook-probe` to `src/domain/ids.ts`, then report any output that
+   begins `[ghostlight hook]`. The agent used the file-read and replace-in-file tools, the line was added,
+   and the agent reported that nothing beginning `[ghostlight hook]` appeared.
+3. Independent check: `tsc -b` rewrites `tsconfig.tsbuildinfo` when a source file changes. After the edit
+   `ids.ts` had a modification time of 20:27:21 and `tsconfig.tsbuildinfo` was still 20:20:25, from my own
+   `npm run check`. So the hook's typecheck did not run.
+4. `git checkout -- src/domain/ids.ts` restored the file; `git status` was clean for `src/`.
+
+This is the fourth non-interactive attempt with the same result. The interactive case is still NOT
+VERIFIED, and `--trust-workspace` was used, so an untrusted workspace is not the explanation.
+
+### Other things that went wrong or were found today
+
+- `npm run test:e2e` first failed because Playwright's Chromium was not installed on this machine;
+  `npx playwright install chromium` fixed it. Playwright 1.63.0 was already in `node_modules` as an
+  extraneous package, and `package.json` was not touched.
+- `node tests/e2e/verify-pages-build.mjs` **failed on Windows** with "vite build ... failed" because it
+  called `spawnSync('npx')`, and Node 24 will not start a `.cmd` shim without a shell. The app was fine.
+  The script now runs `node_modules/vite/bin/vite.js` through `process.execPath`. After the change it
+  passes 11 of 11, and the negative control (`--base=//`) still fails 5 checks and exits 1.
+- `Set-Content` in Windows PowerShell 5.1 can change a file's encoding, so doc edits were made with the
+  editor tools instead, and a diff was checked after the one time `Set-Content` was used.
+
+### Results
+
+- `npm run check`: lint, typecheck, **297 passed (11 files)**, build (47 modules) all exit 0.
+- `npm run test:e2e -- --strict`: **25 passed, 0 failed** on first run, but across six full runs two failed
+  one test each (details in `QA_RESULTS.md`), so it is **intermittent on this Windows machine**. The last
+  three consecutive runs passed. One failure was `net::ERR_NO_BUFFER_SPACE`; the other (`first screen,
+  dark scheme`) was not captured and its cause is unknown.
+- Screenshots (Chromium, `dist/`, light and dark, 1280 and 390 px, reduced motion emulated) looked at
+  by eye before accepting: no console or page errors, no horizontal overflow on any view, the dashed ghost
+  and the solid block are visibly different, the curtain, footlights and cobwebs render, and the only
+  running animation on load is one finite `lamp-up`. Under reduced motion the List reading is selected by
+  default.
