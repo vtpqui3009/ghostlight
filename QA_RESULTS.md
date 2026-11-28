@@ -4,8 +4,9 @@ What has been executed against `main`, with the real numbers. Anything not liste
 These are correctness checks on the implementation; **none of them is evidence that the tool is
 useful to a stage manager.**
 
-Last updated **2026-11-23**: the first section below is the latest run, on Windows. The 2026-11-12
-section after it is kept as the earlier record; where the two differ, the 2026-11-23 numbers win. The `tests/e2e/` harness and this file are reviewer-authored; the
+Last updated **2026-11-28**: the first section below is the latest run, on Windows. The 2026-11-23
+and 2026-11-12 sections after it are kept as the earlier record; where they differ, the newest
+numbers win. The `tests/e2e/` harness and this file are reviewer-authored; the
 application and its domain, UI and persistence tests are Kiro's. See `ops/daily-run.md` for the
 provenance rule and `KIRO_SESSION_EVIDENCE.md` for what Kiro actually did.
 
@@ -20,7 +21,38 @@ node tests/e2e/verify-pages-build.mjs   # the Pages bundle, served from /ghostli
 
 CI runs exactly these on every push and pull request: `.github/workflows/ci.yml`.
 
-## Latest run — 2026-11-23 (K13 Halloween v2), Windows, Node v24.18.0, Playwright 1.63.0, axe-core 4.14.0
+## Latest run — 2026-11-28, Windows, Node v24.18.0, npm 11.16.0, Playwright 1.63.0
+
+Run on `main` at `1682d02` with a clean working tree, after `npm ci` (exit 0). Playwright was installed
+with `npm i --no-save playwright@1.63.0` and `npx playwright install chromium`, so `package.json` and the
+lockfile did not change. On this machine `npm` must be called as `npm.cmd` because PowerShell's
+execution policy blocks `npm.ps1`.
+
+| Check | Command | Result |
+|---|---|---|
+| Lint, types, tests, build | `npm run check` | exit 0. **297 passed** in 11 files; build 48 modules, vite 7.3.8 |
+| End-to-end and accessibility | `npm run test:e2e -- --strict` | exit 0, **32 passed, 0 failed, 9 of 9 runs** (1 baseline run, then 8 repeats) |
+| Pages project-page build | `node tests/e2e/verify-pages-build.mjs` | exit 0, **11 of 11 checks PASS**, "Pages build verified" |
+| Same, negative control | `node tests/e2e/verify-pages-build.mjs --base=//` | exit 1, **5 checks failed**, as it should |
+| Runtime dependencies | `npm audit --omit=dev` | exit 0, **0 vulnerabilities** |
+| All dependencies | `npm audit` | exit 1, **7 moderate, 0 high, 0 critical**. All sit in the dev-only lint chain (`typescript-eslint` and `@typescript-eslint/*` through `minimatch`) |
+
+**Dependency debt (K9) is closed.** The critical and high advisories recorded on 2026-11-10 (`vitest`,
+`tinypool`, `vite`) are gone: `package.json` pins `vite` 7.3.8 and `vitest` 4.1.12. No package was changed
+in this run. The 7 moderate advisories remain; nothing ships to the browser from them.
+
+**Flaky e2e on Windows: not reproduced, cause still unknown.** The two failures recorded on 2026-11-23
+were `net::ERR_NO_BUFFER_SPACE` on `page.goto` (a Windows socket-buffer error) and `first screen, dark
+scheme` (failure detail not captured then). Nine consecutive full strict runs on 2026-11-28 all passed
+32/32. That is the absence of a failure in nine runs, not proof of stability, and it does not identify the
+cause of the dark-scheme failure. `tests/e2e/lib/runner.mjs` already prints the error message under each
+`FAIL` line, so a future failure will carry its detail if the full output is kept. No harness change was
+made, and `src/` was not touched.
+
+Unchanged from the earlier runs and still not shown: a screen-reader pass, a colour-blind reader, a real
+phone, Safari or Firefox, 200% or 400% zoom, a print check, or any real-user validation.
+
+## Earlier run — 2026-11-23 (K13 Halloween v2), Windows, Node v24.18.0, Playwright 1.63.0, axe-core 4.14.0
 
 | Check | Command | Result |
 |---|---|---|
@@ -193,20 +225,24 @@ serving. It means the artefact the workflow uploads is a working bundle at the r
 
 ## Known failures and debt
 
-| Item | Owner | Where |
+Re-checked 2026-11-28 against the repository and the latest run above. Every row from 2026-11-10 is now
+closed; what is open is listed last.
+
+| Item | Owner | State |
 |---|---|---|
-| CSV export for the reports does not exist | Kiro K6 | `ops/kiro-briefs/K6.md` |
-| Dev dependencies carry 2 critical and 1 high advisory — `vitest` ≤4.0.0-beta.19, `tinypool` ≤2.1.1, `vite` ≤6.4.3 | Kiro K9 | this file |
-| Selected timeline row: `color-contrast` 1 node light, 6 dark — a rejected step also reads as green | Kiro K2 (reopened) | `ops/kiro-briefs/K2.md`, `tests/e2e/axe-baseline.json` |
-| The ghost-versus-solid visual language does not render — `.ghost` / `.solid` match nothing | Kiro K10 | `ops/kiro-briefs/K10.md` |
+| ~~CSV export for the reports does not exist~~ | Kiro K6 | **closed 2026-11-13** — `src/ui/reportCsv.ts` and `tests/ui/reportCsv.test.ts` exist; 297 tests pass |
+| ~~Dev dependencies carry 2 critical and 1 high advisory~~ | Kiro K9 | **closed** — `vite` 7.3.8, `vitest` 4.1.12; `npm audit` on 2026-11-28 reports 7 moderate, 0 high, 0 critical |
+| ~~Selected timeline row: `color-contrast`, and a rejected step reads as green~~ | Kiro K2 | **closed** — `axe-baseline.json` is empty for all nine screens, including both selected-row scans, and `--strict` passes 32/32 |
+| ~~The ghost-versus-solid visual language does not render~~ | Kiro K10 | **closed** — `.prop-glyph.required` and `.planned` rules exist in `src/styles.css`, and the e2e test "the stage still says everything in words: labels and the dashed ghost" passes |
 | ~~The committed a11y scan covers one colour scheme and one demo~~ | reviewer | **closed 2026-11-10** — 9 scans, both schemes, selected row |
+| e2e flaky on Windows: `ERR_NO_BUFFER_SPACE` once, `first screen, dark scheme` once | reviewer | **open, not reproduced** — 9 of 9 runs passed on 2026-11-28; the cause of the dark-scheme failure is unknown |
+| 7 moderate advisories in the dev-only lint chain (`typescript-eslint`, `minimatch`) | Kiro | **open, accepted** — not shipped to the browser; not changed this close to the deadline |
 
 Closed on 2026-11-10, by the reviewer rather than by Kiro (see the README's authorship table): the
 delayed `FileReader` import race, the 33 accessibility violations, and the Reports 390 px overflow.
 
-Nothing ships to the browser from the advisory set: `npm audit --omit=dev` is clean, and all four
-packages are build and test tooling. Dependency modernisation has been open since 2026-10-31, when
-npm reported the selected ESLint version unsupported.
+Nothing ships to the browser from the advisory set: `npm audit --omit=dev` is clean, and the remaining
+packages are build and test tooling.
 
 ## What these checks do **not** show
 

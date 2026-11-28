@@ -123,12 +123,14 @@ honest record, including the parts that are still NOT VERIFIED.
 ## State of the work
 
 `npm run check` is green: lint, strict TypeScript, **297 passing tests**, production build. The
-end-to-end and accessibility harness runs 15 tests over the production build; one is a written-down
-known failure.
+end-to-end and accessibility harness runs **32 tests** over the production build with an empty axe
+baseline and no ledgered failure (`npm run test:e2e -- --strict`; last run 2026-11-28, Windows).
+`npm audit --omit=dev` reports 0 vulnerabilities; the 7 moderate advisories that remain are all in
+the dev-only lint chain.
 
 Open work, with owners, is in [`docs/SUBMISSION_ROADMAP.md`](docs/SUBMISSION_ROADMAP.md). The
-measured state — accessibility debt, the open import race, dependency advisories — is in
-[`QA_RESULTS.md`](QA_RESULTS.md), and nothing there is rounded in the project's favour.
+measured state, including what the checks do not show, is in [`QA_RESULTS.md`](QA_RESULTS.md), and
+nothing there is rounded in the project's favour.
 
 ## Where things are
 

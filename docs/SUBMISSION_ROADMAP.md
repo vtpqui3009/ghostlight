@@ -33,6 +33,11 @@ Repository is **public** and the app is **live** at <https://vtpqui3009.github.i
 competitor comparison (U5), blog and social posts (U10), Devpost submission (U6). The copy-paste
 packet is [`submission-packet.md`](submission-packet.md).
 
+> **Latest numbers, 2026-11-28:** 297 unit tests, strict e2e **32/32** (9 of 9 runs), Pages build
+> 11/11, `npm audit` 7 moderate / 0 high / 0 critical. The table above and the "Verified state" section
+> below record the 2026-11-12 and 2026-11-13 runs as written (235 tests, 25 e2e, 12 advisories) and are
+> kept as history. Current figures live in [`QA_RESULTS.md`](../QA_RESULTS.md).
+
 ## Decisions of 2026-11-10
 
 1. **`main` is the Kiro lineage.** `main` was fast-forwarded to `codex/ghostlight-domain-draft-20261031`

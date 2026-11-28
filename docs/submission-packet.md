@@ -142,7 +142,7 @@ tell the next developer → links. Start the post with the line that says it is 
 
 ---
 
-## 4. Social Blitz post — draft in `docs/social-post.md`; rewrite it in your own voice
+## 4. Social Blitz post — outline in `docs/social-outline.md`; the older AI draft is raw material only
 
 This prize is judged on **original thoughts versus AI writing**. A short draft was written on
 2026-11-23 and is in [`docs/social-post.md`](social-post.md), but it was written by an AI assistant, so
@@ -163,15 +163,41 @@ Raw material (pick one or two, say it your way):
 
 ## 5. Pre-submit checklist
 
-- [ ] Repository public; About box shows **MIT License**.
-- [ ] `https://vtpqui3009.github.io/ghostlight/` loads (try it on your phone, too).
-- [ ] `.kiro/` is visible on GitHub (specs, steering, hooks, mcp) and not in `.gitignore`.
-- [ ] Video public, under 3:00, narrated in English.
+Last automated verification: **2026-11-28**, on `main` at `1682d02` (details in
+[`QA_RESULTS.md`](../QA_RESULTS.md)). If any commit lands after that, re-run
+`npm run check`, `npm run build && npm run test:e2e -- --strict` and
+`node tests/e2e/verify-pages-build.mjs` before you submit.
+
+Already checked, nothing for you to do unless the repository changes:
+
+- [x] `npm run check` exit 0, 297 tests (2026-11-28).
+- [x] `npm run test:e2e -- --strict` 32/32, 9 of 9 runs (2026-11-28).
+- [x] Pages build 11/11, negative control fails as intended (2026-11-28).
+- [x] `https://vtpqui3009.github.io/ghostlight/` returns HTTP 200 and serves bundle
+      `index-Lcl3saFI.js`, the same file name as the local build (2026-11-28).
+- [x] `.kiro/` is tracked in git and `git check-ignore .kiro` reports it is not ignored (2026-11-28).
+- [x] `npm audit --omit=dev`: 0 vulnerabilities. `npm audit`: 7 moderate, 0 high, 0 critical.
+
+Only you can do these. Tick each one yourself:
+
+- [ ] Repository public; About box shows **MIT License** (look at the sidebar on GitHub).
+- [ ] `https://vtpqui3009.github.io/ghostlight/` loads on your phone. The check above only proves
+      HTTP 200, not that the page renders on a phone.
+- [ ] `.kiro/` is visible on GitHub (specs, steering, hooks, mcp).
+- [ ] Video public, under 3:00, narrated in English, opened while signed out of YouTube.
+- [ ] Video URL pasted into `docs/submission.md` and the Devpost form.
 - [ ] Description pasted; no `OWNER TO ADD` or `TO FILL` left in anything you paste.
 - [ ] Kiro write-up pasted; the hook and MCP lines match what you actually saw.
-- [ ] Blog and social links pasted, if you wrote them.
+- [ ] Blog published and its link pasted, if you wrote it. The post says it is for Kiroween 2026.
+- [ ] Social post published, begins with `#KiroweenHackathon26`, link pasted, if you wrote it.
+      Outline: [`social-outline.md`](social-outline.md).
 - [ ] Category set to **Costume Contest**.
 - [ ] Submit by **2026-12-04 14:00 PT**, ideally days before.
+
+Optional (about two minutes, owner only): the K8 hook check. In an interactive `kiro-cli chat` in this
+folder, run `/hooks`, ask the agent to append `// k8-hook-probe` to `src/domain/ids.ts`, note whether
+`[ghostlight hook]` appears, then `git checkout -- src`. If you do it, update the **Agent hooks**
+section of `docs/kiro-writeup.md` with what you saw. If you skip it, leave the "not verified" wording.
 
 ## 6. After you submit
 
