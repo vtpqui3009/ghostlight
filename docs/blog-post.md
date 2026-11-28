@@ -7,7 +7,7 @@ own words before publishing, and cut anything you would not say out loud.
 **Rules for the prize:** public, on a third-party blog platform (dev.to, Medium, Hashnode and
 similar), published during the submission period (deadline 2026-12-04 14:00 PST), and it must say
 it was written for the Kiroween 2026 hackathon. 100 winners get 2,000 bonus Kiro credits. After
-publishing, paste the URL into the Devpost form. Replace the two `OWNER TO ADD` links at the bottom.
+publishing, paste the URL into the Devpost form. Replace the three `OWNER TO ADD` links at the bottom.
 
 ---
 

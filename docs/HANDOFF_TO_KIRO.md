@@ -2,7 +2,7 @@
 
 > **Superseded status, 2026-11-23.** The Kiro queue below (K2 to K12) has since been worked; see
 > [`SUBMISSION_ROADMAP.md`](SUBMISSION_ROADMAP.md) and [`../ops/kiro-brief.md`](../ops/kiro-brief.md)
-> for the current state (297 tests, strict e2e 25/25, repository public, app live). The tables below
+> for the current state (297 tests, strict e2e 32/32 as of 2026-11-28, repository public, app live). The tables below
 > are the 2026-11-13 handoff as written and are kept as history. What is left for the owner now is the
 > video, editing and publishing the two posts, pasting into Devpost and pressing Submit.
 
